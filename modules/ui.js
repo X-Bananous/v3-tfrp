@@ -25,10 +25,10 @@ export const showToast = (message, type = 'info') => {
     const id = Date.now();
     
     const colors = {
-        info: 'bg-[#0a0a0c] border-gov-blue text-blue-100',
-        success: 'bg-[#0a0a0c] border-emerald-500 text-emerald-100',
-        error: 'bg-[#0a0a0c] border-gov-red text-red-100',
-        warning: 'bg-[#0a0a0c] border-orange-500 text-orange-100'
+        info: 'bg-gov-blue/20 border-gov-blue text-blue-100',
+        success: 'bg-emerald-500/20 border-emerald-500 text-emerald-100',
+        error: 'bg-gov-red/20 border-gov-red text-red-100',
+        warning: 'bg-orange-500/20 border-orange-500 text-orange-100'
     };
 
     const icon = {
@@ -39,11 +39,11 @@ export const showToast = (message, type = 'info') => {
     };
 
     const toastHtml = `
-        <div id="toast-${id}" class="backdrop-blur-xl p-5 rounded-2xl border-l-4 ${colors[type]} flex items-center gap-4 animate-in shadow-[0_20px_50px_rgba(0,0,0,0.4)] min-w-[350px] z-[9999]">
-            <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
-                <i data-lucide="${icon[type]}" class="w-5 h-5"></i>
+        <div id="toast-${id}" class="backdrop-blur-md p-4 rounded-2xl border ${colors[type]} flex items-center gap-3 animate-in shadow-2xl min-w-[320px] z-[9999]">
+            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                <i data-lucide="${icon[type]}" class="w-4 h-4"></i>
             </div>
-            <span class="text-[12px] font-black uppercase tracking-wider">${message}</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">${message}</span>
         </div>
     `;
 
@@ -64,7 +64,7 @@ export const showToast = (message, type = 'info') => {
 const createToastContainer = () => {
     const div = document.createElement('div');
     div.id = 'toast-container';
-    div.className = 'fixed bottom-8 right-8 flex flex-col gap-4 z-[9999]';
+    div.className = 'fixed bottom-8 right-8 flex flex-col gap-3 z-[9999]';
     document.body.appendChild(div);
     return div;
 };
@@ -77,7 +77,7 @@ export const closeModal = () => {
         modal.classList.add('opacity-0');
         const panel = modal.querySelector('.glass-panel');
         if(panel) {
-            panel.style.transform = 'scale(0.9) translateY(20px)';
+            panel.style.transform = 'scale(0.95) translateY(10px)';
             panel.style.opacity = '0';
         }
         setTimeout(() => modal.remove(), 300);
@@ -108,51 +108,43 @@ export const showModal = ({ title, content, confirmText = 'Confirmer', cancelTex
     const isConfirmOnly = !onConfirm && !onCancel;
 
     const html = `
-        <div id="global-modal" data-closable="${isClosable}" class="fixed inset-0 z-[2000] flex items-center justify-center p-6 transition-all duration-300 bg-black/90 backdrop-blur-md">
+        <div id="global-modal" data-closable="${isClosable}" class="fixed inset-0 z-[2000] flex items-center justify-center p-4 transition-all duration-300 bg-black/70 backdrop-blur-md">
             <div class="absolute inset-0" onclick="${isClosable ? 'ui.closeModal()' : ''}"></div>
             
-            <div class="glass-panel w-full max-w-xl rounded-[48px] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-all duration-500 relative z-10 flex flex-col border border-white/10 bg-[#08080a] animate-in scale-100">
+            <div class="glass-panel w-full max-w-lg rounded-[48px] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)] transition-all duration-300 relative z-10 flex flex-col border border-white/10 bg-white">
                 
                 <div class="h-2 w-full ${theme.btn} opacity-80"></div>
 
-                <div class="p-12">
-                    <div class="flex items-center gap-8 mb-10">
-                        <div class="w-20 h-20 rounded-3xl ${theme.bg} flex items-center justify-center ${theme.color} shrink-0 border ${theme.border} shadow-2xl">
+                <div class="p-10">
+                    <div class="flex flex-col items-center text-center mb-8">
+                        <div class="w-20 h-20 rounded-3xl ${theme.bg} flex items-center justify-center ${theme.color} mb-6 border ${theme.border} shadow-xl">
                             <i data-lucide="${theme.icon}" class="w-10 h-10"></i>
                         </div>
-                        <div class="min-w-0 flex-1">
-                            <h3 class="text-4xl font-black text-white mb-2 tracking-tighter uppercase italic leading-none">${title}</h3>
-                            <div class="text-[10px] font-black uppercase tracking-[0.4em] ${theme.color} opacity-80 flex items-center gap-2">
-                                <span class="w-4 h-0.5 bg-current"></span> PROTOCOLE FONDATION V6
-                            </div>
-                        </div>
+                        <h3 class="text-3xl font-black text-gov-text mb-2 tracking-tighter uppercase italic leading-none">${title}</h3>
+                        <div class="text-[9px] font-black uppercase tracking-[0.3em] ${theme.color} opacity-80">Protocole Officiel de l'État</div>
                     </div>
 
-                    <div class="text-gray-400 text-base leading-relaxed max-h-[45vh] overflow-y-auto custom-scrollbar pr-6 mb-12 font-medium italic border-l-2 border-white/5 pl-6">
+                    <div class="text-gray-500 text-sm leading-relaxed max-h-[40vh] overflow-y-auto custom-scrollbar pr-4 mb-10 font-medium text-center">
                         ${content}
                     </div>
 
-                    <div class="flex flex-col sm:flex-row justify-end gap-5">
-                        ${(onConfirm || cancelText) && !isConfirmOnly && isClosable ? `
-                            <button id="modal-cancel" class="px-10 py-5 rounded-2xl text-[11px] font-black uppercase tracking-widest text-gray-500 hover:bg-white/5 hover:text-white transition-all border border-transparent hover:border-white/10">
-                                ${cancelText}
+                    <div class="flex flex-col gap-3">
+                        ${confirmText ? `
+                            <button id="modal-confirm" class="w-full py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] text-white transition-all shadow-xl ${theme.btn} transform active:scale-95">
+                                ${confirmText}
                             </button>
                         ` : ''}
                         
-                        ${confirmText ? `
-                            <button id="modal-confirm" class="px-12 py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] text-white transition-all shadow-2xl ${theme.btn} transform active:scale-95 hover:scale-[1.02]">
-                                ${confirmText}
+                        ${(onConfirm || cancelText) && !isConfirmOnly && isClosable ? `
+                            <button id="modal-cancel" class="w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gov-text transition-all border border-transparent">
+                                ${cancelText}
                             </button>
                         ` : ''}
                     </div>
                 </div>
                 
-                <div class="bg-white/5 py-4 px-12 flex justify-between items-center border-t border-white/5">
-                    <span class="text-[9px] text-gray-600 font-mono uppercase tracking-[0.5em]">Terminal de Commandement • Accès Restreint</span>
-                    <div class="flex gap-3">
-                        <span class="w-1.5 h-1.5 rounded-full bg-gray-800"></span>
-                        <span class="w-1.5 h-1.5 rounded-full bg-gray-800"></span>
-                    </div>
+                <div class="bg-gov-light/50 py-4 px-10 flex justify-center items-center border-t border-gray-100">
+                    <span class="text-[8px] text-gray-400 font-mono uppercase tracking-[0.4em]">Certifié par le Système de Justice de Los Angeles</span>
                 </div>
             </div>
         </div>
