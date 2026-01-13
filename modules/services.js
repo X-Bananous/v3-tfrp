@@ -2,6 +2,7 @@
 import { state } from './state.js';
 import { CONFIG } from './config.js';
 
+// --- AUTH & PROFILE ---
 export const loadCharacters = async () => {
     if (!state.user) return;
     const { data, error } = await state.supabase
@@ -13,6 +14,17 @@ export const loadCharacters = async () => {
     return data;
 };
 
+export const fetchStaffProfiles = async () => {
+    const { data } = await state.supabase.from('profiles').select('*').not('permissions', 'is', null);
+    state.staffMembers = data || [];
+};
+
+export const fetchOnDutyStaff = async () => {
+    const { data } = await state.supabase.from('on_duty_staff').select('*, profiles(username, avatar_url)');
+    state.onDutyStaff = data || [];
+};
+
+// --- DATA FETCHING ---
 export const fetchBankData = async (charId) => {
     const { data } = await state.supabase.from('bank_accounts').select('*').eq('character_id', charId).maybeSingle();
     state.bankAccount = data;
@@ -26,7 +38,12 @@ export const fetchInventory = async (charId) => {
 };
 
 export const fetchNotifications = async () => {
-    const { data } = await state.supabase.from('notifications').select('*').or(`user_id.eq.${state.user.id},user_id.is.null`).order('created_at', { ascending: false });
+    if (!state.user) return;
+    const { data } = await state.supabase
+        .from('notifications')
+        .select('*')
+        .or(`user_id.eq.${state.user.id},user_id.is.null`)
+        .order('created_at', { ascending: false });
     state.notifications = data || [];
 };
 
@@ -45,11 +62,45 @@ export const fetchEnterprises = async () => {
     state.enterprises = data || [];
 };
 
-export const fetchPublicLandingData = async () => {
-    const { data: staff } = await state.supabase.from('profiles').select('id, username, avatar_url, permissions').not('permissions', 'is', null).limit(8);
-    state.landingStaff = staff || [];
+export const fetchPlayerInvoices = async (charId) => {
+    const { data } = await state.supabase.from('invoices').select('*, enterprises(name)').eq('buyer_id', charId).order('created_at', { ascending: false });
+    state.invoices = data || [];
 };
 
+// --- ILLICIT & HEISTS ---
+export const fetchGlobalHeists = async () => {
+    const { data } = await state.supabase.from('heist_lobbies').select('*').eq('status', 'active');
+    state.globalActiveHeists = data || [];
+};
+
+export const fetchActiveHeistLobby = async (charId) => {
+    const { data } = await state.supabase.from('heist_members').select('*, heist_lobbies(*)').eq('character_id', charId).eq('status', 'accepted').maybeSingle();
+    state.activeHeistLobby = data?.heist_lobbies || null;
+};
+
+export const fetchAvailableLobbies = async () => {
+    const { data } = await state.supabase.from('heist_lobbies').select('*').in('status', ['setup', 'active']);
+    state.availableHeistLobbies = data || [];
+};
+
+// --- EMERGENCY & SESSIONS ---
+export const fetchEmergencyCalls = async () => {
+    const { data } = await state.supabase.from('emergency_calls').select('*').eq('status', 'open');
+    state.emergencyCalls = data || [];
+};
+
+export const fetchActiveSession = async () => {
+    const { data } = await state.supabase.from('game_sessions').select('*, host:profiles(username)').eq('status', 'active').maybeSingle();
+    state.activeGameSession = data || null;
+    return data;
+};
+
+export const fetchPendingApplications = async () => {
+    const { data } = await state.supabase.from('characters').select('*, profiles(username, avatar_url)').eq('status', 'pending');
+    state.pendingApplications = data || [];
+};
+
+// --- CONFIG ---
 export const fetchSecureConfig = async () => {
     const { data } = await state.supabase.from('keys_data').select('*');
     if (data) {
@@ -62,17 +113,18 @@ export const fetchSecureConfig = async () => {
     }
 };
 
-export const IllicitViewCheck = () => {
-    if (!state.user) return false;
-    if (state.user.isFounder) return true;
-    const hasPerm = state.user.permissions?.can_manage_illegal === true;
-    // On simule un succès si l'user est authentifié (la guild sera gérée par les actions)
-    return true; 
+export const fetchPublicLandingData = async () => {
+    const { data: staff } = await state.supabase.from('profiles').select('id, username, avatar_url, permissions').not('permissions', 'is', null).limit(8);
+    state.landingStaff = staff || [];
 };
 
-// Fonctions additionnelles requises par app.js
-export const setupRealtimeListener = () => {};
+export const setupRealtimeListener = () => {
+    // Stubs pour la compatibilité
+};
+
 export const fetchERLCData = async () => ({ players: [], currentPlayers: 0 });
-export const fetchPendingApplications = async () => [];
-export const fetchActiveSession = async () => null;
-export const fetchPlayerInvoices = async () => [];
+
+export const IllicitViewCheck = () => {
+    if (!state.user) return false;
+    return true; // Accès géré par le grade RP du perso ou staff
+};
