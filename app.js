@@ -22,11 +22,11 @@ import * as StaffActions from './modules/actions/staff.js';
 import * as ProfileActions from './modules/actions/profile.js';
 import * as WheelActions from './modules/actions/wheel.js';
 
-import { setupRealtimeListener, fetchERLCData, fetchGlobalHeists, fetchOnDutyStaff, loadCharacters, fetchPublicLandingData, fetchActiveSession, fetchSecureConfig } from './modules/services.js';
+import { setupRealtimeListener, fetchERLCData, loadCharacters, fetchPublicLandingData, fetchSecureConfig } from './modules/services.js';
 
 // Views
 import { LoginView, AccessDeniedView, DeletionPendingView } from './modules/views/login.js';
-import { ProfileHubView } from './modules/views/profile_hub.js'; // Nouveau Hub fusionné
+import { ProfileHubView } from './modules/views/profile_hub.js'; // Vue fusionnée
 import { CharacterCreateView } from './modules/views/create.js';
 import { HubView } from './modules/views/hub.js';
 import { TermsView, PrivacyView } from './modules/views/legal.js';
@@ -48,11 +48,10 @@ const appRenderer = () => {
     let effectiveView = state.currentView;
 
     if (state.user?.deletion_requested_at && effectiveView !== 'login') effectiveView = 'deletion_pending';
-    if (state.user?.isBanned && effectiveView !== 'login') effectiveView = 'banned';
 
     switch (effectiveView) {
         case 'login': htmlContent = LoginView(); break;
-        case 'profile_hub': htmlContent = ProfileHubView(); break; // Point d'entrée après login
+        case 'profile_hub': htmlContent = ProfileHubView(); break;
         case 'create': htmlContent = CharacterCreateView(); break;
         case 'hub': htmlContent = HubView(); break;
         case 'terms': htmlContent = TermsView(); break;
