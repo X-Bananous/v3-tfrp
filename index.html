@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     
-    <title>TFRP : État de Californie - Los Angeles</title>
+    <title>TFRP : Team French RolePlay</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,11 +25,11 @@
             fontFamily: { sans: ['Inter', 'sans-serif'] },
             colors: {
                 gov: {
-                    blue: '#002654', // Navy Blue US Style
-                    red: '#BD3D44',
-                    light: '#F3F4F6',
-                    text: '#111827',
-                    border: '#E5E7EB'
+                    blue: '#000091',
+                    red: '#E1000F',
+                    light: '#F6F6F6',
+                    text: '#161616',
+                    border: '#E5E5E5'
                 }
             }
           }
@@ -37,7 +37,7 @@
       }
     </script>
     
-    <link rel="stylesheet" href="style.css?v=6.0">
+    <link rel="stylesheet" href="style.css?v=5.1">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script type="importmap">
 {
@@ -50,19 +50,21 @@
 </head>
 <body class="bg-white text-gov-text antialiased selection:bg-gov-blue selection:text-white min-h-screen">
 
+    <!-- Loading simple et rapide -->
     <div id="loading-screen" class="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center transition-all duration-300 opacity-0 pointer-events-none">
         <div class="marianne-block uppercase font-black tracking-tight text-gov-text scale-125 mb-8">
-            <div class="text-[10px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1">State of California</div>
-            <div class="text-lg leading-none italic">LOS ANGELES<br>ADMINISTRATION</div>
+            <div class="text-[10px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1">Liberté • Égalité • Roleplay</div>
+            <div class="text-lg leading-none">RÉPUBLIQUE<br>DE LOS ANGELES</div>
         </div>
         <div class="w-48 h-1 bg-gov-light rounded-full overflow-hidden">
             <div class="h-full bg-gov-blue animate-loading-bar w-1/3"></div>
         </div>
     </div>
 
+    <!-- Main App Container : Doit permettre le scroll sur mobile -->
     <div id="app" class="relative z-10 w-full flex flex-col min-h-screen">
     </div>
 
-    <script type="module" src="app.js?v=6.0"></script>
+    <script type="module" src="app.js?v=5.1"></script>
 </body>
 </html>
