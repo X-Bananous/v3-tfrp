@@ -56,7 +56,13 @@ export const state = {
     editingGang: null, 
     enterpriseCreation: { draftName: '', leaderQuery: '', coLeaderQuery: '', leaderResult: null, coLeaderResult: null, searchResults: [] },
     editingEnterprise: null,
-    ui: { modal: { isOpen: false, type: null, data: null }, toasts: [], sidebarOpen: false, sidebarCollapsedSections: [] },
+    ui: { 
+        modal: { isOpen: false, type: null, data: null }, 
+        toasts: [], 
+        sidebarOpen: false, 
+        sidebarCollapsedSections: [],
+        mobileMenuOpen: false
+    },
     economyModal: { isOpen: false, targetId: null, targetName: null, transactions: [] },
     inventoryModal: { isOpen: false, targetId: null, targetName: null, items: [] },
     bankAccount: null,

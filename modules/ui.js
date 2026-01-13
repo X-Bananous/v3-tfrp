@@ -25,10 +25,10 @@ export const showToast = (message, type = 'info') => {
     const id = Date.now();
     
     const colors = {
-        info: 'bg-gov-blue/20 border-gov-blue text-blue-100',
-        success: 'bg-emerald-500/20 border-emerald-500 text-emerald-100',
-        error: 'bg-gov-red/20 border-gov-red text-red-100',
-        warning: 'bg-orange-500/20 border-orange-500 text-orange-100'
+        info: 'bg-gov-blue text-white border-gray-900',
+        success: 'bg-emerald-600 text-white border-gray-900',
+        error: 'bg-gov-red text-white border-gray-900',
+        warning: 'bg-orange-600 text-white border-gray-900'
     };
 
     const icon = {
@@ -39,11 +39,9 @@ export const showToast = (message, type = 'info') => {
     };
 
     const toastHtml = `
-        <div id="toast-${id}" class="backdrop-blur-md p-4 rounded-2xl border ${colors[type]} flex items-center gap-3 animate-in shadow-2xl min-w-[320px] z-[9999]">
-            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                <i data-lucide="${icon[type]}" class="w-4 h-4"></i>
-            </div>
-            <span class="text-[11px] font-black uppercase tracking-wider">${message}</span>
+        <div id="toast-${id}" class="p-5 border-2 ${colors[type]} flex items-center gap-4 animate-in shadow-[8px_8px_0px_#161616] min-w-[350px] z-[9999] rounded-none">
+            <i data-lucide="${icon[type]}" class="w-5 h-5 shrink-0"></i>
+            <span class="text-[11px] font-black uppercase tracking-wider italic">${message}</span>
         </div>
     `;
 
@@ -64,12 +62,12 @@ export const showToast = (message, type = 'info') => {
 const createToastContainer = () => {
     const div = document.createElement('div');
     div.id = 'toast-container';
-    div.className = 'fixed bottom-8 right-8 flex flex-col gap-3 z-[9999]';
+    div.className = 'fixed bottom-8 right-8 flex flex-col gap-4 z-[9999]';
     document.body.appendChild(div);
     return div;
 };
 
-// --- GENERIC MODAL SYSTEM ---
+// --- GENERIC MODAL SYSTEM (RECTANGULAR CERFA) ---
 export const closeModal = () => {
     const modal = document.getElementById('global-modal');
     if(modal) {
@@ -77,8 +75,7 @@ export const closeModal = () => {
         modal.classList.add('opacity-0');
         const panel = modal.querySelector('.glass-panel');
         if(panel) {
-            panel.style.transform = 'scale(0.95) translateY(10px)';
-            panel.style.opacity = '0';
+            panel.style.transform = 'scale(0.98) translateY(10px)';
         }
         setTimeout(() => modal.remove(), 300);
     }
@@ -93,62 +90,60 @@ export const forceCloseModal = () => {
     }
 };
 
-export const showModal = ({ title, content, confirmText = 'Confirmer', cancelText = 'Annuler', onConfirm, onCancel, type = 'default', isClosable = true }) => {
+export const showModal = ({ title, content, confirmText = 'Valider', cancelText = 'Annuler', onConfirm, onCancel, type = 'default', isClosable = true }) => {
     const existing = document.getElementById('global-modal');
     if(existing) existing.remove();
 
     const themes = {
-        default: { icon: 'info', color: 'text-gov-blue', bg: 'bg-gov-blue/10', border: 'border-gov-blue/20', btn: 'bg-gov-blue hover:bg-black', borderTop: 'border-gov-blue' },
-        danger: { icon: 'shield-alert', color: 'text-gov-red', bg: 'bg-gov-red/10', border: 'border-gov-red/30', btn: 'bg-gov-red hover:bg-black', borderTop: 'border-gov-red' },
-        success: { icon: 'check-circle', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', btn: 'bg-emerald-600 hover:bg-emerald-700', borderTop: 'border-emerald-500' },
-        warning: { icon: 'alert-triangle', color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/30', btn: 'bg-orange-600 hover:bg-orange-700', borderTop: 'border-orange-500' }
+        default: { icon: 'info', color: 'text-gov-blue', btn: 'bg-gov-blue hover:bg-black', borderTop: 'border-gov-blue' },
+        danger: { icon: 'shield-alert', color: 'text-gov-red', btn: 'bg-gov-red hover:bg-black', borderTop: 'border-gov-red' },
+        success: { icon: 'check-circle', color: 'text-emerald-600', btn: 'bg-emerald-600 hover:bg-black', borderTop: 'border-emerald-600' },
+        warning: { icon: 'alert-triangle', color: 'text-orange-600', btn: 'bg-orange-600 hover:bg-black', borderTop: 'border-orange-600' }
     };
 
     const theme = themes[type] || themes.default;
     const isConfirmOnly = !onConfirm && !onCancel;
 
     const html = `
-        <div id="global-modal" data-closable="${isClosable}" class="fixed inset-0 z-[2000] flex items-center justify-center p-4 transition-all duration-300 bg-black/70 backdrop-blur-sm">
+        <div id="global-modal" data-closable="${isClosable}" class="fixed inset-0 z-[2000] flex items-center justify-center p-4 transition-all duration-300 bg-black/80 backdrop-blur-sm">
             <div class="absolute inset-0" onclick="${isClosable ? 'ui.closeModal()' : ''}"></div>
             
-            <div class="glass-panel w-full max-w-lg rounded-[48px] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)] transition-all duration-300 relative z-10 flex flex-col border border-white/10 bg-white border-t-8 ${theme.borderTop}">
+            <div class="glass-panel w-full max-w-lg overflow-hidden shadow-[16px_16px_0px_rgba(0,0,0,0.5)] transition-all duration-300 relative z-10 flex flex-col border-2 border-gray-900 bg-white border-t-8 ${theme.borderTop} rounded-none">
                 
                 <div class="p-10 pt-12">
-                    <div class="flex flex-col items-center text-center mb-8">
-                        <div class="w-20 h-20 rounded-3xl ${theme.bg} flex items-center justify-center ${theme.color} mb-6 border ${theme.border} shadow-xl transform -rotate-3">
+                    <div class="flex flex-col items-center text-center mb-10">
+                        <div class="w-20 h-20 bg-gov-light flex items-center justify-center ${theme.color} mb-8 border-2 border-gray-900 shadow-[4px_4px_0px_#161616]">
                             <i data-lucide="${theme.icon}" class="w-10 h-10"></i>
                         </div>
                         <h3 class="text-3xl font-black text-gov-text mb-2 tracking-tighter uppercase italic leading-none">${title}</h3>
-                        <div class="text-[9px] font-black uppercase tracking-[0.3em] ${theme.color} opacity-80 flex items-center gap-2">
-                             <span class="w-4 h-px bg-current opacity-30"></span> 
-                             Protocole de l'État de Californie
-                             <span class="w-4 h-px bg-current opacity-30"></span>
+                        <div class="text-[10px] font-black uppercase tracking-[0.4em] ${theme.color} opacity-60 flex items-center gap-2">
+                             PROTOCOLE OFFICIEL
                         </div>
                     </div>
 
-                    <div class="text-gray-500 text-sm leading-relaxed max-h-[40vh] overflow-y-auto custom-scrollbar px-4 mb-10 font-medium text-center italic">
+                    <div class="text-gray-600 text-sm leading-relaxed max-h-[40vh] overflow-y-auto custom-scrollbar px-4 mb-12 font-medium text-center italic border-l-4 border-gray-100">
                         ${content}
                     </div>
 
-                    <div class="flex flex-col gap-3">
+                    <div class="flex flex-col gap-4">
                         ${confirmText ? `
-                            <button id="modal-confirm" class="w-full py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] text-white transition-all shadow-xl ${theme.btn} transform active:scale-95">
+                            <button id="modal-confirm" class="w-full py-5 font-black text-[11px] uppercase tracking-[0.3em] text-white transition-all shadow-[6px_6px_0px_rgba(0,0,0,0.2)] ${theme.btn} border border-gray-900 rounded-none active:translate-x-1 active:translate-y-1 active:shadow-none">
                                 ${confirmText}
                             </button>
                         ` : ''}
                         
                         ${(onConfirm || cancelText) && !isConfirmOnly && isClosable ? `
-                            <button id="modal-cancel" class="w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gov-text transition-all border border-transparent">
+                            <button id="modal-cancel" class="w-full py-4 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-gov-text transition-all border border-transparent">
                                 ${cancelText}
                             </button>
                         ` : ''}
                     </div>
                 </div>
                 
-                <div class="bg-gov-light/50 py-5 px-10 flex justify-center items-center border-t border-gray-100">
-                    <div class="marianne-block uppercase font-black text-gov-text scale-[0.6] opacity-40">
-                        <div class="text-[10px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red font-black">Liberté • Égalité • Justice</div>
-                        <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES ADMINISTRATION</div>
+                <div class="bg-gov-light py-6 px-10 flex justify-center items-center border-t border-gray-900">
+                    <div class="marianne-block uppercase font-black text-gov-text scale-[0.6] opacity-60">
+                        <div class="text-[10px] tracking-widest border-b border-gray-900 pb-0.5 mb-1 text-gray-900 font-black italic">Liberté • Égalité • Justice</div>
+                        <div class="text-md italic">L.A. ADMINISTRATION</div>
                     </div>
                 </div>
             </div>
