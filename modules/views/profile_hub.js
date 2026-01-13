@@ -13,7 +13,7 @@ export const ProfileHubView = () => {
     const permKeys = Object.keys(perms).filter(k => perms[k] === true);
     const sanctions = state.userSanctions || [];
 
-    // Navigation Tabs
+    // Navigation Tabs Definition
     const tabs = [
         { id: 'identity', label: 'Mes Dossiers', icon: 'users' },
         { id: 'perms', label: 'Accréditations', icon: 'shield-check' },

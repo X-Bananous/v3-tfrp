@@ -39,12 +39,14 @@ export const goToCreate = () => router('create');
 export const cancelCreate = () => router('profile_hub');
 
 export const setHubPanel = async (panel) => {
+    // Redirection vers le hub de profil si clic sur Profil dans la navbar
     if (panel === 'profile') {
         state.activeProfileTab = 'identity';
         router('profile_hub');
         return;
     }
 
+    // Vérification de sécurité pour les panels restreints
     if (panel === 'staff') {
         const hasStaffAccess = Object.keys(state.user.permissions || {}).length > 0 || state.user.isFounder;
         if (!hasStaffAccess) return ui.showToast("Accès Fondation refusé.", "error");

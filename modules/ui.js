@@ -25,10 +25,10 @@ export const showToast = (message, type = 'info') => {
     const id = Date.now();
     
     const colors = {
-        info: 'bg-[#121214] border-gov-blue text-blue-100',
-        success: 'bg-[#121214] border-emerald-500 text-emerald-100',
-        error: 'bg-[#121214] border-gov-red text-red-100',
-        warning: 'bg-[#121214] border-orange-500 text-orange-100'
+        info: 'bg-[#0a0a0c] border-gov-blue text-blue-100',
+        success: 'bg-[#0a0a0c] border-emerald-500 text-emerald-100',
+        error: 'bg-[#0a0a0c] border-gov-red text-red-100',
+        warning: 'bg-[#0a0a0c] border-orange-500 text-orange-100'
     };
 
     const icon = {
@@ -39,7 +39,7 @@ export const showToast = (message, type = 'info') => {
     };
 
     const toastHtml = `
-        <div id="toast-${id}" class="backdrop-blur-xl p-5 rounded-2xl border-l-4 ${colors[type]} flex items-center gap-4 animate-in shadow-[0_20px_50px_rgba(0,0,0,0.3)] min-w-[350px] z-[9999]">
+        <div id="toast-${id}" class="backdrop-blur-xl p-5 rounded-2xl border-l-4 ${colors[type]} flex items-center gap-4 animate-in shadow-[0_20px_50px_rgba(0,0,0,0.4)] min-w-[350px] z-[9999]">
             <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
                 <i data-lucide="${icon[type]}" class="w-5 h-5"></i>
             </div>
@@ -111,7 +111,7 @@ export const showModal = ({ title, content, confirmText = 'Confirmer', cancelTex
         <div id="global-modal" data-closable="${isClosable}" class="fixed inset-0 z-[2000] flex items-center justify-center p-6 transition-all duration-300 bg-black/90 backdrop-blur-md">
             <div class="absolute inset-0" onclick="${isClosable ? 'ui.closeModal()' : ''}"></div>
             
-            <div class="glass-panel w-full max-w-xl rounded-[48px] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.6)] transition-all duration-500 relative z-10 flex flex-col border border-white/10 bg-[#08080a] animate-in scale-100">
+            <div class="glass-panel w-full max-w-xl rounded-[48px] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.7)] transition-all duration-500 relative z-10 flex flex-col border border-white/10 bg-[#08080a] animate-in scale-100">
                 
                 <div class="h-2 w-full ${theme.btn} opacity-80"></div>
 
