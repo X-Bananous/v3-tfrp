@@ -19,7 +19,7 @@ const refreshBanner = `
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
             </div>
-            <span><span class="font-bold">Protocol Terminal</span> • Accès Administrateur v6.0</span>
+            <span><span class="font-bold">Protocol Terminal</span> • Accès Fondation v6.0</span>
         </div>
         <button onclick="actions.refreshCurrentView()" id="refresh-data-btn" class="text-[10px] font-black uppercase tracking-widest text-purple-400 hover:text-white flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap">
             <i data-lucide="refresh-cw" class="w-3 h-3"></i> Sync Monde
@@ -41,7 +41,7 @@ export const StaffView = () => {
                         <i data-lucide="shield-alert" class="w-12 h-12"></i>
                     </div>
                     <h2 class="text-3xl font-black text-white mb-4 italic uppercase tracking-tighter leading-none text-center">Accès<br>Restreint</h2>
-                    <p class="text-gray-400 mb-10 leading-relaxed font-medium">Votre niveau d'accréditation n'est pas suffisant pour accéder au Directoire de l'État de Californie.</p>
+                    <p class="text-gray-400 mb-10 leading-relaxed font-medium">Votre niveau d'accréditation n'est pas suffisant pour accéder à la Fondation de l'État de Californie.</p>
                     <a href="${CONFIG.INVITE_STAFF}" target="_blank" class="glass-btn w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 bg-purple-600 hover:bg-purple-500 shadow-xl shadow-purple-900/40 uppercase tracking-widest italic">
                         <i data-lucide="external-link" class="w-5 h-5"></i>
                         Postuler au Staff
@@ -67,7 +67,7 @@ export const StaffView = () => {
     const isOnDuty = state.onDutyStaff?.some(s => s.id === state.user.id);
 
     const allTabs = [
-        { id: 'citizens', label: 'Population', icon: 'users', perm: 'can_manage_characters' },
+        { id: 'citizens', label: 'Population', icon: 'users', perm: 'can_approve_characters' },
         { id: 'economy', label: 'Finances', icon: 'coins', perm: 'can_manage_economy' },
         { id: 'illegal', label: 'Criminel', icon: 'skull', perm: 'can_manage_illegal' },
         { id: 'enterprise', label: 'Commerce', icon: 'building-2', perm: 'can_manage_enterprises' },
@@ -85,7 +85,7 @@ export const StaffView = () => {
                 <div>
                     <h2 class="text-4xl font-black text-white flex items-center gap-4 uppercase italic tracking-tighter">
                         <i data-lucide="shield" class="w-10 h-10 text-purple-500"></i>
-                        Directoire
+                        Fondation
                     </h2>
                     <div class="flex items-center gap-3 mt-1">
                          <span class="text-[10px] text-purple-500/60 font-black uppercase tracking-widest">Protocol OS v6.0</span>

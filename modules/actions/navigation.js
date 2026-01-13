@@ -39,10 +39,17 @@ export const goToCreate = () => router('create');
 export const cancelCreate = () => router('profile_hub');
 
 export const setHubPanel = async (panel) => {
+    // Redirection vers le hub de profil si clic sur Profil dans la navbar
+    if (panel === 'profile') {
+        state.activeProfileTab = 'identity';
+        router('profile_hub');
+        return;
+    }
+
     // Vérification de sécurité pour les panels restreints
     if (panel === 'staff') {
         const hasStaffAccess = Object.keys(state.user.permissions || {}).length > 0 || state.user.isFounder;
-        if (!hasStaffAccess) return ui.showToast("Accès administratif refusé.", "error");
+        if (!hasStaffAccess) return ui.showToast("Accès Fondation refusé.", "error");
     }
     if (panel === 'illicit') {
         if (state.activeCharacter?.alignment !== 'illegal') return ui.showToast("Accès réservé au secteur clandestin.", "error");
@@ -59,13 +66,6 @@ export const setHubPanel = async (panel) => {
         else if (panel === 'bank') await fetchBankData(state.activeCharacter.id);
         else if (panel === 'assets') await Promise.all([fetchInventory(state.activeCharacter.id), fetchPlayerInvoices(state.activeCharacter.id)]);
         else if (panel === 'staff') await Promise.all([fetchPendingApplications(), fetchAllCharacters(), fetchStaffProfiles(), fetchGlobalHeists()]);
-        else if (panel === 'profile') {
-            state.activeProfileTab = 'identity';
-            // On charge les sanctions au passage
-            if (window.actions && window.actions.loadUserSanctions) {
-                await window.actions.loadUserSanctions();
-            }
-        }
     } finally { state.isPanelLoading = false; render(); }
 };
 

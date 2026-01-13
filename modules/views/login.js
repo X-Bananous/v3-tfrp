@@ -35,20 +35,21 @@ export const LoginView = () => {
         <section class="landing-section bg-gov-light border-b border-gray-200">
             <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <div class="text-center lg:text-left animate-in">
-                    <span class="inline-block px-4 py-1 bg-blue-100 text-gov-blue text-[10px] font-black uppercase tracking-[0.3em] mb-6">Portail National d'Information</span>
+                    <span class="inline-block px-4 py-1 bg-blue-100 text-gov-blue text-[10px] font-black uppercase tracking-[0.3em] mb-6">Plateforme de Gestion Roleplay</span>
                     <h1 class="text-5xl md:text-7xl font-black text-gov-text tracking-tighter leading-none mb-8 uppercase italic">
-                        L'administration <span class="text-gov-blue">simplifiée.</span>
+                        TEAM FRENCH<br><span class="text-gov-blue">ROLEPLAY.</span>
                     </h1>
+                    <div class="text-2xl font-black text-gray-400 uppercase tracking-widest mb-10 italic">Panel TFRP v6.0</div>
                     <p class="text-lg text-gray-600 mb-10 leading-relaxed font-medium max-w-xl mx-auto lg:mx-0">
-                        Gérez votre identité civile, consultez vos actifs et interagissez avec les services publics de l'État de Californie sur la plateforme officielle de Los Angeles.
+                        L'interface officielle de l'État de Californie. Gérez vos identités civiles, vos finances et interagissez avec les services publics de Los Angeles.
                     </p>
                     <button onclick="${state.user ? "router('profile_hub')" : "actions.login()"}" class="px-10 py-5 bg-gov-blue text-white font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-blue-900 transition-all transform hover:scale-105">
                         Accéder au portail
                     </button>
                 </div>
                 <div class="hidden lg:block animate-in" style="animation-delay: 0.2s">
-                    <div class="bg-white p-2 rounded-sm shadow-2xl border border-gray-200 rotate-2">
-                        <img src="https://media.discordapp.net/attachments/1279455759414857759/1454487850132308109/GouvLA.png" class="w-full grayscale contrast-125 opacity-80">
+                    <div class="bg-white p-2 rounded-[32px] shadow-2xl border border-gray-200 rotate-2 overflow-hidden aspect-video">
+                        <img src="https://images.unsplash.com/photo-1542738738-55374d209119?auto=format&fit=crop&w=1200&q=80" class="w-full h-full object-cover grayscale contrast-125 opacity-90">
                     </div>
                 </div>
             </div>
@@ -57,9 +58,9 @@ export const LoginView = () => {
         <!-- STAFF -->
         <section class="landing-section bg-white border-b border-gray-100">
             <div class="max-w-6xl mx-auto text-center">
-                <h2 class="text-3xl font-black uppercase tracking-tighter italic mb-16">Conseil d'Administration</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-12">
-                    ${sortedStaff.slice(0, 8).map(s => `
+                <h2 class="text-3xl font-black uppercase tracking-tighter italic mb-16 underline decoration-gov-red decoration-4 underline-offset-8">L'Équipe de la Fondation</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12">
+                    ${sortedStaff.map(s => `
                         <div class="group flex flex-col items-center">
                             <div class="relative mb-6">
                                 <img src="${s.avatar_url}" class="w-24 h-24 rounded-full border-4 border-white shadow-xl grayscale group-hover:grayscale-0 transition-all duration-500 transform group-hover:scale-110">
@@ -71,7 +72,7 @@ export const LoginView = () => {
                             </div>
                             <div class="font-black uppercase text-gov-text tracking-tighter text-lg">${s.username}</div>
                             <div class="text-[9px] font-black ${state.adminIds.includes(s.id) ? 'text-gov-red' : 'text-gov-blue'} uppercase tracking-widest mt-1">
-                                ${state.adminIds.includes(s.id) ? 'Directoire' : 'Service Public'}
+                                ${state.adminIds.includes(s.id) ? 'Fondation' : 'Service Public'}
                             </div>
                         </div>
                     `).join('')}
@@ -108,27 +109,3 @@ export const LoginView = () => {
     </div>
     `;
 };
-
-export const AccessDeniedView = () => `
-    <div class="min-h-screen flex items-center justify-center p-8 bg-gov-light text-center">
-        <div class="bg-white max-w-lg p-12 border-t-8 border-gov-red shadow-2xl">
-            <div class="w-16 h-16 bg-red-50 text-gov-red rounded-full flex items-center justify-center mx-auto mb-8"><i data-lucide="lock" class="w-8 h-8"></i></div>
-            <h2 class="text-2xl font-black text-gov-text mb-4 uppercase italic">Accès Non Autorisé</h2>
-            <p class="text-gray-600 mb-10 leading-relaxed">Votre identité n'est pas répertoriée dans le registre de l'État de Californie.</p>
-            <a href="${CONFIG.INVITE_URL}" target="_blank" class="block w-full py-4 bg-gov-blue text-white font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all shadow-xl">Rejoindre la Communauté</a>
-            <button onclick="actions.logout()" class="mt-6 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gov-text transition-colors">Retour à l'accueil</button>
-        </div>
-    </div>
-`;
-
-export const DeletionPendingView = () => `
-    <div class="min-h-screen flex items-center justify-center p-8 bg-gov-light text-center">
-        <div class="bg-white max-w-lg p-12 border-t-8 border-orange-500 shadow-2xl">
-            <div class="w-16 h-16 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-8"><i data-lucide="trash-2" class="w-8 h-8"></i></div>
-            <h2 class="text-2xl font-black text-gov-text mb-4 uppercase italic">Compte en cours de Purge</h2>
-            <p class="text-gray-600 mb-10 leading-relaxed font-medium">Vos données sont marquées pour une suppression définitive dans les prochaines 72h.</p>
-            <button onclick="actions.cancelDataDeletion()" class="w-full py-4 bg-gov-text text-white font-black text-xs uppercase tracking-widest hover:bg-black transition-all shadow-xl">Annuler la procédure d'effacement</button>
-            <button onclick="actions.logout()" class="mt-6 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gov-text transition-colors">Déconnexion</button>
-        </div>
-    </div>
-`;
