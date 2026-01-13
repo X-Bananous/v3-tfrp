@@ -1,10 +1,10 @@
 
-/* Reset & Base */
+/* Base & Global Scroll */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; }
+html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; font-family: 'Inter', sans-serif; }
 #app { min-height: 100vh; display: flex; flex-direction: column; }
 
-/* Marianne Block DSFR */
+/* Marianne Block DSFR Style */
 .marianne-block {
     border-left: 2px solid #000091;
     padding-left: 1rem;
@@ -13,15 +13,18 @@ html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; }
     flex-direction: column;
 }
 
-/* Navbar Terminal */
+/* Horizontal Navbar Terminal */
 .terminal-nav {
-    height: 80px;
+    height: 70px;
     background: #fff;
     border-bottom: 1px solid #E5E5E5;
     position: sticky;
     top: 0;
     z-index: 1000;
+    padding: 0 1.5rem;
 }
+
+.nav-item { position: relative; height: 100%; display: flex; align-items: center; }
 
 .nav-dropdown {
     position: absolute;
@@ -29,12 +32,14 @@ html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; }
     left: 0;
     background: #fff;
     border: 1px solid #E5E5E5;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-    min-width: 240px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    min-width: 220px;
     opacity: 0;
     transform: translateY(10px);
     pointer-events: none;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0 0 8px 8px;
+    padding: 0.5rem;
 }
 
 .nav-item:hover .nav-dropdown {
@@ -43,29 +48,35 @@ html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; }
     pointer-events: auto;
 }
 
-/* Cards & Interaction */
+/* Gov Cards & Interaction */
 .gov-card {
     background: #fff;
     border: 1px solid #E5E5E5;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    z-index: 10;
 }
 .gov-card:hover {
-    border-bottom: 2px solid #000091;
-    box-shadow: 0 12px 24px rgba(0,0,145,0.06);
+    border-color: #000091;
+    box-shadow: 0 10px 25px rgba(0,0,145,0.06);
     transform: translateY(-4px);
 }
 
-/* Layout Helpers */
-.landing-section { padding: 5rem 1.5rem; }
+.gov-card-active { border-left: 4px solid #000091; }
+
+/* Landing Layout */
+.landing-section { padding: 4rem 1.5rem; }
 @media (max-width: 768px) {
-    .landing-section { padding: 3rem 1rem; }
-    .terminal-nav { height: auto; padding: 1rem 0; }
+    .terminal-nav { height: auto; padding: 1rem; flex-direction: column; gap: 1rem; }
+    .nav-dropdown { position: static; opacity: 1; pointer-events: auto; transform: none; box-shadow: none; border: none; width: 100%; }
 }
 
-/* Animations */
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.animate-in { animation: fadeInUp 0.5s ease-out forwards; }
+/* Utils */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #E5E5E5; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #000091; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: fadeIn 0.4s ease-out forwards; }
