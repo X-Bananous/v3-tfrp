@@ -1,4 +1,3 @@
-
 import { state } from '../state.js';
 import { render, router } from '../utils.js';
 import { ui } from '../ui.js';
@@ -51,5 +50,14 @@ export const setHubPanel = async (panel) => {
         else if (panel === 'bank') await fetchBankData(state.activeCharacter.id);
         else if (panel === 'assets') await Promise.all([fetchInventory(state.activeCharacter.id), fetchPlayerInvoices(state.activeCharacter.id)]);
         else if (panel === 'staff') await Promise.all([fetchPendingApplications(), fetchAllCharacters()]);
+        else if (panel === 'profile') {
+            state.activeProfileTab = 'identity';
+            if (window.actions.loadUserSanctions) await window.actions.loadUserSanctions();
+        }
     } finally { state.isPanelLoading = false; render(); }
+};
+
+export const setProfileTab = (tab) => {
+    state.activeProfileTab = tab;
+    render();
 };

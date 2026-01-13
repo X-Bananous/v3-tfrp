@@ -95,7 +95,7 @@ const handleAuthenticatedSession = async (session) => {
         const discordUser = supabaseUser.user_metadata;
         const discordId = discordUser.provider_id || discordUser.sub;
         
-        // Récupération des guildes depuis l'identité (nécessite le scope guilds lors du login)
+        // Récupération des guildes et des assets cosmétiques
         const guilds = discordUser.guilds || [];
 
         const { data: profile } = await state.supabase
@@ -108,6 +108,9 @@ const handleAuthenticatedSession = async (session) => {
             id: discordId, 
             username: discordUser.full_name || discordUser.username || discordUser.custom_claims?.global_name, 
             avatar: discordUser.avatar_url,
+            // Données cosmétiques étendues Discord
+            banner: discordUser.banner_url || null,
+            decoration: discordUser.avatar_decoration || null,
             guilds: guilds,
             permissions: profile?.permissions || {}, 
             deletion_requested_at: profile?.deletion_requested_at || null, 

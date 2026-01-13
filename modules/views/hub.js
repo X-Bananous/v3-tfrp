@@ -38,13 +38,6 @@ export const HubView = () => {
                                 <span class="w-12 h-0.5 bg-gov-blue"></span> Dossier National : #${char.id.substring(0,8).toUpperCase()}
                             </p>
                         </div>
-                        <div class="bg-gov-light p-8 border border-gray-200 shadow-xl rounded-sm">
-                            <div class="text-[9px] font-black text-gov-blue uppercase tracking-[0.4em] mb-3">État des Liaisons</div>
-                            <div class="flex items-center gap-3">
-                                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-                                <div class="text-sm font-black text-gray-900 uppercase italic">Signal Crypte OK</div>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -128,7 +121,6 @@ export const HubView = () => {
 
                     <button onclick="actions.setHubPanel('assets')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${panel === 'assets' ? 'text-gov-blue' : 'text-gray-400 hover:text-gov-text'}">Patrimoine</button>
                     
-                    <!-- SPECIAL PANELS -->
                     <div class="h-6 w-px bg-gray-100 mx-2"></div>
                     
                     <button onclick="actions.setHubPanel('illicit')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all">Réseau Clandestin</button>
@@ -152,9 +144,10 @@ export const HubView = () => {
                             <div class="text-[10px] font-black uppercase text-gov-text leading-none">${char.first_name}</div>
                             <div class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">${char.job ? char.job.toUpperCase() : 'CIVIL'}</div>
                         </div>
-                        <div class="relative">
-                            <img src="${u.avatar}" class="w-10 h-10 rounded-full grayscale border border-gray-200 p-0.5">
-                            <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white"></div>
+                        <div class="relative w-10 h-10">
+                            <img src="${u.avatar}" class="w-full h-full rounded-full grayscale border border-gray-200 p-0.5 relative z-10">
+                            ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] h-[130%] max-w-none z-20 pointer-events-none">` : ''}
+                            <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white z-30"></div>
                         </div>
                     </div>
                     <div class="nav-dropdown right-0 left-auto">

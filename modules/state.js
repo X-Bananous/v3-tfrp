@@ -1,4 +1,3 @@
-
 export const state = {
     user: null, 
     accessToken: null,
@@ -122,5 +121,9 @@ export const state = {
     userSanctions: [],
     activeSanctionTarget: null,
     staffSanctionSearchQuery: '',
-    staffSanctionResults: []
+    staffSanctionResults: [],
+    globalSanctions: [],
+    
+    // NEW PROFILE TABS
+    activeProfileTab: 'identity'
 };
