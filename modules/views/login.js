@@ -17,7 +17,7 @@ export const LoginView = () => {
             </div>
             <div>
                 ${state.user ? `
-                    <button onclick="router('profile_hub')" class="bg-gov-blue text-white px-6 py-2.5 rounded-sm font-bold uppercase text-[10px] tracking-widest hover:opacity-90 transition-all">Espace Citoyen</button>
+                    <button onclick="router('profile_hub')" class="bg-gov-blue text-white px-6 py-2.5 rounded-sm font-bold uppercase text-[10px] tracking-widest hover:opacity-90 transition-all">Mon Espace</button>
                 ` : `
                     <button onclick="actions.login()" class="bg-[#5865F2] text-white px-6 py-2.5 rounded-sm flex items-center gap-3 font-bold uppercase text-[10px] tracking-widest hover:opacity-90 transition-all">
                         <i data-lucide="discord" class="w-4 h-4"></i> Connexion
@@ -35,7 +35,7 @@ export const LoginView = () => {
                         L'administration <span class="text-gov-blue underline decoration-gov-red decoration-4">Fédérale.</span>
                     </h1>
                     <p class="text-lg text-gray-600 mb-10 leading-relaxed font-medium max-w-xl">
-                        Bienvenue sur le portail officiel de l'État de Californie pour le district de Los Angeles. Gérez vos titres, votre patrimoine et vos accès officiels.
+                        Bienvenue sur le portail officiel de l'État de Californie pour le district de Los Angeles. Gagnez du temps dans vos démarches administratives.
                     </p>
                     <button onclick="${state.user ? "router('profile_hub')" : "actions.login()"}" class="px-10 py-5 bg-gov-blue text-white font-black uppercase text-xs tracking-widest shadow-2xl hover:scale-105 transition-all italic">
                         Accéder au registre national

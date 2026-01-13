@@ -44,11 +44,6 @@ export const ProfileHubView = () => {
                             class="flex-1 py-4 font-black text-[10px] uppercase tracking-widest transition-all ${isAccepted ? 'bg-gov-blue text-white hover:bg-black shadow-lg' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}">
                             ${isAccepted ? 'Charger le Dossier' : 'Vérification en cours'}
                         </button>
-                        ${isAccepted ? `
-                            <button onclick="actions.startEditCharacter('${char.id}')" class="p-4 bg-gray-100 text-gray-600 hover:bg-gov-blue hover:text-white transition-all rounded-sm">
-                                <i data-lucide="settings-2" class="w-4 h-4"></i>
-                            </button>
-                        ` : ''}
                     `}
                 </div>
             </div>
@@ -58,6 +53,31 @@ export const ProfileHubView = () => {
     return `
     <div class="flex-1 flex flex-col bg-gov-light min-h-screen overflow-y-auto custom-scrollbar">
         
+        <!-- HEADER OMNIPRÉSENT ADAPTÉ -->
+        <nav class="global-nav shrink-0 bg-white">
+            <div class="flex items-center gap-10 h-full">
+                <div onclick="router('profile_hub')" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer">
+                    <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red italic">California</div>
+                    <div class="text-md leading-none italic">LOS ANGELES</div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 h-full">
+                <div class="nav-item h-full">
+                    <div class="flex items-center gap-4 cursor-pointer p-2 hover:bg-gov-light rounded-sm transition-all">
+                        <div class="text-right hidden sm:block">
+                            <div class="text-[9px] font-black uppercase text-gov-text leading-none">${u.username}</div>
+                            <div class="text-[7px] font-bold text-gray-400 uppercase tracking-widest mt-1">ID: ${u.id.substring(0,8)}</div>
+                        </div>
+                        <img src="${u.avatar}" class="w-9 h-9 rounded-full grayscale border border-gray-100 shadow-sm">
+                    </div>
+                    <div class="nav-dropdown">
+                        <button onclick="actions.logout()" class="w-full text-left p-4 hover:bg-red-50 text-gov-red text-[9px] font-black uppercase tracking-widest flex items-center gap-3"><i data-lucide="log-out" class="w-4 h-4"></i> Quitter le portail</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
         <!-- HEADER IDENTITÉ DISCORD -->
         <div class="bg-white border-b border-gray-200 px-8 py-12 shrink-0">
             <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
@@ -75,7 +95,6 @@ export const ProfileHubView = () => {
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button onclick="actions.logout()" class="px-8 py-3 bg-white text-gov-red border-2 border-red-100 hover:bg-red-50 font-black text-[10px] uppercase tracking-widest transition-all">Déconnexion</button>
                     ${u.isFounder || permKeys.length > 0 ? `<button onclick="actions.bypassLogin()" class="px-8 py-3 bg-gov-blue text-white font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-black transition-all italic">Accès Console Staff</button>` : ''}
                 </div>
             </div>
@@ -105,39 +124,40 @@ export const ProfileHubView = () => {
                 <!-- ACCREDITATIONS & SANCTIONS -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="gov-card p-10 bg-white">
-                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-8">Niveau d'Accréditation Système</h4>
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-8">Accréditations Système</h4>
                         <div class="grid grid-cols-2 gap-3">
                             ${permKeys.length > 0 ? permKeys.map(k => `
                                 <div class="bg-gov-light p-3 rounded-sm border border-gray-100 flex items-center gap-3">
                                     <i data-lucide="check-circle" class="w-4 h-4 text-gov-blue"></i>
                                     <span class="text-[9px] font-black text-gov-text uppercase truncate">${k.replace('can_', '').replace(/_/g, ' ')}</span>
                                 </div>
-                            `).join('') : '<div class="col-span-full py-10 text-center text-gray-400 italic text-[10px] uppercase font-bold tracking-widest border border-dashed border-gray-100">Aucun accès spécifique</div>'}
+                            `).join('') : '<div class="col-span-full py-10 text-center text-gray-400 italic text-[10px] uppercase font-bold tracking-widest border border-dashed border-gray-100">Aucun badge administratif</div>'}
                         </div>
                     </div>
                     
                     <div class="gov-card p-10 bg-white flex flex-col">
                         <h4 class="text-[10px] font-black text-gov-red uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
-                            <i data-lucide="shield-alert" class="w-4 h-4"></i> Registre Disciplinaire (Dernières Sanctions)
+                            <i data-lucide="shield-alert" class="w-4 h-4"></i> Registre Disciplinaire
                         </h4>
                         <div class="flex-1 overflow-y-auto max-h-48 custom-scrollbar space-y-3">
                             ${sanctions.length === 0 ? '<p class="text-center text-gray-400 italic text-[10px] py-10 uppercase tracking-widest">Registre de casier vierge</p>' : sanctions.map(s => `
-                                <div class="p-4 bg-red-50 border border-red-100 rounded-sm flex flex-col gap-2 relative">
+                                <div class="p-4 bg-red-50 border border-red-100 rounded-sm flex flex-col gap-2 relative group">
                                     <div class="flex justify-between items-center">
                                         <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-red-600 text-white">${s.type}</span>
                                         <span class="text-[9px] text-gray-400 font-mono">${new Date(s.created_at).toLocaleDateString()}</span>
                                     </div>
                                     <p class="text-[11px] text-red-900 font-medium leading-relaxed italic">"${s.reason}"</p>
+                                    ${!s.appeal_at ? `<button onclick="actions.openAppealModal('${s.id}')" class="text-[8px] font-black text-gov-blue uppercase underline mt-2 opacity-0 group-hover:opacity-100 transition-opacity">Contester (1x par an)</button>` : '<span class="text-[8px] font-black text-gray-400 uppercase mt-2 italic">Contestation en cours</span>'}
                                 </div>
                             `).join('')}
                         </div>
                     </div>
                 </div>
 
-                <!-- SECURITY / Danger Zone -->
+                <!-- SECURITY -->
                 <div class="gov-card p-10 bg-white border-t-8 border-gov-red">
                     <h4 class="text-[10px] font-black text-gov-red uppercase tracking-[0.3em] mb-6">Zone de Sécurité & RGPD</h4>
-                    <p class="text-xs text-gray-500 mb-10 leading-relaxed font-medium italic">"Conformément aux lois fédérales, vous pouvez demander l'effacement total de votre identité numérique. Cette action supprimera tous les personnages, inventaires et actifs bancaires liés à ce compte."</p>
+                    <p class="text-xs text-gray-500 mb-10 leading-relaxed font-medium italic">"Vous disposez d'un droit à l'oubli définitif. La purge supprimera vos personnages, vos actifs bancaires et vos inventaires de façon irréversible."</p>
                     <button onclick="actions.requestDataDeletion()" class="w-full py-4 bg-red-600/10 text-gov-red font-black text-[10px] uppercase tracking-widest hover:bg-gov-red hover:text-white transition-all border border-red-200">
                         Révoquer mon identité fédérale (Purge 72h)
                     </button>
@@ -146,8 +166,8 @@ export const ProfileHubView = () => {
             </div>
         </div>
 
-        <div class="bg-white border-t border-gray-100 py-8 text-center">
-            <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.6em]">Registre National des Populations • California State Administration</p>
+        <div class="bg-white border-t border-gray-100 py-8 text-center shrink-0">
+            <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.6em]">Registre National • California State Administration</p>
         </div>
     </div>
     `;
