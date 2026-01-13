@@ -4,13 +4,12 @@ import { ui } from '../ui.js';
 import { 
     loadCharacters, fetchBankData, fetchInventory, fetchActiveHeistLobby, 
     fetchGlobalHeists, fetchEmergencyCalls, fetchAllCharacters, fetchAllReports, fetchEnterprises,
-    fetchERLCData, fetchNotifications, fetchSecureConfig, fetchActiveSession, fetchPlayerInvoices
+    fetchERLCData, fetchNotifications, fetchActiveSession, fetchPlayerInvoices
 } from '../services.js';
 
 export const backToSelect = async () => {
     state.activeCharacter = null;
     state.bankAccount = null;
-    state.ui.mobileMenuOpen = false;
     sessionStorage.removeItem('tfrp_active_char');
     sessionStorage.removeItem('tfrp_hub_panel');
     await loadCharacters();
@@ -21,16 +20,10 @@ export const backToLanding = () => {
     state.activeCharacter = null;
     state.activeHubPanel = 'main';
     state.currentView = 'login';
-    state.ui.mobileMenuOpen = false;
     sessionStorage.removeItem('tfrp_active_char');
     sessionStorage.removeItem('tfrp_hub_panel');
     sessionStorage.setItem('tfrp_current_view', 'login');
     router('login');
-};
-
-export const toggleMobileMenu = () => {
-    state.ui.mobileMenuOpen = !state.ui.mobileMenuOpen;
-    render();
 };
 
 export const selectCharacter = async (charId) => {
@@ -55,8 +48,9 @@ export const goToCreate = () => router('create');
 export const cancelCreate = () => router('profile_hub');
 
 export const setHubPanel = async (panel) => {
+    // Fermer le menu mobile lors d'un changement de vue
     state.ui.mobileMenuOpen = false;
-    
+
     if (panel === 'profile') {
         state.activeProfileTab = 'identity';
         router('profile_hub');
@@ -85,14 +79,17 @@ export const setHubPanel = async (panel) => {
     } finally { state.isPanelLoading = false; render(); }
 };
 
+export const toggleMobileMenu = () => {
+    state.ui.mobileMenuOpen = !state.ui.mobileMenuOpen;
+    render();
+};
+
 export const setProfileTab = (tab) => {
     state.activeProfileTab = tab;
-    state.ui.mobileMenuOpen = false;
     render();
 };
 
 export const confirmLogout = () => {
-    state.ui.mobileMenuOpen = false;
     ui.showModal({
         title: "DÉCONNEXION SÉCURISÉE",
         content: "Souhaitez-vous fermer définitivement votre session administrative ?",

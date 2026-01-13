@@ -122,14 +122,10 @@ export const state = {
     alignmentModalShown: false, 
     supabase: null,
     queueCount: 0,
-    
-    // SANCTIONS STATE
     userSanctions: [],
     activeSanctionTarget: null,
     staffSanctionSearchQuery: '',
     staffSanctionResults: [],
     globalSanctions: [],
-    
-    // NEW PROFILE TABS
     activeProfileTab: 'identity'
 };
