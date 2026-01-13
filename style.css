@@ -1,45 +1,45 @@
 
-/* Base & Global Scroll */
+/* Base */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; font-family: 'Inter', sans-serif; }
+html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
 #app { min-height: 100vh; display: flex; flex-direction: column; }
 
-/* Marianne Block DSFR Style */
+/* Institutional Branding */
 .marianne-block {
-    border-left: 2px solid #000091;
-    padding-left: 1rem;
+    border-left: 3px solid #002654;
+    padding-left: 0.75rem;
     line-height: 1.1;
     display: flex;
     flex-direction: column;
 }
 
-/* Horizontal Navbar Terminal */
-.terminal-nav {
+/* Global Navbar */
+.global-nav {
     height: 70px;
     background: #fff;
-    border-bottom: 1px solid #E5E5E5;
+    border-bottom: 1px solid #E5E7EB;
     position: sticky;
     top: 0;
     z-index: 1000;
     padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
-
-.nav-item { position: relative; height: 100%; display: flex; align-items: center; }
 
 .nav-dropdown {
     position: absolute;
     top: 100%;
-    left: 0;
+    right: 0;
     background: #fff;
-    border: 1px solid #E5E5E5;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-    min-width: 220px;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    min-width: 240px;
     opacity: 0;
     transform: translateY(10px);
     pointer-events: none;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 0 0 8px 8px;
-    padding: 0.5rem;
+    border-radius: 0 0 12px 12px;
 }
 
 .nav-item:hover .nav-dropdown {
@@ -48,35 +48,23 @@ html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; fo
     pointer-events: auto;
 }
 
-/* Gov Cards & Interaction */
+/* Card Interaction */
 .gov-card {
     background: #fff;
-    border: 1px solid #E5E5E5;
+    border: 1px solid #E5E7EB;
     transition: all 0.2s ease;
-    cursor: pointer;
-    position: relative;
-    z-index: 10;
+    border-radius: 8px;
+    overflow: hidden;
 }
 .gov-card:hover {
-    border-color: #000091;
-    box-shadow: 0 10px 25px rgba(0,0,145,0.06);
-    transform: translateY(-4px);
+    border-color: #002654;
+    box-shadow: 0 12px 24px rgba(0,38,84,0.08);
+    transform: translateY(-2px);
 }
 
-.gov-card-active { border-left: 4px solid #000091; }
-
-/* Landing Layout */
-.landing-section { padding: 4rem 1.5rem; }
-@media (max-width: 768px) {
-    .terminal-nav { height: auto; padding: 1rem; flex-direction: column; gap: 1rem; }
-    .nav-dropdown { position: static; opacity: 1; pointer-events: auto; transform: none; box-shadow: none; border: none; width: 100%; }
-}
-
-/* Utils */
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #E5E5E5; border-radius: 10px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #000091; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #002654; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .animate-in { animation: fadeIn 0.4s ease-out forwards; }
