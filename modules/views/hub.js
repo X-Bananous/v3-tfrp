@@ -19,9 +19,11 @@ export const HubView = () => {
     }
 
     const panel = state.activeHubPanel;
-    const hasStaffAccess = Object.keys(state.user.permissions || {}).length > 0 || state.user.isFounder;
+    const isFounder = state.user?.isFounder || state.adminIds.includes(state.user?.id);
+    const hasStaffAccess = Object.keys(state.user.permissions || {}).some(k => state.user.permissions[k] === true) || isFounder;
     const isIllegal = char.alignment === 'illegal';
     const erlc = state.erlcData || { currentPlayers: 0, maxPlayers: 42, queue: [], joinKey: '?????' };
+    const heists = state.globalActiveHeists || [];
 
     if (state.isPanelLoading) {
         return `<div class="flex h-screen w-full bg-white items-center justify-center animate-in"><div class="text-center"><div class="w-12 h-12 border-4 border-gov-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p class="text-[10px] font-black text-gov-blue uppercase tracking-[0.3em]">Synchronisation CAD...</p></div></div>`;
@@ -31,7 +33,9 @@ export const HubView = () => {
     switch(panel) {
         case 'main':
             mainContent = `
-                <div class="animate-in p-8 max-w-7xl mx-auto w-full space-y-12">
+                <div class="animate-in p-8 max-w-7xl mx-auto w-full space-y-12 pb-24">
+                    
+                    <!-- Header Section -->
                     <div class="flex flex-col md:flex-row justify-between items-start gap-8 border-b border-gray-100 pb-12">
                         <div>
                             <div class="text-[10px] font-black text-gov-blue uppercase tracking-[0.5em] mb-4">Portail Officiel de l'État</div>
@@ -42,75 +46,132 @@ export const HubView = () => {
                         </div>
 
                         <!-- ERLC SERVER STATUS WIDGET -->
-                        <div class="bg-gov-light p-6 border border-gray-200 shadow-xl rounded-2xl min-w-[280px]">
+                        <div class="bg-gov-light p-6 border border-gray-200 shadow-xl rounded-[32px] min-w-[280px]">
                             <div class="flex justify-between items-center mb-4">
-                                <span class="text-[9px] font-black text-gov-blue uppercase tracking-widest">Signal Serveur ERLC</span>
+                                <span class="text-[9px] font-black text-gov-blue uppercase tracking-widest">Signal Serveur</span>
                                 <div class="flex items-center gap-1.5">
                                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    <span class="text-[10px] font-black uppercase text-emerald-600">En Ligne</span>
+                                    <span class="text-[10px] font-black uppercase text-emerald-600">Live</span>
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div class="text-[8px] text-gray-500 font-black uppercase mb-1">Population</div>
+                                    <div class="text-[8px] text-gray-500 font-black uppercase mb-1">Pop.</div>
                                     <div class="text-xl font-mono font-black text-gov-text">${erlc.currentPlayers}<span class="text-gray-400 text-xs">/${erlc.maxPlayers}</span></div>
                                 </div>
                                 <div>
-                                    <div class="text-[8px] text-gray-500 font-black uppercase mb-1">File d'attente</div>
+                                    <div class="text-[8px] text-gray-500 font-black uppercase mb-1">File</div>
                                     <div class="text-xl font-mono font-black text-gov-text">${erlc.queue?.length || 0}</div>
                                 </div>
                             </div>
                             <div class="mt-4 pt-4 border-t border-gray-200">
-                                <div class="text-[8px] text-gray-500 font-black uppercase mb-1">Join Key</div>
+                                <div class="text-[8px] text-gray-500 font-black uppercase mb-1">Clef de raccordement</div>
                                 <div class="text-xs font-mono font-black text-gov-blue select-all uppercase tracking-widest">${erlc.joinKey || 'INDISPONIBLE'}</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <button onclick="actions.setHubPanel('bank')" class="gov-card p-10 flex flex-col items-center text-center group bg-white shadow-xl">
-                            <div class="w-16 h-16 bg-gov-light rounded-2xl flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500">
-                                <i data-lucide="landmark" class="w-8 h-8"></i>
-                            </div>
-                            <h4 class="text-xl font-black uppercase italic tracking-tight">Finances</h4>
-                            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-2">Banque & Trésorerie</p>
-                        </button>
-                        <button onclick="actions.setHubPanel('assets')" class="gov-card p-10 flex flex-col items-center text-center group bg-white shadow-xl">
-                            <div class="w-16 h-16 bg-gov-light rounded-2xl flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500">
-                                <i data-lucide="gem" class="w-8 h-8"></i>
-                            </div>
-                            <h4 class="text-xl font-black uppercase italic tracking-tight">Patrimoine</h4>
-                            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-2">Inventaire & Papiers</p>
-                        </button>
-                        <button onclick="actions.setHubPanel('jobs')" class="gov-card p-10 flex flex-col items-center text-center group bg-white shadow-xl">
-                            <div class="w-16 h-16 bg-gov-light rounded-2xl flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500">
-                                <i data-lucide="briefcase" class="w-8 h-8"></i>
-                            </div>
-                            <h4 class="text-xl font-black uppercase italic tracking-tight">Pôle Emploi</h4>
-                            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-2">Marché du Travail</p>
-                        </button>
-                    </div>
+                    <!-- GRID DES BULLES (Quick Access) -->
+                    <div class="space-y-6">
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.4em] flex items-center gap-4 px-2">
+                             <span class="w-8 h-px bg-gray-200"></span> TERMINAUX ACCRÉDITÉS
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            
+                            <!-- Banque -->
+                            <button onclick="actions.setHubPanel('bank')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-[40px] shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
+                                <div class="w-16 h-16 bg-gov-light rounded-2xl flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                                    <i data-lucide="landmark" class="w-8 h-8"></i>
+                                </div>
+                                <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Banque</h4>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Trésorerie & Flux</p>
+                            </button>
 
-                    <!-- ACTIVE HEISTS MONITOR (For heists that have started) -->
-                    ${state.globalActiveHeists?.length > 0 ? `
-                        <div class="space-y-6">
-                             <h3 class="text-xs font-black text-gov-red uppercase tracking-[0.4em] flex items-center gap-4">
-                                <span class="w-8 h-0.5 bg-gov-red"></span> Alertes Sécurité Publique
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                ${state.globalActiveHeists.map(h => `
-                                    <div class="p-6 bg-white border-2 border-red-100 rounded-[28px] shadow-lg flex items-center gap-6 relative overflow-hidden animate-pulse">
-                                        <div class="absolute top-0 right-0 p-3"><i data-lucide="alert-triangle" class="w-4 h-4 text-red-500"></i></div>
-                                        <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-600 border border-red-100"><i data-lucide="siren" class="w-6 h-6"></i></div>
-                                        <div>
-                                            <div class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-1">Code 3 : Braquage</div>
-                                            <div class="font-black text-gov-text uppercase italic truncate max-w-[150px]">${h.location || 'Localisation Inconnue'}</div>
-                                        </div>
+                            <!-- Patrimoine -->
+                            <button onclick="actions.setHubPanel('assets')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-[40px] shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
+                                <div class="w-16 h-16 bg-gov-light rounded-2xl flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                                    <i data-lucide="gem" class="w-8 h-8"></i>
+                                </div>
+                                <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Patrimoine</h4>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Biens & Documents</p>
+                            </button>
+
+                            <!-- Emploi -->
+                            <button onclick="actions.setHubPanel('jobs')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-[40px] shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
+                                <div class="w-16 h-16 bg-gov-light rounded-2xl flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                                    <i data-lucide="briefcase" class="w-8 h-8"></i>
+                                </div>
+                                <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Emploi</h4>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Marché du Travail</p>
+                            </button>
+
+                             <!-- Entreprises -->
+                            <button onclick="actions.setHubPanel('enterprise')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-[40px] shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
+                                <div class="w-16 h-16 bg-gov-light rounded-2xl flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                                    <i data-lucide="building-2" class="w-8 h-8"></i>
+                                </div>
+                                <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Corporations</h4>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Registre Commercial</p>
+                            </button>
+
+                            <!-- CAD (If applicable job) -->
+                            ${['leo', 'lafd', 'ladot', 'lawyer', 'maire', 'adjoint', 'juge', 'procureur'].includes(char.job) ? `
+                                <button onclick="actions.setHubPanel('services')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-[40px] shadow-xl border border-blue-100 hover:border-blue-500 transition-all duration-500">
+                                    <div class="w-16 h-16 bg-blue-50 text-gov-blue rounded-2xl flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                                        <i data-lucide="shield-check" class="w-8 h-8"></i>
                                     </div>
-                                `).join('')}
+                                    <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Service Public</h4>
+                                    <p class="text-[10px] text-blue-400 font-black uppercase tracking-widest mt-2">Terminal CAD-OS</p>
+                                </button>
+                            ` : ''}
+
+                            <!-- Illicit (If alignment is illegal) -->
+                            ${isIllegal ? `
+                                <button onclick="actions.setHubPanel('illicit')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-[40px] shadow-xl border border-red-100 hover:border-gov-red transition-all duration-500">
+                                    <div class="w-16 h-16 bg-red-50 text-gov-red rounded-2xl flex items-center justify-center mb-6 group-hover:bg-gov-red group-hover:text-white group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                                        <i data-lucide="skull" class="w-8 h-8"></i>
+                                    </div>
+                                    <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Clandestinité</h4>
+                                    <p class="text-[10px] text-gov-red font-black uppercase tracking-widest mt-2">Fréquence Cryptée</p>
+                                </button>
+                            ` : ''}
+
+                            <!-- Administration (If staff) -->
+                            ${hasStaffAccess ? `
+                                <button onclick="actions.setHubPanel('staff')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-[40px] shadow-xl border border-purple-100 hover:border-purple-600 transition-all duration-500">
+                                    <div class="w-16 h-16 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-purple-600 group-hover:text-white group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                                        <i data-lucide="shield" class="w-8 h-8"></i>
+                                    </div>
+                                    <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Administration</h4>
+                                    <p class="text-[10px] text-purple-500 font-black uppercase tracking-widest mt-2">Fondation TFRP</p>
+                                </button>
+                            ` : ''}
+                            
+                            <!-- News & Heists Card -->
+                            <div class="p-8 bg-gov-text text-white rounded-[40px] shadow-2xl flex flex-col justify-between relative overflow-hidden group">
+                                <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all"></div>
+                                <div class="relative z-10">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <span class="text-[10px] font-black uppercase tracking-[0.3em] text-gov-red">Alertes L.A.</span>
+                                        <i data-lucide="megaphone" class="w-4 h-4 text-gray-500"></i>
+                                    </div>
+                                    <div class="space-y-3 max-h-[80px] overflow-y-auto custom-scrollbar">
+                                        ${heists.length > 0 ? heists.map(h => `
+                                            <div class="flex items-center gap-3">
+                                                <span class="w-1.5 h-1.5 bg-gov-red rounded-full animate-pulse"></span>
+                                                <div class="text-[10px] font-bold uppercase truncate">${h.location || 'Incident inconnu'}</div>
+                                            </div>
+                                        `).join('') : `
+                                            <div class="text-[10px] text-gray-500 uppercase font-black tracking-widest italic">R.A.S. - Ville calme</div>
+                                        `}
+                                    </div>
+                                </div>
+                                <button onclick="actions.setHubPanel('notifications')" class="mt-6 text-[10px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white transition-all text-left relative z-10 flex items-center gap-2">
+                                    Consulter les annonces <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                                </button>
                             </div>
                         </div>
-                    ` : ''}
+                    </div>
                 </div>`;
             break;
         case 'bank': mainContent = BankView(); break;
