@@ -39,6 +39,15 @@ export const goToCreate = () => router('create');
 export const cancelCreate = () => router('profile_hub');
 
 export const setHubPanel = async (panel) => {
+    // Vérification de sécurité pour les panels restreints
+    if (panel === 'staff') {
+        const hasStaffAccess = Object.keys(state.user.permissions || {}).length > 0 || state.user.isFounder;
+        if (!hasStaffAccess) return ui.showToast("Accès administratif refusé.", "error");
+    }
+    if (panel === 'illicit') {
+        if (state.activeCharacter?.alignment !== 'illegal') return ui.showToast("Accès réservé au secteur clandestin.", "error");
+    }
+
     state.activeHubPanel = panel;
     sessionStorage.setItem('tfrp_hub_panel', panel);
     state.isPanelLoading = true;
@@ -49,10 +58,13 @@ export const setHubPanel = async (panel) => {
         else if (panel === 'jobs') await fetchEnterprises();
         else if (panel === 'bank') await fetchBankData(state.activeCharacter.id);
         else if (panel === 'assets') await Promise.all([fetchInventory(state.activeCharacter.id), fetchPlayerInvoices(state.activeCharacter.id)]);
-        else if (panel === 'staff') await Promise.all([fetchPendingApplications(), fetchAllCharacters()]);
+        else if (panel === 'staff') await Promise.all([fetchPendingApplications(), fetchAllCharacters(), fetchStaffProfiles(), fetchGlobalHeists()]);
         else if (panel === 'profile') {
             state.activeProfileTab = 'identity';
-            if (window.actions.loadUserSanctions) await window.actions.loadUserSanctions();
+            // On charge les sanctions au passage
+            if (window.actions && window.actions.loadUserSanctions) {
+                await window.actions.loadUserSanctions();
+            }
         }
     } finally { state.isPanelLoading = false; render(); }
 };

@@ -20,6 +20,8 @@ export const HubView = () => {
 
     const panel = state.activeHubPanel;
     const hasStaffAccess = Object.keys(state.user.permissions || {}).length > 0 || state.user.isFounder;
+    const isIllegal = char.alignment === 'illegal';
+    const erlc = state.erlcData || { currentPlayers: 0, maxPlayers: 42, queue: [], joinKey: '?????' };
 
     if (state.isPanelLoading) {
         return `<div class="flex h-screen w-full bg-white items-center justify-center animate-in"><div class="text-center"><div class="w-12 h-12 border-4 border-gov-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p class="text-[10px] font-black text-gov-blue uppercase tracking-[0.3em]">Synchronisation CAD...</p></div></div>`;
@@ -38,31 +40,77 @@ export const HubView = () => {
                                 <span class="w-12 h-0.5 bg-gov-blue"></span> Dossier National : #${char.id.substring(0,8).toUpperCase()}
                             </p>
                         </div>
+
+                        <!-- ERLC SERVER STATUS WIDGET -->
+                        <div class="bg-gov-light p-6 border border-gray-200 shadow-xl rounded-2xl min-w-[280px]">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-[9px] font-black text-gov-blue uppercase tracking-widest">Signal Serveur ERLC</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span class="text-[10px] font-black uppercase text-emerald-600">En Ligne</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <div class="text-[8px] text-gray-500 font-black uppercase mb-1">Population</div>
+                                    <div class="text-xl font-mono font-black text-gov-text">${erlc.currentPlayers}<span class="text-gray-400 text-xs">/${erlc.maxPlayers}</span></div>
+                                </div>
+                                <div>
+                                    <div class="text-[8px] text-gray-500 font-black uppercase mb-1">File d'attente</div>
+                                    <div class="text-xl font-mono font-black text-gov-text">${erlc.queue?.length || 0}</div>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <div class="text-[8px] text-gray-500 font-black uppercase mb-1">Join Key</div>
+                                <div class="text-xs font-mono font-black text-gov-blue select-all uppercase tracking-widest">${erlc.joinKey || 'INDISPONIBLE'}</div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <button onclick="actions.setHubPanel('bank')" class="gov-card p-12 flex flex-col items-center text-center group bg-white shadow-xl">
-                            <div class="w-20 h-20 bg-gov-light rounded-full flex items-center justify-center mb-8 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500">
-                                <i data-lucide="landmark" class="w-10 h-10 transition-transform group-hover:scale-110"></i>
+                        <button onclick="actions.setHubPanel('bank')" class="gov-card p-10 flex flex-col items-center text-center group bg-white shadow-xl">
+                            <div class="w-16 h-16 bg-gov-light rounded-2xl flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500">
+                                <i data-lucide="landmark" class="w-8 h-8"></i>
                             </div>
-                            <h4 class="text-2xl font-black uppercase italic tracking-tight">Système Bancaire</h4>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">Gestion des Actifs et Flux</p>
+                            <h4 class="text-xl font-black uppercase italic tracking-tight">Finances</h4>
+                            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-2">Banque & Trésorerie</p>
                         </button>
-                        <button onclick="actions.setHubPanel('assets')" class="gov-card p-12 flex flex-col items-center text-center group bg-white shadow-xl">
-                            <div class="w-20 h-20 bg-gov-light rounded-full flex items-center justify-center mb-8 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500">
-                                <i data-lucide="gem" class="w-10 h-10 transition-transform group-hover:scale-110"></i>
+                        <button onclick="actions.setHubPanel('assets')" class="gov-card p-10 flex flex-col items-center text-center group bg-white shadow-xl">
+                            <div class="w-16 h-16 bg-gov-light rounded-2xl flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500">
+                                <i data-lucide="gem" class="w-8 h-8"></i>
                             </div>
-                            <h4 class="text-2xl font-black uppercase italic tracking-tight">Patrimoine Civil</h4>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">Inventaire et Documents</p>
+                            <h4 class="text-xl font-black uppercase italic tracking-tight">Patrimoine</h4>
+                            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-2">Inventaire & Papiers</p>
                         </button>
-                        <button onclick="actions.setHubPanel('jobs')" class="gov-card p-12 flex flex-col items-center text-center group bg-white shadow-xl">
-                            <div class="w-20 h-20 bg-gov-light rounded-full flex items-center justify-center mb-8 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500">
-                                <i data-lucide="briefcase" class="w-10 h-10 transition-transform group-hover:scale-110"></i>
+                        <button onclick="actions.setHubPanel('jobs')" class="gov-card p-10 flex flex-col items-center text-center group bg-white shadow-xl">
+                            <div class="w-16 h-16 bg-gov-light rounded-2xl flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500">
+                                <i data-lucide="briefcase" class="w-8 h-8"></i>
                             </div>
-                            <h4 class="text-2xl font-black uppercase italic tracking-tight">Marché du Travail</h4>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">Opportunités Professionnelles</p>
+                            <h4 class="text-xl font-black uppercase italic tracking-tight">Pôle Emploi</h4>
+                            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-2">Marché du Travail</p>
                         </button>
                     </div>
+
+                    <!-- ACTIVE HEISTS MONITOR (For heists that have started) -->
+                    ${state.globalActiveHeists?.length > 0 ? `
+                        <div class="space-y-6">
+                             <h3 class="text-xs font-black text-gov-red uppercase tracking-[0.4em] flex items-center gap-4">
+                                <span class="w-8 h-0.5 bg-gov-red"></span> Alertes Sécurité Publique
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                ${state.globalActiveHeists.map(h => `
+                                    <div class="p-6 bg-white border-2 border-red-100 rounded-[28px] shadow-lg flex items-center gap-6 relative overflow-hidden animate-pulse">
+                                        <div class="absolute top-0 right-0 p-3"><i data-lucide="alert-triangle" class="w-4 h-4 text-red-500"></i></div>
+                                        <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-600 border border-red-100"><i data-lucide="siren" class="w-6 h-6"></i></div>
+                                        <div>
+                                            <div class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-1">Code 3 : Braquage</div>
+                                            <div class="font-black text-gov-text uppercase italic truncate max-w-[150px]">${h.location || 'Localisation Inconnue'}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
                 </div>`;
             break;
         case 'bank': mainContent = BankView(); break;
@@ -123,7 +171,9 @@ export const HubView = () => {
                     
                     <div class="h-6 w-px bg-gray-100 mx-2"></div>
                     
-                    <button onclick="actions.setHubPanel('illicit')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all">Réseau Clandestin</button>
+                    ${isIllegal ? `
+                        <button onclick="actions.setHubPanel('illicit')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all">Réseau Clandestin</button>
+                    ` : ''}
                     
                     ${hasStaffAccess ? `
                         <button onclick="actions.setHubPanel('staff')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest text-purple-600 hover:bg-purple-50 border border-transparent hover:border-purple-100 transition-all">Panel Administration</button>
