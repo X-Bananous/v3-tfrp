@@ -98,33 +98,35 @@ export const showModal = ({ title, content, confirmText = 'Confirmer', cancelTex
     if(existing) existing.remove();
 
     const themes = {
-        default: { icon: 'info', color: 'text-gov-blue', bg: 'bg-gov-blue/10', border: 'border-gov-blue/20', btn: 'bg-gov-blue hover:bg-black' },
-        danger: { icon: 'shield-alert', color: 'text-gov-red', bg: 'bg-gov-red/10', border: 'border-gov-red/30', btn: 'bg-gov-red hover:bg-black' },
-        success: { icon: 'check-circle', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', btn: 'bg-emerald-600 hover:bg-emerald-700' },
-        warning: { icon: 'alert-triangle', color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/30', btn: 'bg-orange-600 hover:bg-orange-700' }
+        default: { icon: 'info', color: 'text-gov-blue', bg: 'bg-gov-blue/10', border: 'border-gov-blue/20', btn: 'bg-gov-blue hover:bg-black', borderTop: 'border-gov-blue' },
+        danger: { icon: 'shield-alert', color: 'text-gov-red', bg: 'bg-gov-red/10', border: 'border-gov-red/30', btn: 'bg-gov-red hover:bg-black', borderTop: 'border-gov-red' },
+        success: { icon: 'check-circle', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', btn: 'bg-emerald-600 hover:bg-emerald-700', borderTop: 'border-emerald-500' },
+        warning: { icon: 'alert-triangle', color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/30', btn: 'bg-orange-600 hover:bg-orange-700', borderTop: 'border-orange-500' }
     };
 
     const theme = themes[type] || themes.default;
     const isConfirmOnly = !onConfirm && !onCancel;
 
     const html = `
-        <div id="global-modal" data-closable="${isClosable}" class="fixed inset-0 z-[2000] flex items-center justify-center p-4 transition-all duration-300 bg-black/70 backdrop-blur-md">
+        <div id="global-modal" data-closable="${isClosable}" class="fixed inset-0 z-[2000] flex items-center justify-center p-4 transition-all duration-300 bg-black/70 backdrop-blur-sm">
             <div class="absolute inset-0" onclick="${isClosable ? 'ui.closeModal()' : ''}"></div>
             
-            <div class="glass-panel w-full max-w-lg rounded-[48px] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)] transition-all duration-300 relative z-10 flex flex-col border border-white/10 bg-white">
+            <div class="glass-panel w-full max-w-lg rounded-[48px] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)] transition-all duration-300 relative z-10 flex flex-col border border-white/10 bg-white border-t-8 ${theme.borderTop}">
                 
-                <div class="h-2 w-full ${theme.btn} opacity-80"></div>
-
-                <div class="p-10">
+                <div class="p-10 pt-12">
                     <div class="flex flex-col items-center text-center mb-8">
-                        <div class="w-20 h-20 rounded-3xl ${theme.bg} flex items-center justify-center ${theme.color} mb-6 border ${theme.border} shadow-xl">
+                        <div class="w-20 h-20 rounded-3xl ${theme.bg} flex items-center justify-center ${theme.color} mb-6 border ${theme.border} shadow-xl transform -rotate-3">
                             <i data-lucide="${theme.icon}" class="w-10 h-10"></i>
                         </div>
                         <h3 class="text-3xl font-black text-gov-text mb-2 tracking-tighter uppercase italic leading-none">${title}</h3>
-                        <div class="text-[9px] font-black uppercase tracking-[0.3em] ${theme.color} opacity-80">Protocole Officiel de l'État</div>
+                        <div class="text-[9px] font-black uppercase tracking-[0.3em] ${theme.color} opacity-80 flex items-center gap-2">
+                             <span class="w-4 h-px bg-current opacity-30"></span> 
+                             Protocole de l'État de Californie
+                             <span class="w-4 h-px bg-current opacity-30"></span>
+                        </div>
                     </div>
 
-                    <div class="text-gray-500 text-sm leading-relaxed max-h-[40vh] overflow-y-auto custom-scrollbar pr-4 mb-10 font-medium text-center">
+                    <div class="text-gray-500 text-sm leading-relaxed max-h-[40vh] overflow-y-auto custom-scrollbar px-4 mb-10 font-medium text-center italic">
                         ${content}
                     </div>
 
@@ -143,8 +145,11 @@ export const showModal = ({ title, content, confirmText = 'Confirmer', cancelTex
                     </div>
                 </div>
                 
-                <div class="bg-gov-light/50 py-4 px-10 flex justify-center items-center border-t border-gray-100">
-                    <span class="text-[8px] text-gray-400 font-mono uppercase tracking-[0.4em]">Certifié par le Système de Justice de Los Angeles</span>
+                <div class="bg-gov-light/50 py-5 px-10 flex justify-center items-center border-t border-gray-100">
+                    <div class="marianne-block uppercase font-black text-gov-text scale-[0.6] opacity-40">
+                        <div class="text-[10px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red font-black">Liberté • Égalité • Justice</div>
+                        <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES ADMINISTRATION</div>
+                    </div>
                 </div>
             </div>
         </div>

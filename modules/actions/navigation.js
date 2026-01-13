@@ -4,8 +4,7 @@ import { ui } from '../ui.js';
 import { 
     loadCharacters, fetchBankData, fetchInventory, fetchActiveHeistLobby, 
     fetchGlobalHeists, fetchEmergencyCalls, fetchAllCharacters, fetchAllReports, fetchEnterprises,
-    fetchERLCData, fetchPendingApplications, fetchStaffProfiles, fetchOnDutyStaff, 
-    fetchNotifications, fetchSecureConfig, fetchActiveSession, fetchPlayerInvoices
+    fetchERLCData, fetchNotifications, fetchSecureConfig, fetchActiveSession, fetchPlayerInvoices
 } from '../services.js';
 
 export const backToSelect = async () => {
@@ -15,6 +14,16 @@ export const backToSelect = async () => {
     sessionStorage.removeItem('tfrp_hub_panel');
     await loadCharacters();
     router('profile_hub');
+};
+
+export const backToLanding = () => {
+    state.activeCharacter = null;
+    state.activeHubPanel = 'main';
+    state.currentView = 'login';
+    sessionStorage.removeItem('tfrp_active_char');
+    sessionStorage.removeItem('tfrp_hub_panel');
+    sessionStorage.setItem('tfrp_current_view', 'login');
+    router('login');
 };
 
 export const selectCharacter = async (charId) => {
@@ -39,14 +48,12 @@ export const goToCreate = () => router('create');
 export const cancelCreate = () => router('profile_hub');
 
 export const setHubPanel = async (panel) => {
-    // Redirection vers le hub de profil si clic sur Profil dans la navbar
     if (panel === 'profile') {
         state.activeProfileTab = 'identity';
         router('profile_hub');
         return;
     }
 
-    // Vérification de sécurité pour les panels restreints
     if (panel === 'staff') {
         const hasStaffAccess = Object.keys(state.user.permissions || {}).some(k => state.user.permissions[k] === true) || state.user.isFounder;
         if (!hasStaffAccess) return ui.showToast("Accès Fondation refusé.", "error");
@@ -76,16 +83,12 @@ export const setProfileTab = (tab) => {
 
 export const confirmLogout = () => {
     ui.showModal({
-        title: "Gestion de Session",
-        content: "Souhaitez-vous retourner à l'accueil du portail ou vous déconnecter complètement ?",
-        confirmText: "Retour Accueil",
-        cancelText: "Déconnexion Totale",
+        title: "DÉCONNEXION SÉCURISÉE",
+        content: "Souhaitez-vous fermer définitivement votre session administrative ?",
+        confirmText: "Confirmer la sortie",
+        cancelText: "Annuler",
+        type: 'danger',
         onConfirm: () => {
-            state.activeCharacter = null;
-            state.activeHubPanel = 'main';
-            router('login');
-        },
-        onCancel: () => {
             if (window.actions && window.actions.logout) {
                 window.actions.logout();
             }

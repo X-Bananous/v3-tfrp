@@ -27,7 +27,7 @@ export const ProfileHubView = () => {
 
     let tabContent = '';
 
-    // --- TAB: DOSSIERS ---
+    // --- TAB: DOSSIERS (GRID RE-STYLED) ---
     if (currentTab === 'identity') {
         tabContent = `
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 animate-in pb-20">
@@ -38,20 +38,16 @@ export const ProfileHubView = () => {
                     
                     return `
                         <div class="gov-card flex flex-col bg-white rounded-[32px] border border-gray-100 shadow-xl overflow-hidden transition-all hover:shadow-2xl hover:-translate-y-1">
-                            <!-- Header de la carte -->
-                            <div class="p-8 pb-0 flex justify-between items-start">
+                            <div class="p-8 pb-4 flex justify-between items-start">
                                 <div class="w-14 h-14 bg-gov-light rounded-2xl flex items-center justify-center border border-gray-100 shadow-inner">
                                     <i data-lucide="user" class="w-7 h-7 text-gray-400"></i>
                                 </div>
-                                <div class="flex flex-col items-end gap-1.5">
-                                    <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase border tracking-widest bg-${statusColor}-50 text-${statusColor}-600 border-${statusColor}-200">
-                                        ${isDeleting ? 'PURGE EN COURS' : char.status.toUpperCase()}
-                                    </span>
-                                </div>
+                                <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase border tracking-widest bg-${statusColor}-50 text-${statusColor}-600 border-${statusColor}-200">
+                                    ${isDeleting ? 'PURGE EN COURS' : char.status.toUpperCase()}
+                                </span>
                             </div>
 
-                            <!-- Corps de la carte -->
-                            <div class="p-8 flex-1">
+                            <div class="p-8 pt-2 flex-1">
                                 <div class="text-[9px] text-gray-400 font-black uppercase tracking-[0.2em] mb-1">Identité Nationale</div>
                                 <h3 class="text-3xl font-black text-gov-text uppercase italic tracking-tighter leading-none mb-6">
                                     ${char.last_name}<br><span class="text-gov-blue">${char.first_name}</span>
@@ -73,7 +69,6 @@ export const ProfileHubView = () => {
                                 </div>
                             </div>
 
-                            <!-- Actions Footer -->
                             <div class="p-6 bg-gov-light/30 border-t border-gray-100 flex flex-col gap-2">
                                 ${isAccepted && !isDeleting ? `
                                     <button onclick="actions.selectCharacter('${char.id}')" class="w-full py-4 bg-gov-blue text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-black transition-all rounded-xl shadow-lg transform active:scale-95">
@@ -116,7 +111,6 @@ export const ProfileHubView = () => {
         `;
     } 
 
-    // --- TAB: PERMS ---
     else if (currentTab === 'perms') {
         tabContent = `
             <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-2xl animate-in max-w-4xl mx-auto">
@@ -140,7 +134,6 @@ export const ProfileHubView = () => {
         `;
     }
 
-    // --- TAB: SANCTIONS ---
     else if (currentTab === 'sanctions') {
         tabContent = `
             <div class="space-y-4 animate-in max-w-4xl mx-auto pb-20">
@@ -162,7 +155,6 @@ export const ProfileHubView = () => {
         `;
     }
 
-    // --- TAB: SECURITY ---
     else if (currentTab === 'security') {
         const deletionDate = u.deletion_requested_at ? new Date(u.deletion_requested_at) : null;
         tabContent = `
@@ -191,21 +183,21 @@ export const ProfileHubView = () => {
     return `
     <div class="flex-1 flex flex-col bg-[#F6F6F6] min-h-screen">
         
-        <!-- UNIVERSAL NAVBAR DU PROFIL -->
-        <nav class="h-20 shrink-0 bg-white border-b border-gray-100 px-8 flex items-center justify-between sticky top-0 z-[1000] shadow-sm">
-            <div class="flex items-center gap-8 h-full">
-                <div onclick="actions.confirmLogout()" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer hover:opacity-70 transition-opacity">
+        <!-- UNIVERSAL NAVBAR DU PROFIL (RESPONSIVE) -->
+        <nav class="shrink-0 bg-white border-b border-gray-100 px-4 md:px-8 flex flex-col md:flex-row items-center justify-between sticky top-0 z-[1000] shadow-sm py-4 md:py-0 md:h-20">
+            <div class="flex items-center gap-6 w-full md:w-auto h-full">
+                <div onclick="actions.backToLanding()" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer hover:opacity-70 transition-opacity">
                     <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red uppercase font-black">Liberté • Égalité • Justice</div>
                     <div class="text-md leading-none uppercase tracking-tighter italic">ÉTAT DE CALIFORNIE</div>
                 </div>
                 
-                <div class="h-8 w-px bg-gray-100"></div>
+                <div class="hidden md:block h-8 w-px bg-gray-100"></div>
 
-                <!-- Onglets dans la navbar -->
-                <div class="flex items-center gap-1 h-full">
+                <!-- Tabs (Terminal Style) -->
+                <div class="flex flex-nowrap items-center gap-1 h-full overflow-x-auto no-scrollbar md:static absolute bottom-0 left-0 w-full px-4 md:px-0 md:bg-transparent bg-white border-t md:border-t-0 border-gray-100">
                     ${tabs.map(t => `
                         <button onclick="actions.setProfileTab('${t.id}')" 
-                            class="px-6 h-10 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 ${currentTab === t.id ? 'bg-gov-blue text-white shadow-lg' : 'text-gray-400 hover:text-gov-text hover:bg-gray-50'}">
+                            class="px-4 md:px-6 h-10 md:h-12 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 whitespace-nowrap ${currentTab === t.id ? 'bg-gov-blue text-white shadow-lg' : 'text-gray-400 hover:text-gov-text hover:bg-gray-50'}">
                             <i data-lucide="${t.icon}" class="w-3.5 h-3.5"></i>
                             ${t.label}
                         </button>
@@ -213,17 +205,22 @@ export const ProfileHubView = () => {
                 </div>
             </div>
 
-            <div class="flex items-center gap-6">
-                <button onclick="actions.confirmLogout()" class="flex items-center gap-2 text-[9px] font-black text-gov-red uppercase tracking-widest hover:underline px-4 py-2 bg-red-50 rounded-lg border border-red-100">
-                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Quitter
-                </button>
+            <div class="flex items-center gap-3 md:gap-6 mt-4 md:mt-0 w-full md:w-auto justify-between md:justify-end">
+                <div class="flex gap-2">
+                    <button onclick="actions.backToLanding()" class="flex items-center gap-2 text-[9px] font-black text-gov-text uppercase tracking-widest hover:underline px-4 py-2 bg-gray-50 rounded-lg border border-gray-200 transition-all">
+                        <i data-lucide="home" class="w-3.5 h-3.5"></i> Accueil
+                    </button>
+                    <button onclick="actions.confirmLogout()" class="flex items-center gap-2 text-[9px] font-black text-gov-red uppercase tracking-widest hover:underline px-4 py-2 bg-red-50 rounded-lg border border-red-100 transition-all">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Quitter
+                    </button>
+                </div>
                 
-                <div class="flex items-center gap-3 pl-6 border-l border-gray-100">
+                <div class="flex items-center gap-3 pl-4 md:pl-6 border-l border-gray-100">
                     <div class="text-right hidden sm:block">
                         <div class="text-[10px] font-black text-gov-text uppercase italic leading-none">${u.username}</div>
                         <div class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">PROFIL CERTIFIÉ</div>
                     </div>
-                    <div class="relative w-10 h-10">
+                    <div class="relative w-9 h-9 md:w-10 md:h-10">
                         <img src="${u.avatar}" class="w-full h-full rounded-xl border-2 border-gov-blue p-0.5 bg-white object-cover">
                         ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
                     </div>
@@ -233,41 +230,41 @@ export const ProfileHubView = () => {
 
         <div class="flex-1 overflow-y-auto custom-scrollbar">
             <!-- BANNER -->
-            <div class="relative h-64 md:h-80 shrink-0 overflow-hidden bg-gov-blue">
+            <div class="relative h-48 md:h-80 shrink-0 overflow-hidden bg-gov-blue">
                 ${u.banner ? `<img src="${u.banner}" class="w-full h-full object-cover">` : '<div class="w-full h-full bg-gradient-to-r from-gov-blue via-blue-900 to-indigo-900 opacity-90"></div>'}
                 <div class="absolute inset-0 bg-gradient-to-t from-[#F6F6F6] via-transparent to-transparent"></div>
                 <div class="absolute inset-0 bg-black/10"></div>
             </div>
 
             <!-- HEADER CONTENT -->
-            <div class="max-w-6xl mx-auto w-full px-8 -mt-24 relative z-10 mb-12">
-                <div class="flex flex-col md:flex-row items-end gap-10">
+            <div class="max-w-6xl mx-auto w-full px-6 md:px-8 -mt-16 md:-mt-24 relative z-10 mb-12">
+                <div class="flex flex-col md:flex-row items-end gap-6 md:gap-10">
                     <div class="relative group mx-auto md:mx-0">
-                        <div class="w-40 h-40 rounded-[32px] border-[8px] border-white bg-white shadow-2xl overflow-hidden relative">
+                        <div class="w-32 h-32 md:w-40 md:h-40 rounded-[32px] border-[6px] md:border-[8px] border-white bg-white shadow-2xl overflow-hidden relative">
                             <img src="${u.avatar}" class="w-full h-full object-cover">
                         </div>
-                        <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-gov-blue text-white rounded-xl flex items-center justify-center border-4 border-white shadow-xl transform rotate-12">
-                            <i data-lucide="verified" class="w-5 h-5"></i>
+                        <div class="absolute -bottom-1 -right-1 md:-bottom-2 md:-right-2 w-8 h-8 md:w-10 md:h-10 bg-gov-blue text-white rounded-xl flex items-center justify-center border-4 border-white shadow-xl transform rotate-12">
+                            <i data-lucide="verified" class="w-4 h-4 md:w-5 md:h-5"></i>
                         </div>
                     </div>
-                    <div class="flex-1 pb-4 text-center md:text-left">
-                        <div class="text-[10px] font-black text-gov-blue uppercase tracking-[0.4em] mb-3">Répertoire des Identités</div>
-                        <h2 class="text-5xl font-black text-gov-text tracking-tighter uppercase italic leading-none drop-shadow-xl">${u.username}</h2>
+                    <div class="flex-1 pb-4 text-center md:text-left w-full">
+                        <div class="text-[9px] md:text-[10px] font-black text-gov-blue uppercase tracking-[0.4em] mb-3">Répertoire des Identités</div>
+                        <h2 class="text-4xl md:text-5xl font-black text-gov-text tracking-tighter uppercase italic leading-none drop-shadow-xl">${u.username}</h2>
                         <div class="flex flex-wrap justify-center md:justify-start gap-3 mt-6">
-                            <span class="text-gray-400 font-mono text-[10px] uppercase tracking-widest bg-white px-4 py-1.5 rounded-lg border border-gray-100 shadow-sm">UID: ${u.id}</span>
-                            ${u.isFounder ? '<span class="text-[10px] font-black text-purple-600 uppercase tracking-widest bg-purple-50 px-4 py-1.5 border border-purple-100 rounded-lg italic">Fondation</span>' : ''}
+                            <span class="text-gray-400 font-mono text-[9px] md:text-[10px] uppercase tracking-widest bg-white px-4 py-1.5 rounded-lg border border-gray-100 shadow-sm">UID: ${u.id}</span>
+                            ${u.isFounder ? '<span class="text-[9px] md:text-[10px] font-black text-purple-600 uppercase tracking-widest bg-purple-50 px-4 py-1.5 border border-purple-100 rounded-lg italic">Fondation</span>' : ''}
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- MAIN CONTENT -->
-            <main class="max-w-6xl mx-auto w-full px-8 flex-1">
+            <main class="max-w-6xl mx-auto w-full px-6 md:px-8 flex-1">
                 ${tabContent}
             </main>
             
             <footer class="py-12 text-center opacity-30">
-                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.5em]">Terminal de Gestion Identitaire • v6.1</p>
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.5em]">Terminal de Gestion Identitaire • v6.2</p>
             </footer>
         </div>
     </div>
