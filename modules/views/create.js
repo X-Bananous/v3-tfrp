@@ -7,108 +7,107 @@ export const CharacterCreateView = () => {
     const char = state.editingCharacter || {};
 
     return `
-    <div class="flex-1 flex items-center justify-center p-6 animate-fade-in h-full overflow-y-auto custom-scrollbar bg-[#030303] relative overflow-hidden">
-        <!-- High Tech Background Elements -->
-        <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,_rgba(59,130,246,0.1),transparent_70%)] pointer-events-none"></div>
-        <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-600/5 rounded-full blur-[120px] pointer-events-none"></div>
-        <div class="absolute top-40 right-10 w-px h-64 bg-gradient-to-b from-transparent via-blue-500/20 to-transparent hidden lg:block"></div>
-
-        <div class="glass-panel w-full max-w-3xl p-10 rounded-[48px] relative my-auto border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
-            <div class="flex justify-between items-start mb-12 border-b border-white/5 pb-8">
+    <div class="flex-1 flex flex-col bg-[#F6F6F6] animate-gov-in min-h-full font-sans">
+        
+        <header class="bg-white border-b border-gray-200 px-8 py-10 shrink-0">
+            <div class="max-w-4xl mx-auto flex justify-between items-end">
                 <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 text-blue-400 text-[9px] font-black uppercase tracking-[0.3em] border border-blue-500/20 mb-3 rounded-lg">
-                        <i data-lucide="file-text" class="w-3 h-3"></i> Immigration v2.4
-                    </div>
-                    <h2 class="text-4xl font-black text-white uppercase italic tracking-tighter">${isEdit ? 'Dossier de Révision' : 'Dossier d\'Immigration'}</h2>
-                    <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-2">Los Angeles Port Authority • Enregistrement Citoyen</p>
+                    <div class="text-[10px] font-black text-[#000091] uppercase tracking-[0.3em] mb-2">Formulaire CERFA-TFRP v12.4</div>
+                    <h2 class="text-4xl font-black text-gray-900 tracking-tighter uppercase italic">${isEdit ? 'Révision d\'État Civil' : 'Demande de Recensement'}</h2>
+                    <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-2">Dépôt de dossier auprès des services de l'immigration</p>
                 </div>
-                <button onclick="actions.cancelCreate()" class="p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white border border-white/5 transition-all group">
-                    <i data-lucide="x" class="w-6 h-6 group-hover:rotate-90 transition-transform duration-500"></i>
+                <button onclick="actions.cancelCreate()" class="text-gray-400 hover:text-red-600 transition-colors p-2">
+                    <i data-lucide="x" class="w-8 h-8"></i>
                 </button>
             </div>
+        </header>
 
-            <form onsubmit="actions.submitCharacter(event)" class="space-y-10">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1 block">Prénom(s)</label>
-                        <input type="text" name="first_name" value="${char.first_name || ''}" required placeholder="Ex: John" 
-                            class="glass-input w-full p-4 rounded-2xl text-base font-bold bg-black/40 border-white/10 focus:border-blue-500/50 uppercase tracking-tight">
-                    </div>
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1 block">Nom de famille</label>
-                        <input type="text" name="last_name" value="${char.last_name || ''}" required placeholder="Ex: Wick" 
-                            class="glass-input w-full p-4 rounded-2xl text-base font-bold bg-black/40 border-white/10 focus:border-blue-500/50 uppercase tracking-tight">
-                    </div>
+        <div class="flex-1 p-8 overflow-y-auto custom-scrollbar">
+            <div class="max-w-4xl mx-auto bg-white border border-gray-200 p-10 md:p-16 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                    <i data-lucide="landmark" class="w-64 h-64 text-black"></i>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1 block">Date de naissance</label>
-                        <input type="date" name="birth_date" value="${char.birth_date || ''}" required 
-                            class="glass-input w-full p-4 rounded-2xl text-sm font-mono bg-black/40 border-white/10 text-gray-300">
-                    </div>
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1 block">Lieu de naissance</label>
-                        <input type="text" name="birth_place" value="${char.birth_place || 'Los Angeles'}" required placeholder="Ville, Pays" 
-                            class="glass-input w-full p-4 rounded-2xl text-sm font-bold bg-black/40 border-white/10 italic">
-                    </div>
-                </div>
-
-                <!-- ALIGNMENT SELECTION -->
-                <div class="space-y-4">
-                    <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1 block text-center">Orientation Sociale & Judiciaire</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <label class="cursor-pointer group relative">
-                            <input type="radio" name="alignment" value="legal" class="peer sr-only" required ${char.alignment !== 'illegal' ? 'checked' : ''}>
-                            <div class="p-8 rounded-[32px] bg-black/40 border border-white/5 peer-checked:bg-blue-600/10 peer-checked:border-blue-500 peer-checked:shadow-[0_0_30px_rgba(59,130,246,0.2)] hover:bg-white/5 transition-all text-center h-full relative overflow-hidden">
-                                <div class="absolute -right-6 -top-6 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl transition-all"></div>
-                                <div class="w-16 h-16 mx-auto bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-6 border border-blue-500/20 group-hover:scale-110 transition-transform">
-                                    <i data-lucide="briefcase" class="w-8 h-8"></i>
-                                </div>
-                                <div class="font-black text-white text-lg uppercase italic tracking-tight mb-2">Civil / Légal</div>
-                                <div class="text-[10px] text-gray-500 leading-relaxed font-bold uppercase tracking-widest">Boulot régulier • Respect des lois • Vie paisible</div>
+                <form onsubmit="actions.submitCharacter(event)" class="space-y-12 relative z-10">
+                    
+                    <!-- Section IDENTITE -->
+                    <div class="space-y-8">
+                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest border-b-4 border-[#000091] w-fit pb-1">1. État Civil de l'individu</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            <div class="space-y-3">
+                                <label class="text-[11px] font-black text-gray-600 uppercase tracking-widest block">Prénom(s)</label>
+                                <input type="text" name="first_name" value="${char.first_name || ''}" required placeholder="Jean-Luc" 
+                                    class="w-full p-4 border-b-2 border-gray-200 focus:border-[#000091] outline-none text-gray-900 font-bold uppercase tracking-tight transition-all">
                             </div>
-                        </label>
-                        <label class="cursor-pointer group relative">
-                            <input type="radio" name="alignment" value="illegal" class="peer sr-only" ${char.alignment === 'illegal' ? 'checked' : ''}>
-                            <div class="p-8 rounded-[32px] bg-black/40 border border-white/5 peer-checked:bg-red-600/10 peer-checked:border-red-500 peer-checked:shadow-[0_0_30px_rgba(239,68,68,0.2)] hover:bg-white/5 transition-all text-center h-full relative overflow-hidden">
-                                <div class="absolute -right-6 -top-6 w-20 h-20 bg-red-500/5 rounded-full blur-2xl transition-all"></div>
-                                <div class="w-16 h-16 mx-auto bg-red-500/10 rounded-2xl flex items-center justify-center text-red-400 mb-6 border border-red-500/20 group-hover:scale-110 transition-transform">
-                                    <i data-lucide="skull" class="w-8 h-8"></i>
-                                </div>
-                                <div class="font-black text-white text-lg uppercase italic tracking-tight mb-2">Clandestinité</div>
-                                <div class="text-[10px] text-gray-500 leading-relaxed font-bold uppercase tracking-widest">Affiliation Gang • Risque élevé • Marché Noir</div>
+                            <div class="space-y-3">
+                                <label class="text-[11px] font-black text-gray-600 uppercase tracking-widest block">Nom de famille</label>
+                                <input type="text" name="last_name" value="${char.last_name || ''}" required placeholder="DUPONT" 
+                                    class="w-full p-4 border-b-2 border-gray-200 focus:border-[#000091] outline-none text-gray-900 font-bold uppercase tracking-tight transition-all">
                             </div>
-                        </label>
-                    </div>
-                </div>
-                
-                ${isEdit ? `
-                    <div class="bg-orange-600/10 border border-orange-500/30 p-6 rounded-3xl flex gap-5 items-center">
-                        <div class="w-12 h-12 bg-orange-500/20 rounded-2xl flex items-center justify-center text-orange-400 shrink-0 border border-orange-500/20 shadow-lg">
-                            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
                         </div>
-                        <p class="text-[11px] text-orange-200 font-bold uppercase tracking-wide leading-relaxed">Attention: Toute modification d'état civil (Nom/Prénom) réinitialisera votre statut de validation staff pour vérification.</p>
-                    </div>
-                ` : `
-                    <div class="bg-blue-600/5 border border-blue-500/20 p-6 rounded-3xl flex gap-5 items-start">
-                        <div class="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-blue-400 shrink-0 border border-blue-500/20 shadow-lg">
-                            <i data-lucide="info" class="w-6 h-6"></i>
-                        </div>
-                        <p class="text-[11px] text-blue-100/80 font-bold uppercase tracking-wide leading-relaxed">
-                            Ce dossier est confidentiel. Une fois validé par les autorités municipales, vous recevrez vos titres de transport et l'accès à votre compte bancaire national.
-                        </p>
-                    </div>
-                `}
 
-                <div class="pt-6 border-t border-white/5 flex justify-end gap-6 items-center">
-                    <button type="button" onclick="actions.cancelCreate()" class="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] hover:text-white transition-colors">Annuler le processus</button>
-                    <button type="submit" class="glass-btn px-12 py-5 rounded-[24px] font-black text-xs uppercase tracking-[0.3em] flex items-center gap-4 bg-blue-600 hover:bg-blue-500 shadow-2xl shadow-blue-900/30 transition-all transform hover:scale-[1.02] active:scale-95">
-                        <i data-lucide="save" class="w-5 h-5"></i> ${isEdit ? 'RATIFIER LES MODIFICATIONS' : 'TRANSMETTRE LE DOSSIER'}
-                    </button>
-                </div>
-            </form>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            <div class="space-y-3">
+                                <label class="text-[11px] font-black text-gray-600 uppercase tracking-widest block">Date de naissance</label>
+                                <input type="date" name="birth_date" value="${char.birth_date || ''}" required 
+                                    class="w-full p-4 border-b-2 border-gray-200 focus:border-[#000091] outline-none text-gray-900 font-mono">
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-[11px] font-black text-gray-600 uppercase tracking-widest block">Lieu de naissance</label>
+                                <input type="text" name="birth_place" value="${char.birth_place || 'Los Angeles'}" required 
+                                    class="w-full p-4 border-b-2 border-gray-200 focus:border-[#000091] outline-none text-gray-900 font-bold uppercase italic">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section ORIENTATION -->
+                    <div class="space-y-8">
+                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest border-b-4 border-[#000091] w-fit pb-1">2. Orientation Socio-Professionnelle</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <label class="cursor-pointer group">
+                                <input type="radio" name="alignment" value="legal" class="peer sr-only" required ${char.alignment !== 'illegal' ? 'checked' : ''}>
+                                <div class="p-8 border-2 border-gray-100 peer-checked:border-[#000091] peer-checked:bg-blue-50/50 hover:bg-gray-50 transition-all">
+                                    <div class="w-12 h-12 bg-blue-100 text-[#000091] rounded-lg flex items-center justify-center mb-6">
+                                        <i data-lucide="briefcase" class="w-6 h-6"></i>
+                                    </div>
+                                    <div class="font-black text-gray-900 text-lg uppercase italic tracking-tight mb-2">Secteur Légal</div>
+                                    <p class="text-[10px] text-gray-500 font-medium uppercase tracking-widest leading-relaxed">Emplois civils, fonction publique et respect strict des décrets municipaux.</p>
+                                </div>
+                            </label>
+                            
+                            <label class="cursor-pointer group">
+                                <input type="radio" name="alignment" value="illegal" class="peer sr-only" ${char.alignment === 'illegal' ? 'checked' : ''}>
+                                <div class="p-8 border-2 border-gray-100 peer-checked:border-[#E1000F] peer-checked:bg-red-50/50 hover:bg-gray-50 transition-all">
+                                    <div class="w-12 h-12 bg-red-100 text-[#E1000F] rounded-lg flex items-center justify-center mb-6">
+                                        <i data-lucide="skull" class="w-6 h-6"></i>
+                                    </div>
+                                    <div class="font-black text-gray-900 text-lg uppercase italic tracking-tight mb-2">Clandestinité</div>
+                                    <p class="text-[10px] text-gray-500 font-medium uppercase tracking-widest leading-relaxed">Activités non répertoriées, risques judiciaires élevés et absence de protection sociale.</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Disclaimer -->
+                    <div class="bg-[#F6F6F6] p-6 text-[11px] text-gray-600 leading-relaxed font-medium italic border-l-4 border-gray-300 uppercase tracking-wide">
+                        L’usurpation d’identité ou la fourniture de fausses informations lors du recensement constitue un délit grave. Les informations collectées font l'objet d'un traitement informatique destiné à la gestion du registre national.
+                    </div>
+
+                    <div class="pt-10 border-t border-gray-100 flex flex-col md:flex-row justify-end gap-6 items-center">
+                        <button type="button" onclick="actions.cancelCreate()" class="text-xs font-black text-gray-400 uppercase tracking-widest hover:text-red-600 transition-colors">Annuler la procédure</button>
+                        <button type="submit" class="w-full md:w-auto px-12 py-5 bg-[#000091] text-white font-black text-sm uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all">
+                            DÉPOSER LE DOSSIER
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="mt-20 mb-10 text-center opacity-30">
+                <div class="text-[9px] font-black uppercase tracking-[0.6em] text-gray-500">République de Los Angeles • Portail Immigration</div>
+            </div>
         </div>
     </div>
-`;
+    `;
 };
