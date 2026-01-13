@@ -1,10 +1,15 @@
-
 import { CONFIG } from '../config.js';
 import { state } from '../state.js';
 import { router } from '../utils.js';
 
 export const LoginView = () => {
     const staff = state.landingStaff || [];
+    // Tri des staffs pour mettre les fondateurs/admins en premier
+    const sortedStaff = [...staff].sort((a, b) => {
+        const aIsAdmin = state.adminIds.includes(a.id);
+        const bIsAdmin = state.adminIds.includes(b.id);
+        return bIsAdmin - aIsAdmin;
+    });
 
     return `
     <div class="flex-1 flex flex-col bg-white overflow-y-auto custom-scrollbar">
@@ -12,8 +17,8 @@ export const LoginView = () => {
         <!-- HEADER -->
         <header class="w-full px-6 py-5 flex justify-between items-center border-b border-gray-100 sticky top-0 bg-white/90 backdrop-blur-md z-[100]">
             <div class="marianne-block uppercase font-black tracking-tight text-gov-text">
-                <div class="text-[10px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red">Liberté • Égalité • Roleplay</div>
-                <div class="text-lg leading-none">RÉPUBLIQUE<br>DE LOS ANGELES</div>
+                <div class="text-[10px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red">Liberté • Égalité • Justice</div>
+                <div class="text-lg leading-none">ÉTAT DE CALIFORNIE<br>LOS ANGELES</div>
             </div>
             <div class="flex items-center gap-4">
                 ${state.user ? `
@@ -35,7 +40,7 @@ export const LoginView = () => {
                         L'administration <span class="text-gov-blue">simplifiée.</span>
                     </h1>
                     <p class="text-lg text-gray-600 mb-10 leading-relaxed font-medium max-w-xl mx-auto lg:mx-0">
-                        Gérez votre identité civile, consultez vos actifs et interagissez avec les services publics de Los Angeles sur la plateforme officielle.
+                        Gérez votre identité civile, consultez vos actifs et interagissez avec les services publics de l'État de Californie sur la plateforme officielle de Los Angeles.
                     </p>
                     <button onclick="${state.user ? "router('profile_hub')" : "actions.login()"}" class="px-10 py-5 bg-gov-blue text-white font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-blue-900 transition-all transform hover:scale-105">
                         Accéder au portail
@@ -53,33 +58,49 @@ export const LoginView = () => {
         <section class="landing-section bg-white border-b border-gray-100">
             <div class="max-w-6xl mx-auto text-center">
                 <h2 class="text-3xl font-black uppercase tracking-tighter italic mb-16">Conseil d'Administration</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                    ${staff.slice(0, 4).map(s => `
-                        <div class="group">
-                            <img src="${s.avatar_url}" class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-xl grayscale group-hover:grayscale-0 transition-all">
-                            <div class="font-black uppercase text-gov-text">${s.username}</div>
-                            <div class="text-[9px] font-black text-gov-red uppercase tracking-widest mt-1">${state.adminIds.includes(s.id) ? 'FONDATEUR' : 'ADMINISTRATEUR'}</div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-12">
+                    ${sortedStaff.slice(0, 8).map(s => `
+                        <div class="group flex flex-col items-center">
+                            <div class="relative mb-6">
+                                <img src="${s.avatar_url}" class="w-24 h-24 rounded-full border-4 border-white shadow-xl grayscale group-hover:grayscale-0 transition-all duration-500 transform group-hover:scale-110">
+                                ${state.adminIds.includes(s.id) ? `
+                                    <div class="absolute -bottom-2 -right-2 bg-gov-blue text-white p-1.5 rounded-full shadow-lg border-2 border-white">
+                                        <i data-lucide="shield" class="w-4 h-4"></i>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="font-black uppercase text-gov-text tracking-tighter text-lg">${s.username}</div>
+                            <div class="text-[9px] font-black ${state.adminIds.includes(s.id) ? 'text-gov-red' : 'text-gov-blue'} uppercase tracking-widest mt-1">
+                                ${state.adminIds.includes(s.id) ? 'Directoire' : 'Service Public'}
+                            </div>
                         </div>
                     `).join('')}
                 </div>
             </div>
         </section>
 
-        <!-- CREDITS -->
-        <section class="landing-section bg-gov-text text-white text-center">
-            <div class="max-w-4xl mx-auto opacity-40 flex flex-wrap justify-center gap-12 grayscale">
-                <span class="text-2xl font-black italic tracking-tighter">ZEKYO</span>
-                <span class="text-2xl font-black tracking-tighter">MATMAT</span>
-                <span class="text-2xl font-black italic tracking-tighter">SUPABASE</span>
-                <span class="text-2xl font-black tracking-tighter">ROBLOX</span>
+        <!-- POWERED BY -->
+        <section class="py-12 bg-white border-b border-gray-100">
+            <div class="max-w-4xl mx-auto flex flex-col items-center">
+                <div class="text-[9px] font-black text-gray-400 uppercase tracking-[0.5em] mb-8">Infrastructure & Technologies</div>
+                <div class="flex flex-wrap justify-center gap-16 grayscale opacity-40">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="github" class="w-6 h-6"></i>
+                        <span class="text-xl font-black tracking-tighter uppercase">GITHUB</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="database" class="w-6 h-6"></i>
+                        <span class="text-xl font-black tracking-tighter uppercase">SUPABASE</span>
+                    </div>
+                </div>
             </div>
         </section>
 
         <footer class="py-12 px-6 border-t-4 border-gov-blue bg-white">
             <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                <span>&copy; 2025 TFRP • RÉPUBLIQUE DE LOS ANGELES</span>
+                <span>&copy; 2025 TFRP • ÉTAT DE CALIFORNIE • LOS ANGELES DIVISION</span>
                 <div class="flex gap-8">
-                    <a onclick="router('terms')" class="hover:text-gov-blue cursor-pointer">Conditions</a>
+                    <a onclick="router('terms')" class="hover:text-gov-blue cursor-pointer">Conditions d'Utilisation</a>
                     <a onclick="router('privacy')" class="hover:text-gov-blue cursor-pointer">Confidentialité</a>
                 </div>
             </div>
@@ -93,7 +114,7 @@ export const AccessDeniedView = () => `
         <div class="bg-white max-w-lg p-12 border-t-8 border-gov-red shadow-2xl">
             <div class="w-16 h-16 bg-red-50 text-gov-red rounded-full flex items-center justify-center mx-auto mb-8"><i data-lucide="lock" class="w-8 h-8"></i></div>
             <h2 class="text-2xl font-black text-gov-text mb-4 uppercase italic">Accès Non Autorisé</h2>
-            <p class="text-gray-600 mb-10 leading-relaxed">Votre identité n'est pas répertoriée dans le registre du serveur Discord officiel.</p>
+            <p class="text-gray-600 mb-10 leading-relaxed">Votre identité n'est pas répertoriée dans le registre de l'État de Californie.</p>
             <a href="${CONFIG.INVITE_URL}" target="_blank" class="block w-full py-4 bg-gov-blue text-white font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all shadow-xl">Rejoindre la Communauté</a>
             <button onclick="actions.logout()" class="mt-6 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gov-text transition-colors">Retour à l'accueil</button>
         </div>

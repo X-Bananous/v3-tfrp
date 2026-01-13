@@ -1,7 +1,6 @@
-
 /**
- * TFRP Core Application v5.2
- * Design Gouvernemental - Espace Citoyen Fusionné
+ * TFRP Core Application v6.0
+ * Unified Identity - California State Division
  */
 
 import { CONFIG } from './modules/config.js';
@@ -10,7 +9,7 @@ import { router, render } from './modules/utils.js';
 import { ui } from './modules/ui.js'; 
 import { initSecurity } from './modules/security.js';
 
-// Import Actions
+// Actions
 import * as AuthActions from './modules/actions/auth.js';
 import * as NavActions from './modules/actions/navigation.js';
 import * as CharacterActions from './modules/actions/character.js';
@@ -26,7 +25,7 @@ import { setupRealtimeListener, fetchERLCData, loadCharacters, fetchPublicLandin
 
 // Views
 import { LoginView, AccessDeniedView, DeletionPendingView } from './modules/views/login.js';
-import { ProfileHubView } from './modules/views/profile_hub.js'; // Vue fusionnée
+import { ProfileHubView } from './modules/views/profile_hub.js';
 import { CharacterCreateView } from './modules/views/create.js';
 import { HubView } from './modules/views/hub.js';
 import { TermsView, PrivacyView } from './modules/views/legal.js';
@@ -47,7 +46,10 @@ const appRenderer = () => {
     let htmlContent = '';
     let effectiveView = state.currentView;
 
-    if (state.user?.deletion_requested_at && effectiveView !== 'login') effectiveView = 'deletion_pending';
+    // Redirections forcées basées sur l'état
+    if (state.user?.deletion_requested_at && effectiveView !== 'login') {
+        effectiveView = 'deletion_pending';
+    }
 
     switch (effectiveView) {
         case 'login': htmlContent = LoginView(); break;
@@ -63,21 +65,28 @@ const appRenderer = () => {
     }
 
     app.innerHTML = htmlContent;
-    if (window.lucide) setTimeout(() => lucide.createIcons(), 50);
+    if (window.lucide) {
+        setTimeout(() => lucide.createIcons(), 50);
+    }
 };
 
 const initApp = async () => {
     initSecurity();
+    
     if (window.supabase) {
         state.supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         await fetchSecureConfig();
         setupRealtimeListener();
     }
+    
     await fetchPublicLandingData();
     
     const result = await state.supabase.auth.getSession();
-    if (result.data.session) await handleAuthenticatedSession(result.data.session);
-    else router('login');
+    if (result.data.session) {
+        await handleAuthenticatedSession(result.data.session);
+    } else {
+        router('login');
+    }
 };
 
 const handleAuthenticatedSession = async (session) => {
@@ -85,18 +94,43 @@ const handleAuthenticatedSession = async (session) => {
         const { data: { user: supabaseUser } } = await state.supabase.auth.getUser();
         const discordUser = supabaseUser.user_metadata;
         const discordId = discordUser.provider_id || discordUser.sub;
+        
+        // Récupération des guildes depuis l'identité (nécessite le scope guilds lors du login)
+        const guilds = discordUser.guilds || [];
 
-        const { data: profile } = await state.supabase.from('profiles').select('*').eq('id', discordId).maybeSingle();
+        const { data: profile } = await state.supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', discordId)
+            .maybeSingle();
+
         state.user = { 
-            id: discordId, username: discordUser.full_name || discordUser.username, 
-            avatar: discordUser.avatar_url, permissions: profile?.permissions || {}, 
+            id: discordId, 
+            username: discordUser.full_name || discordUser.username || discordUser.custom_claims?.global_name, 
+            avatar: discordUser.avatar_url,
+            guilds: guilds,
+            permissions: profile?.permissions || {}, 
             deletion_requested_at: profile?.deletion_requested_at || null, 
             isFounder: state.adminIds.includes(discordId)
         };
         
         await loadCharacters();
-        if (state.currentView === 'login') router('profile_hub');
-    } catch (e) { router('login'); }
+        
+        // Restaurer la vue si existante en session, sinon hub de profil
+        const savedView = sessionStorage.getItem('tfrp_current_view');
+        const activeCharId = sessionStorage.getItem('tfrp_active_char');
+        
+        if (activeCharId) {
+            state.activeCharacter = state.characters.find(c => c.id === activeCharId);
+            state.activeHubPanel = sessionStorage.getItem('tfrp_hub_panel') || 'main';
+            router('hub');
+        } else {
+            router('profile_hub');
+        }
+    } catch (e) { 
+        console.error("Session init error:", e);
+        router('login'); 
+    }
 };
 
 document.addEventListener('render-view', appRenderer);
