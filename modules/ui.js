@@ -25,9 +25,9 @@ export const showToast = (message, type = 'info') => {
     const id = Date.now();
     
     const colors = {
-        info: 'bg-blue-500/20 border-blue-500 text-blue-100',
+        info: 'bg-gov-blue/20 border-gov-blue text-blue-100',
         success: 'bg-emerald-500/20 border-emerald-500 text-emerald-100',
-        error: 'bg-red-500/20 border-red-500 text-red-100',
+        error: 'bg-gov-red/20 border-gov-red text-red-100',
         warning: 'bg-orange-500/20 border-orange-500 text-orange-100'
     };
 
@@ -39,9 +39,11 @@ export const showToast = (message, type = 'info') => {
     };
 
     const toastHtml = `
-        <div id="toast-${id}" class="glass-panel p-4 rounded-xl border ${colors[type]} flex items-center gap-3 animate-toast shadow-2xl min-w-[300px]">
-            <i data-lucide="${icon[type]}" class="w-5 h-5"></i>
-            <span class="text-sm font-medium">${message}</span>
+        <div id="toast-${id}" class="backdrop-blur-md p-4 rounded-2xl border ${colors[type]} flex items-center gap-3 animate-in shadow-2xl min-w-[320px] z-[9999]">
+            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                <i data-lucide="${icon[type]}" class="w-4 h-4"></i>
+            </div>
+            <span class="text-[11px] font-black uppercase tracking-wider">${message}</span>
         </div>
     `;
 
@@ -52,16 +54,17 @@ export const showToast = (message, type = 'info') => {
         const el = document.getElementById(`toast-${id}`);
         if(el) {
             el.style.opacity = '0';
-            el.style.transform = 'translateY(10px)';
-            el.style.transition = 'all 0.3s ease';
-            setTimeout(() => el.remove(), 300);
+            el.style.transform = 'translateX(20px)';
+            el.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            setTimeout(() => el.remove(), 400);
         }
-    }, 4000);
+    }, 4500);
 };
 
 const createToastContainer = () => {
     const div = document.createElement('div');
     div.id = 'toast-container';
+    div.className = 'fixed bottom-8 right-8 flex flex-col gap-3 z-[9999]';
     document.body.appendChild(div);
     return div;
 };
@@ -70,13 +73,11 @@ const createToastContainer = () => {
 export const closeModal = () => {
     const modal = document.getElementById('global-modal');
     if(modal) {
-        // Sécurité : On ne ferme pas si la modal est marquée comme non-closable
         if (modal.dataset.closable === 'false') return;
-
         modal.classList.add('opacity-0');
         const panel = modal.querySelector('.glass-panel');
         if(panel) {
-            panel.style.transform = 'scale(0.9) translateY(20px)';
+            panel.style.transform = 'scale(0.95) translateY(10px)';
             panel.style.opacity = '0';
         }
         setTimeout(() => modal.remove(), 300);
@@ -84,7 +85,6 @@ export const closeModal = () => {
     state.ui.modal.isOpen = false;
 };
 
-// Fonction forcée pour les récompenses
 export const forceCloseModal = () => {
     const modal = document.getElementById('global-modal');
     if(modal) {
@@ -93,79 +93,64 @@ export const forceCloseModal = () => {
     }
 };
 
-/**
- * showModal
- * @param {string} title - Titre du modal
- * @param {string} content - Contenu HTML ou texte
- * @param {string} confirmText - Texte du bouton de confirmation
- * @param {string} cancelText - Texte du bouton d'annulation
- * @param {function} onConfirm - Callback de confirmation
- * @param {function} onCancel - Callback d'annulation
- * @param {string} type - 'default', 'danger', 'success', 'warning'
- * @param {boolean} isClosable - Permet de forcer l'affichage sans fermeture possible
- */
-export const showModal = ({ title, content, confirmText = 'OK', cancelText = 'Annuler', onConfirm, onCancel, type = 'default', isClosable = true }) => {
+export const showModal = ({ title, content, confirmText = 'Confirmer', cancelText = 'Annuler', onConfirm, onCancel, type = 'default', isClosable = true }) => {
     const existing = document.getElementById('global-modal');
     if(existing) existing.remove();
 
     const themes = {
-        default: { icon: 'info', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', btn: 'bg-blue-600 hover:bg-blue-500' },
-        danger: { icon: 'shield-alert', color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/30', btn: 'bg-red-600 hover:bg-red-500' },
-        success: { icon: 'check-circle', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', btn: 'bg-emerald-600 hover:bg-emerald-500' },
-        warning: { icon: 'alert-triangle', color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/30', btn: 'bg-orange-600 hover:bg-orange-500' }
+        default: { icon: 'info', color: 'text-gov-blue', bg: 'bg-gov-blue/10', border: 'border-gov-blue/20', btn: 'bg-gov-blue hover:bg-black' },
+        danger: { icon: 'shield-alert', color: 'text-gov-red', bg: 'bg-gov-red/10', border: 'border-gov-red/30', btn: 'bg-gov-red hover:bg-black' },
+        success: { icon: 'check-circle', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', btn: 'bg-emerald-600 hover:bg-emerald-700' },
+        warning: { icon: 'alert-triangle', color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/30', btn: 'bg-orange-600 hover:bg-orange-700' }
     };
 
     const theme = themes[type] || themes.default;
     const isConfirmOnly = !onConfirm && !onCancel;
 
     const html = `
-        <div id="global-modal" data-closable="${isClosable}" class="fixed inset-0 z-[200] flex items-center justify-center p-4 backdrop-enter" style="background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);">
+        <div id="global-modal" data-closable="${isClosable}" class="fixed inset-0 z-[2000] flex items-center justify-center p-4 transition-all duration-300 bg-black/80 backdrop-blur-sm">
             <div class="absolute inset-0" onclick="${isClosable ? 'ui.closeModal()' : ''}"></div>
             
-            <div class="glass-panel w-full max-w-lg rounded-[32px] overflow-hidden shadow-2xl modal-enter relative z-10 flex flex-col border ${theme.border}">
+            <div class="glass-panel w-full max-w-lg rounded-[40px] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] transition-all duration-300 relative z-10 flex flex-col border border-white/10 bg-[#121214]">
                 
-                <!-- Header Decorative -->
-                <div class="h-1.5 w-full ${theme.btn}"></div>
+                <div class="h-1.5 w-full ${theme.btn} opacity-50"></div>
 
-                <div class="p-8">
-                    <div class="flex items-start gap-6 mb-6">
-                        <div class="w-14 h-14 rounded-2xl ${theme.bg} flex items-center justify-center ${theme.color} shrink-0 border ${theme.border} shadow-inner">
+                <div class="p-10">
+                    <div class="flex items-start gap-8 mb-8">
+                        <div class="w-16 h-16 rounded-2xl ${theme.bg} flex items-center justify-center ${theme.color} shrink-0 border ${theme.border} shadow-2xl">
                             <i data-lucide="${theme.icon}" class="w-8 h-8"></i>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <h3 class="text-2xl font-bold text-white mb-1 tracking-tight leading-tight">${title}</h3>
-                            <div class="text-xs font-bold uppercase tracking-widest ${theme.color} opacity-80">Notification Système</div>
+                            <h3 class="text-3xl font-black text-white mb-2 tracking-tighter uppercase italic leading-none">${title}</h3>
+                            <div class="text-[9px] font-black uppercase tracking-[0.3em] ${theme.color} opacity-80">Protocole Fondation v6.0</div>
                         </div>
-                        ${isClosable ? `
-                            <button onclick="ui.closeModal()" class="text-gray-500 hover:text-white transition-colors p-1">
-                                <i data-lucide="x" class="w-6 h-6"></i>
-                            </button>
-                        ` : ''}
                     </div>
 
-                    <div class="text-gray-300 text-sm leading-relaxed max-h-[50vh] overflow-y-auto custom-scrollbar pr-2 mb-8 font-medium">
+                    <div class="text-gray-400 text-sm leading-relaxed max-h-[50vh] overflow-y-auto custom-scrollbar pr-4 mb-10 font-medium italic">
                         ${content}
                     </div>
 
-                    <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+                    <div class="flex flex-col sm:flex-row justify-end gap-4">
                         ${(onConfirm || cancelText) && !isConfirmOnly && isClosable ? `
-                            <button id="modal-cancel" class="glass-btn-secondary px-8 py-3.5 rounded-2xl text-sm font-bold hover:bg-white/10 transition-all">
+                            <button id="modal-cancel" class="px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:bg-white/5 hover:text-white transition-all border border-transparent hover:border-white/10">
                                 ${cancelText}
                             </button>
                         ` : ''}
                         
                         ${confirmText ? `
-                            <button id="modal-confirm" class="px-8 py-3.5 rounded-2xl text-sm font-black uppercase tracking-widest text-white transition-all shadow-lg ${theme.btn} transform active:scale-95">
+                            <button id="modal-confirm" class="px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all shadow-2xl ${theme.btn} transform active:scale-95">
                                 ${confirmText}
                             </button>
                         ` : ''}
                     </div>
                 </div>
                 
-                <!-- Footer Decorative -->
-                <div class="bg-white/5 py-2 px-8 flex justify-between items-center border-t border-white/5">
-                    <span class="text-[9px] text-gray-500 font-mono uppercase tracking-widest">Team French Roleplay • Secured</span>
-                    <i data-lucide="shield-check" class="w-3 h-3 text-gray-700"></i>
+                <div class="bg-white/5 py-3 px-10 flex justify-between items-center border-t border-white/5">
+                    <span class="text-[8px] text-gray-600 font-mono uppercase tracking-[0.4em]">Team French Roleplay • Accès Sécurisé</span>
+                    <div class="flex gap-2">
+                        <span class="w-1 h-1 rounded-full bg-gray-700"></span>
+                        <span class="w-1 h-1 rounded-full bg-gray-700"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -178,7 +163,6 @@ export const showModal = ({ title, content, confirmText = 'OK', cancelText = 'An
     if (confirmBtn) {
         confirmBtn.onclick = () => {
             if (onConfirm) onConfirm();
-            // On bypass la sécurité pour fermer via le bouton de confirmation interne
             const modal = document.getElementById('global-modal');
             if(modal) modal.dataset.closable = 'true';
             closeModal();
@@ -192,14 +176,6 @@ export const showModal = ({ title, content, confirmText = 'OK', cancelText = 'An
             closeModal();
         };
     }
-
-    const handleEsc = (e) => {
-        if(e.key === 'Escape' && isClosable) {
-            closeModal();
-            document.removeEventListener('keydown', handleEsc);
-        }
-    };
-    if (isClosable) document.addEventListener('keydown', handleEsc);
 };
 
 export const ui = {

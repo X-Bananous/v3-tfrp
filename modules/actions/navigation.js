@@ -73,3 +73,23 @@ export const setProfileTab = (tab) => {
     state.activeProfileTab = tab;
     render();
 };
+
+export const confirmLogout = () => {
+    ui.showModal({
+        title: "Retour à l'accueil",
+        content: "Voulez-vous retourner à la page d'accueil ou vous déconnecter complètement de votre session ?",
+        confirmText: "Page d'accueil",
+        cancelText: "Déconnexion",
+        onConfirm: () => {
+            state.activeCharacter = null;
+            state.currentView = 'login';
+            sessionStorage.removeItem('tfrp_active_char');
+            router('login');
+        },
+        onCancel: () => {
+            if (window.actions && window.actions.logout) {
+                window.actions.logout();
+            }
+        }
+    });
+};
