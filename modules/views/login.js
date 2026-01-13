@@ -2,9 +2,12 @@ import { CONFIG } from '../config.js';
 import { state } from '../state.js';
 import { router } from '../utils.js';
 
+/**
+ * VUE PRINCIPALE : LANDING PAGE
+ */
 export const LoginView = () => {
     const staff = state.landingStaff || [];
-    // Tri des staffs pour mettre les fondateurs/admins en premier
+    // Tri des staffs pour mettre les membres de la fondation en premier
     const sortedStaff = [...staff].sort((a, b) => {
         const aIsAdmin = state.adminIds.includes(a.id);
         const bIsAdmin = state.adminIds.includes(b.id);
@@ -106,6 +109,62 @@ export const LoginView = () => {
                 </div>
             </div>
         </footer>
+    </div>
+    `;
+};
+
+/**
+ * VUE : ACCÈS REFUSÉ (GUILDE MANQUANTE)
+ */
+export const AccessDeniedView = () => {
+    return `
+    <div class="flex-1 flex items-center justify-center bg-gov-light p-6 animate-in">
+        <div class="max-w-md w-full bg-white p-12 border border-gray-200 shadow-2xl text-center rounded-[40px]">
+            <div class="w-24 h-24 bg-red-100 text-gov-red rounded-full flex items-center justify-center mx-auto mb-8">
+                <i data-lucide="shield-alert" class="w-12 h-12"></i>
+            </div>
+            <h2 class="text-3xl font-black text-gov-text uppercase italic tracking-tighter mb-4">Accès Restreint</h2>
+            <p class="text-gray-500 mb-10 leading-relaxed font-medium">Vous devez être membre du serveur Discord officiel pour accéder au panel citoyen de l'État de Californie.</p>
+            
+            <a href="${CONFIG.INVITE_URL}" target="_blank" class="block w-full py-5 bg-gov-blue text-white font-black uppercase text-xs tracking-widest hover:bg-blue-900 transition-all shadow-xl mb-4 rounded-2xl">
+                Rejoindre le Discord
+            </a>
+            <button onclick="actions.logout()" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gov-text transition-colors">
+                Changer de compte
+            </button>
+        </div>
+    </div>
+    `;
+};
+
+/**
+ * VUE : SUPPRESSION EN COURS (RGPD)
+ */
+export const DeletionPendingView = () => {
+    const date = state.user?.deletion_requested_at ? new Date(state.user.deletion_requested_at) : null;
+    const finalDate = date ? new Date(date.getTime() + 72 * 60 * 60 * 1000) : null;
+
+    return `
+    <div class="flex-1 flex items-center justify-center bg-[#050505] p-6 animate-in">
+        <div class="max-w-lg w-full bg-white p-12 border-t-8 border-gov-red shadow-2xl text-center rounded-[40px]">
+            <div class="w-20 h-20 bg-red-50 text-gov-red rounded-full flex items-center justify-center mx-auto mb-8">
+                <i data-lucide="trash-2" class="w-10 h-10"></i>
+            </div>
+            <h2 class="text-3xl font-black text-gov-text uppercase italic tracking-tighter mb-4">Purge de l'Identité</h2>
+            <p class="text-gray-500 mb-8 leading-relaxed font-medium">Une demande de suppression définitive de vos données a été reçue. Conformément au RGPD, vos accès sont suspendus durant la phase de suppression.</p>
+            
+            <div class="bg-gray-50 p-6 rounded-3xl mb-10 border border-gray-100">
+                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-1">Effacement définitif le</div>
+                <div class="text-xl font-mono font-bold text-gov-text">${finalDate ? finalDate.toLocaleString() : '---'}</div>
+            </div>
+
+            <button onclick="actions.cancelDataDeletion()" class="w-full py-5 bg-gov-text text-white font-black uppercase text-xs tracking-widest hover:bg-black transition-all shadow-xl mb-4 rounded-2xl">
+                Annuler la suppression
+            </button>
+            <button onclick="actions.logout()" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-600 transition-colors">
+                Déconnexion
+            </button>
+        </div>
     </div>
     `;
 };
