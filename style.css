@@ -1,14 +1,20 @@
 
-/* Reset */
-* { margin: 0; padding: 0; box-box: border-box; }
+/* Base & Scroll Fix */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-/* Permet le défilement global */
 html, body {
-    height: auto;
+    height: 100%;
     overflow-x: hidden;
+    overflow-y: auto;
 }
 
-/* Marianne Block DSFR */
+#app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Marianne Block */
 .marianne-block {
     border-left: 2px solid #000091;
     padding-left: 1rem;
@@ -17,38 +23,33 @@ html, body {
     flex-direction: column;
 }
 
-/* Animations */
-@keyframes loading-bar {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(300%); }
-}
-.animate-loading-bar {
-    animation: loading-bar 1.5s infinite ease-in-out;
-}
-
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.animate-gov-in {
-    animation: slideIn 0.5s cubic-bezier(0, 0, 0.2, 1) forwards;
-}
-
-/* DSFR Cards & Utils */
+/* Common Cards */
 .gov-card {
     background: #fff;
     border: 1px solid #E5E5E5;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     border-bottom: 2px solid transparent;
 }
 .gov-card:hover {
-    background: #F6F6F6;
     border-bottom: 2px solid #000091;
-    box-shadow: 0 8px 16px rgba(0,0,145,0.05);
+    box-shadow: 0 10px 20px rgba(0,0,145,0.05);
+    transform: translateY(-2px);
 }
 
 .gov-alert { border-left: 4px solid #E1000F; background: #fff1f0; }
 .gov-info-box { border-left: 4px solid #000091; background: #f0f0ff; }
+
+/* Grid Responsive */
+.responsive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+    .responsive-grid { grid-template-columns: 1fr; }
+    .marianne-block { font-size: 0.8rem; }
+}
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 8px; }
@@ -56,33 +57,6 @@ html, body {
 ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #000091; }
 
-/* Grids Responsives */
-.responsive-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
-@media (max-width: 640px) {
-    .responsive-grid {
-        grid-template-columns: 1fr;
-    }
-    .marianne-block { font-size: 0.8rem; }
-}
-
-/* Hub Layout */
-.hub-container {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-}
-
-@media (max-width: 768px) {
-    .hub-container {
-        flex-direction: column;
-        height: auto;
-        min-h-screen: 100vh;
-        overflow: visible;
-    }
-}
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-gov { animation: fadeIn 0.4s ease-out forwards; }
