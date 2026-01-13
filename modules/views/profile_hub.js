@@ -31,13 +31,13 @@ export const ProfileHubView = () => {
     // --- TAB: MES DOSSIERS (Selection) ---
     if (currentTab === 'identity') {
         tabContent = `
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in pb-20">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 animate-in pb-20">
                 ${characters.map(char => {
                     const isAccepted = char.status === 'accepted';
                     const isDeleting = !!char.deletion_requested_at;
                     
                     return `
-                        <div class="gov-card p-8 flex flex-col aspect-[4/5] min-h-[480px] bg-white animate-in relative group overflow-hidden shadow-2xl rounded-[40px] border border-gray-100 transition-all hover:scale-[1.02]">
+                        <div class="gov-card p-8 flex flex-col aspect-[4/5] min-h-[500px] bg-white animate-in relative group overflow-hidden shadow-2xl rounded-[40px] border border-gray-100 transition-all hover:scale-[1.02]">
                             <div class="flex justify-between items-start mb-8 shrink-0">
                                 <div class="w-16 h-20 bg-gov-light flex items-center justify-center border border-gray-200 rounded-2xl grayscale shadow-inner group-hover:grayscale-0 transition-all duration-500">
                                     <i data-lucide="user" class="w-8 h-8 text-gray-400 group-hover:text-gov-blue"></i>
@@ -98,7 +98,7 @@ export const ProfileHubView = () => {
                 }).join('')}
                 
                 ${characters.length < CONFIG.MAX_CHARS ? `
-                    <button onclick="actions.goToCreate()" class="group bg-white/40 border-4 border-dashed border-gray-200 aspect-[4/5] min-h-[480px] flex flex-col items-center justify-center hover:border-gov-blue hover:bg-blue-50/50 transition-all rounded-[40px]">
+                    <button onclick="actions.goToCreate()" class="group bg-white/40 border-4 border-dashed border-gray-200 aspect-[4/5] min-h-[500px] flex flex-col items-center justify-center hover:border-gov-blue hover:bg-blue-50/50 transition-all rounded-[40px]">
                         <div class="w-20 h-20 bg-white text-gray-300 rounded-full flex items-center justify-center mb-8 group-hover:bg-gov-blue group-hover:text-white transition-all shadow-xl group-hover:scale-110 duration-500">
                             <i data-lucide="plus" class="w-10 h-10"></i>
                         </div>
@@ -110,7 +110,6 @@ export const ProfileHubView = () => {
         `;
     } 
 
-    // --- AUTRES ONGLETS (IDENTIQUES MAIS AVEC STYLE FONDATION) ---
     else if (currentTab === 'perms') {
         tabContent = `
             <div class="bg-white p-12 rounded-[48px] border border-gray-100 shadow-2xl animate-in max-w-5xl mx-auto">
@@ -187,9 +186,9 @@ export const ProfileHubView = () => {
     return `
     <div class="flex-1 flex flex-col bg-[#F6F6F6] min-h-screen overflow-y-auto custom-scrollbar">
         
-        <!-- UNIVERSAL NAVBAR -->
-        <nav class="terminal-nav flex items-center justify-between shrink-0 bg-white border-b border-gray-100 px-10 sticky top-0 z-[1000]">
-            <div class="flex items-center gap-10">
+        <!-- UNIVERSAL NAVBAR WITH INTEGRATED TABS -->
+        <nav class="terminal-nav flex items-center justify-between shrink-0 bg-white border-b border-gray-100 px-10 sticky top-0 z-[1000] h-[80px]">
+            <div class="flex items-center gap-8 h-full">
                 <div class="marianne-block uppercase font-black text-gov-text scale-90 origin-left">
                     <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red uppercase font-black">Liberté • Égalité • Justice</div>
                     <div class="text-md leading-none uppercase tracking-tighter italic">ÉTAT DE CALIFORNIE</div>
@@ -203,7 +202,18 @@ export const ProfileHubView = () => {
                 </button>
             </div>
 
-            <div class="flex items-center gap-8">
+            <!-- TABS MOVED TO NAVBAR -->
+            <div class="hidden lg:flex items-center h-full gap-1">
+                ${tabs.map(t => `
+                    <button onclick="actions.setProfileTab('${t.id}')" 
+                        class="px-6 h-full flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.15em] transition-all border-b-4 ${currentTab === t.id ? 'text-gov-blue border-gov-blue bg-blue-50/30' : 'text-gray-400 border-transparent hover:text-gov-text hover:bg-gray-50'}">
+                        <i data-lucide="${t.icon}" class="w-3.5 h-3.5"></i>
+                        ${t.label}
+                    </button>
+                `).join('')}
+            </div>
+
+            <div class="flex items-center gap-8 h-full">
                 <div class="flex items-center gap-4">
                     <div class="text-right hidden sm:block">
                         <div class="text-[11px] font-black text-gov-text uppercase italic leading-none">${u.username}</div>
@@ -259,22 +269,7 @@ export const ProfileHubView = () => {
             </div>
         </div>
 
-        <!-- NAVIGATION SUB-TABS -->
-        <div class="max-w-6xl mx-auto w-full px-10 mb-16">
-            <div class="flex flex-wrap gap-2 p-2.5 bg-gray-200/40 backdrop-blur-md rounded-[32px] w-fit border border-gray-200/50 shadow-inner">
-                ${tabs.map(t => `
-                    <button onclick="actions.setProfileTab('${t.id}')" 
-                        class="px-10 py-4 rounded-[22px] text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${currentTab === t.id ? 'bg-white text-gov-blue shadow-[0_10px_30px_rgba(0,0,145,0.15)] scale-105' : 'text-gray-500 hover:text-gov-text hover:bg-white/50'}">
-                        <div class="flex items-center gap-4">
-                            <i data-lucide="${t.icon}" class="w-4 h-4"></i>
-                            ${t.label}
-                        </div>
-                    </button>
-                `).join('')}
-            </div>
-        </div>
-
-        <!-- MAIN TAB CONTENT -->
+        <!-- MAIN TAB CONTENT (FULL WIDTH) -->
         <div class="max-w-6xl mx-auto w-full px-10 flex-1">
             ${tabContent}
         </div>

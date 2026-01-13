@@ -39,14 +39,12 @@ export const goToCreate = () => router('create');
 export const cancelCreate = () => router('profile_hub');
 
 export const setHubPanel = async (panel) => {
-    // Redirection vers le hub de profil si clic sur Profil dans la navbar
     if (panel === 'profile') {
         state.activeProfileTab = 'identity';
         router('profile_hub');
         return;
     }
 
-    // Vérification de sécurité pour les panels restreints
     if (panel === 'staff') {
         const hasStaffAccess = Object.keys(state.user.permissions || {}).length > 0 || state.user.isFounder;
         if (!hasStaffAccess) return ui.showToast("Accès Fondation refusé.", "error");
@@ -76,9 +74,16 @@ export const setProfileTab = (tab) => {
 
 export const confirmLogout = () => {
     ui.showModal({
-        title: "Retour à l'accueil",
-        content: "Voulez-vous retourner à la page d'accueil ou vous déconnecter complètement de votre session ?",
-        confirmText: "Page d'accueil",
+        title: "Navigation Terminal",
+        content: `
+            <div class="space-y-4">
+                <p>Souhaitez-vous retourner à la <b>page d'accueil publique</b> ou fermer complètement votre session sécurisée ?</p>
+                <div class="bg-blue-500/5 p-4 rounded-2xl border border-blue-500/20 text-[10px] text-gray-500 uppercase font-black leading-relaxed">
+                    Note : En retournant à l'accueil, votre session reste active en arrière-plan.
+                </div>
+            </div>
+        `,
+        confirmText: "Page d'Accueil",
         cancelText: "Déconnexion",
         onConfirm: () => {
             state.activeCharacter = null;
