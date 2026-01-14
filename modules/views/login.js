@@ -4,6 +4,7 @@ import { state } from '../state.js';
 import { router } from '../utils.js';
 
 export const LoginView = () => {
+    const u = state.user;
     const staff = state.landingStaff || [];
     const erlc = state.erlcData || { currentPlayers: 0, maxPlayers: 42, queue: [] };
     const heists = state.globalActiveHeists || [];
@@ -26,9 +27,37 @@ export const LoginView = () => {
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
-                ${state.user ? `
-                    <button onclick="router('profile_hub')" class="px-6 py-2 bg-gov-blue text-white font-black uppercase text-[10px] tracking-widest hover:bg-black transition-all rounded-sm shadow-lg">Espace Citoyen</button>
+            <div class="flex items-center gap-4 h-full">
+                ${u ? `
+                    <div class="nav-item h-full flex items-center">
+                        <div class="flex items-center gap-4 cursor-pointer p-2.5 hover:bg-gov-light rounded-sm transition-all h-full">
+                            <div class="text-right hidden sm:block">
+                                <div class="text-[10px] font-black uppercase text-gov-text leading-none">${u.username}</div>
+                                <div class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">SESSION ACTIVE</div>
+                            </div>
+                            <div class="relative w-10 h-10 shrink-0">
+                                <img src="${u.avatar}" class="w-full h-full rounded-full grayscale border border-gray-200 p-0.5 relative z-10 object-cover">
+                                ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
+                                <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white z-30"></div>
+                            </div>
+                        </div>
+                        <div class="nav-dropdown right-0 left-auto rounded-none shadow-2xl">
+                            <div class="px-4 py-3 border-b border-gray-50 bg-gov-light/30">
+                                <div class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Identité Discord</div>
+                                <div class="text-[11px] font-black text-gov-text uppercase">${u.id}</div>
+                            </div>
+                            <button onclick="router('profile_hub')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors text-gov-blue">
+                                <i data-lucide="user" class="w-4 h-4"></i> Mon Profil
+                            </button>
+                            <button onclick="actions.setHubPanel('main')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors">
+                                <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard Citoyen
+                            </button>
+                            <div class="h-px bg-gray-50 my-1"></div>
+                            <button onclick="actions.confirmLogout()" class="w-full text-left p-4 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-red-600 transition-colors">
+                                <i data-lucide="log-out" class="w-4 h-4"></i> Déconnexion
+                            </button>
+                        </div>
+                    </div>
                 ` : `
                     <button onclick="actions.login()" class="px-6 py-2 bg-[#5865F2] text-white font-black uppercase text-[10px] tracking-widest hover:opacity-90 transition-all rounded-sm shadow-lg flex items-center gap-3">
                         <i data-lucide="discord" class="w-4 h-4"></i> Connexion
@@ -48,7 +77,7 @@ export const LoginView = () => {
                     Interface gouvernementale officielle de l'État de Californie. Gestion unifiée des identités, du patrimoine et des accréditations.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <button onclick="${state.user ? "router('profile_hub')" : "actions.login()"}" class="px-12 py-5 bg-gov-blue text-white font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-black transition-all transform hover:scale-105 flex items-center justify-center gap-3">
+                    <button onclick="${u ? "router('profile_hub')" : "actions.login()"}" class="px-12 py-5 bg-gov-blue text-white font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-black transition-all transform hover:scale-105 flex items-center justify-center gap-3">
                         <i data-lucide="shield" class="w-5 h-5"></i> Accéder au portail
                     </button>
                     <a href="${CONFIG.INVITE_URL}" target="_blank" class="px-12 py-5 bg-white text-gov-text font-black border border-gray-200 uppercase text-xs tracking-widest hover:bg-gray-50 transition-all shadow-xl flex items-center justify-center gap-3">

@@ -225,24 +225,49 @@ export const ProfileHubView = () => {
     else if (currentTab === 'security') {
         const deletionDate = u.deletion_requested_at ? new Date(u.deletion_requested_at) : null;
         tabContent = `
-            <div class="bg-white p-12 rounded-[48px] border-t-8 border-gov-red shadow-2xl animate-in max-w-3xl mx-auto text-center">
-                <div class="w-16 h-16 bg-red-50 text-gov-red rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg border border-red-100">
-                    <i data-lucide="shield-alert" class="w-8 h-8"></i>
-                </div>
-                <h4 class="text-4xl font-black text-gov-text uppercase italic mb-4 tracking-tighter">Droit à l'Oubli</h4>
-                <p class="text-sm text-gray-500 leading-relaxed mb-10 font-medium italic">L'exercice de ce droit entraîne la suppression irrévocable de votre existence numérique dans nos bases sous 72h.</p>
-                
-                ${deletionDate ? `
-                    <div class="bg-orange-50 border-2 border-orange-200 p-8 rounded-[32px] mb-8 inline-block w-full">
-                        <div class="text-[9px] text-orange-600 font-black uppercase tracking-[0.4em] mb-4">Phase de purge active</div>
-                        <div class="text-4xl font-mono font-black text-gov-text mb-8">72:00:00</div>
-                        <button onclick="actions.cancelDataDeletion()" class="bg-gov-text text-white px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all">ANNULER LA PROCÉDURE</button>
+            <div class="bg-white p-12 rounded-[48px] border-t-8 border-gov-red shadow-2xl animate-in max-w-4xl mx-auto">
+                <div class="flex flex-col md:flex-row items-center gap-10 mb-12 border-b border-gray-100 pb-12">
+                    <div class="relative shrink-0">
+                        <div class="w-32 h-32 rounded-full border-4 border-gov-light bg-white overflow-hidden relative shadow-xl">
+                            <img src="${u.avatar}" class="w-full h-full object-cover">
+                            ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] h-[130%] max-w-none z-20 pointer-events-none">` : ''}
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-8 h-8 bg-gov-blue text-white rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+                            <i data-lucide="shield" class="w-4 h-4"></i>
+                        </div>
                     </div>
-                ` : `
-                    <button onclick="actions.requestDataDeletion()" class="bg-gov-red text-white px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl transform hover:scale-105">
-                        DÉTRUIRE MON IDENTITÉ
-                    </button>
-                `}
+                    <div class="text-center md:text-left">
+                        <h4 class="text-3xl font-black text-gov-text uppercase italic mb-2 tracking-tighter">Identité de Sécurité</h4>
+                        <div class="flex flex-wrap justify-center md:justify-start gap-3">
+                            <span class="text-[9px] font-mono font-bold text-gray-400 uppercase bg-gov-light px-3 py-1 rounded-lg border border-gray-200">UID: ${u.id}</span>
+                            <span class="text-[9px] font-black text-gov-blue uppercase bg-blue-50 px-3 py-1 rounded-lg border border-blue-100 tracking-widest">${u.username}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-4 leading-relaxed font-medium italic">Centre de gestion RGPD • Droit à l'oubli numérique</p>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-red-50 text-gov-red rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg border border-red-100">
+                        <i data-lucide="shield-alert" class="w-8 h-8"></i>
+                    </div>
+                    <h5 class="text-2xl font-black text-gov-text uppercase italic mb-4 tracking-tighter">Procédure de Purge Identitaire</h5>
+                    <p class="text-sm text-gray-500 leading-relaxed mb-10 max-w-2xl mx-auto font-medium italic">
+                        L'exercice du droit à l'oubli entraîne la suppression irrévocable de votre existence numérique dans nos bases. 
+                        <b>Cette action effacera vos dossiers, vos comptes bancaires et vos archives sous 72h.</b>
+                    </p>
+                    
+                    ${deletionDate ? `
+                        <div class="bg-orange-50 border-2 border-orange-200 p-8 rounded-[32px] mb-8 inline-block w-full">
+                            <div class="text-[9px] text-orange-600 font-black uppercase tracking-[0.4em] mb-4">Phase de purge active</div>
+                            <div class="text-4xl font-mono font-black text-gov-text mb-8">72:00:00</div>
+                            <button onclick="actions.cancelDataDeletion()" class="bg-gov-text text-white px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl transform active:scale-95">ANNULER LA PROCÉDURE</button>
+                        </div>
+                    ` : `
+                        <button onclick="actions.requestDataDeletion()" class="bg-gov-red text-white px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl transform hover:scale-105 active:scale-95">
+                            DÉTRUIRE MON IDENTITÉ NATIONALE
+                        </button>
+                    `}
+                </div>
             </div>
         `;
     }
@@ -258,16 +283,6 @@ export const ProfileHubView = () => {
                 <div onclick="actions.backToLanding()" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer transition-transform hover:scale-[0.8]">
                     <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red font-black">État de Californie</div>
                     <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
-                </div>
-
-                <!-- Desktop Menu Tabs -->
-                <div class="hidden lg:flex items-center gap-1 h-full">
-                    ${tabs.map(t => `
-                        <button onclick="actions.setProfileTab('${t.id}')" 
-                            class="px-6 h-full text-[10px] font-black uppercase tracking-widest transition-all ${currentTab === t.id ? 'text-gov-blue border-b-2 border-gov-blue' : 'text-gray-400 hover:text-gov-text'} flex items-center gap-2">
-                             <i data-lucide="${t.icon}" class="w-3.5 h-3.5"></i> ${t.label}
-                        </button>
-                    `).join('')}
                 </div>
             </div>
 
@@ -338,6 +353,18 @@ export const ProfileHubView = () => {
                             ${u.isFounder ? '<span class="text-[9px] md:text-[10px] font-black text-purple-600 uppercase tracking-widest bg-purple-50 px-4 py-1.5 border border-purple-100 rounded-lg italic">Fondation</span>' : ''}
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- UNIFIED SUB-NAV TABS (TERMINAL STYLE) -->
+            <div class="max-w-6xl mx-auto w-full px-6 md:px-8 mb-12">
+                <div class="flex flex-nowrap gap-2 bg-white/5 p-1.5 rounded-2xl overflow-x-auto no-scrollbar border border-gray-200 w-fit mx-auto md:mx-0 shadow-sm">
+                    ${tabs.map(t => `
+                        <button onclick="actions.setProfileTab('${t.id}')" 
+                            class="px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all whitespace-nowrap shrink-0 ${currentTab === t.id ? 'bg-gov-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-400 hover:text-gov-text hover:bg-gov-light'}">
+                            <i data-lucide="${t.icon}" class="w-4 h-4"></i> ${t.label}
+                        </button>
+                    `).join('')}
                 </div>
             </div>
 
