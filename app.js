@@ -123,7 +123,7 @@ const handleAuthenticatedSession = async (session) => {
         const userBox = document.getElementById('loading-user-box');
         const userLabel = document.getElementById('loading-username');
         if (userBox && userLabel) {
-            userLabel.textContent = username;
+            userLabel.innerHTML = `Connecté en tant que <span class="text-gov-blue">${username}</span>`;
             userBox.classList.remove('opacity-0');
             userBox.classList.add('opacity-100');
         }
@@ -142,6 +142,7 @@ const handleAuthenticatedSession = async (session) => {
             decoration: discordUser.avatar_decoration || null,
             guilds: discordUser.guilds || [],
             permissions: profile?.permissions || {}, 
+            whell_turn: profile?.whell_turn || 0,
             deletion_requested_at: profile?.deletion_requested_at || null, 
             isFounder: state.adminIds.includes(discordId)
         };
@@ -153,11 +154,10 @@ const handleAuthenticatedSession = async (session) => {
             state.activeCharacter = state.characters.find(c => c.id === activeCharId);
         }
         
-        // Petit délai pour laisser l'utilisateur voir son nom
         setTimeout(() => {
             state.isInitializingAuth = false;
             router('profile_hub');
-        }, 800);
+        }, 1200);
 
     } catch (e) { 
         console.error("Session init error:", e);
