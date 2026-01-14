@@ -9,8 +9,6 @@ export const ProfileHubView = () => {
 
     const currentTab = state.activeProfileTab || 'identity';
     const characters = state.characters || [];
-    const perms = u.permissions || {};
-    const permKeys = Object.keys(perms).filter(k => perms[k] === true);
     const sanctions = state.userSanctions || [];
     const isMobileMenuOpen = state.ui.mobileMenuOpen;
 
@@ -44,7 +42,7 @@ export const ProfileHubView = () => {
                     </button>
                 `).join('')}
                 <div class="mt-auto pt-10 flex flex-col gap-4">
-                    <button onclick="actions.backToLanding()" class="w-full py-4 bg-gov-light text-gov-text font-black uppercase text-[10px] tracking-widest text-center rounded-xl">Accueil</button>
+                    <button onclick="actions.backToLanding()" class="w-full py-4 bg-gov-light text-gov-text font-black uppercase text-[10px] tracking-widest text-center rounded-xl">Accueil Portail</button>
                     <button onclick="actions.confirmLogout()" class="w-full py-4 bg-red-50 text-red-600 font-black uppercase text-[10px] tracking-widest text-center rounded-xl">Déconnexion</button>
                 </div>
             </div>
@@ -96,16 +94,59 @@ export const ProfileHubView = () => {
             </div>
         `;
     } else if (currentTab === 'perms') {
+        const ALL_PERMS = [
+            { k: 'can_approve_characters', l: 'File Whitelist', d: "Examen des dossiers d'immigration." },
+            { k: 'can_manage_characters', l: 'Registre Civil', d: "Modification des dossiers nationaux." },
+            { k: 'can_manage_economy', l: 'Pilotage Économique', d: "Contrôle des flux monétaires civils." },
+            { k: 'can_manage_illegal', l: 'Audit Illégal', d: "Gestion des syndicats criminels." },
+            { k: 'can_manage_enterprises', l: 'Réseau Commercial', d: "Modération du marché et des sociétés." },
+            { k: 'can_manage_staff', l: 'Directoire Staff', d: "Administration des membres d'équipe." },
+            { k: 'can_manage_inventory', l: 'Saisie d\'Objets', d: "Droit de perquisition administrative." },
+            { k: 'can_change_team', l: 'Mutation Secteur', d: "Changement d'alignement citoyen." },
+            { k: 'can_go_onduty', l: 'Badge Service', d: "Autorisation de service modérateur." },
+            { k: 'can_manage_jobs', l: 'Affectation Métier', d: "Attribution manuelle des carrières." },
+            { k: 'can_bypass_login', l: 'Accès Fondation', d: "Contrôle total du panel V3." },
+            { k: 'can_launch_session', l: 'Cycle de Session', d: "Démarrage des sessions de jeu." },
+            { k: 'can_execute_commands', l: 'Console ERLC', d: "Instructions directes au serveur." },
+            { k: 'can_give_wheel_turn', l: 'Maître des Roues', d: "Distribution des tours de loterie." },
+            { k: 'can_use_dm', l: 'Messagerie Bot', d: "Transmission privée via le bot Discord." },
+            { k: 'can_use_say', l: 'Transmission Bot', d: "Annonces publiques via le bot Discord." },
+            { k: 'can_warn', l: 'Warn System', d: "Application d'avertissements officiels." },
+            { k: 'can_mute', l: 'Mute System', d: "Sanctions de communication." },
+            { k: 'can_ban', l: 'Ban System', d: "Exclusion définitive des services." }
+        ];
+
         tabContent = `
-            <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-2xl animate-in max-w-4xl mx-auto">
-                <h4 class="text-[10px] font-black text-gov-blue uppercase tracking-[0.4em] mb-10">Privilèges du Profil</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    ${permKeys.length > 0 ? permKeys.map(k => `
-                        <div class="bg-gov-light p-4 rounded-xl border border-gray-100 flex items-center gap-4 hover:border-gov-blue/20 transition-all">
-                            <div class="w-9 h-9 bg-gov-blue text-white rounded-lg flex items-center justify-center shadow-lg"><i data-lucide="check" class="w-4 h-4"></i></div>
-                            <span class="text-[10px] font-black text-gov-text uppercase tracking-widest">${k.replace('can_', '').replace(/_/g, ' ')}</span>
+            <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-2xl animate-in max-w-5xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+                    <div>
+                        <h4 class="text-[10px] font-black text-gov-blue uppercase tracking-[0.4em] mb-2">Audit des Accréditations</h4>
+                        <p class="text-sm text-gray-400 font-medium italic">Liste exhaustive de vos privilèges administratifs sur la plateforme V3.</p>
+                    </div>
+                    ${u.isFounder ? `
+                        <div class="px-6 py-3 bg-purple-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl border border-purple-400 animate-pulse">
+                            ACCÈS RACINE FONDATION
                         </div>
-                    `).join('') : '<p class="col-span-full py-10 text-center text-gray-400 uppercase font-black text-[9px]">Aucune accréditation staff</p>'}
+                    ` : ''}
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ${ALL_PERMS.map(p => {
+                        const hasPerm = u.isFounder || (u.permissions && u.permissions[p.k] === true);
+                        return `
+                            <div class="bg-gov-light p-4 rounded-2xl border ${hasPerm ? 'border-emerald-500/30 bg-emerald-50/20' : 'border-gray-100'} flex items-center gap-4 transition-all">
+                                <div class="w-10 h-10 ${hasPerm ? 'bg-emerald-500 text-white shadow-emerald-200' : 'bg-gray-200 text-gray-400'} rounded-xl flex items-center justify-center shadow-lg shrink-0">
+                                    <i data-lucide="${hasPerm ? 'check' : 'lock'}" class="w-5 h-5"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[11px] font-black text-gov-text uppercase tracking-widest truncate">${p.l}</span>
+                                        ${hasPerm ? '<span class="text-[7px] font-black text-emerald-600 bg-white px-1.5 py-0.5 rounded border border-emerald-200">ACCORDÉ</span>' : ''}
+                                    </div>
+                                    <p class="text-[9px] text-gray-400 font-medium leading-tight mt-0.5 italic">${p.d}</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
             </div>
         `;
@@ -142,12 +183,11 @@ export const ProfileHubView = () => {
     return `
     <div class="flex-1 flex flex-col bg-[#F6F6F6] min-h-screen">
         ${isMobileMenuOpen ? MobileMenuOverlay() : ''}
-        
         <nav class="shrink-0 bg-white border-b border-gray-100 px-4 md:px-8 flex items-center justify-between sticky top-0 z-[1000] h-20 shadow-sm">
-            <div class="flex items-center gap-4 md:gap-6 h-full">
+            <div class="flex items-center gap-6 h-full">
                 <div onclick="actions.backToLanding()" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer hover:opacity-70 transition-opacity">
-                    <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red uppercase font-black">État de Californie</div>
-                    <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
+                    <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red uppercase font-black">Liberté • Égalité • Justice</div>
+                    <div class="text-md leading-none uppercase tracking-tighter italic">ÉTAT DE CALIFORNIE</div>
                 </div>
                 <div class="hidden lg:flex items-center gap-1 h-full">
                     ${tabs.map(t => `<button onclick="actions.setProfileTab('${t.id}')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${currentTab === t.id ? 'text-gov-blue border-b-2 border-gov-blue' : 'text-gray-400 hover:text-gov-text'}">${t.label}</button>`).join('')}
@@ -156,7 +196,7 @@ export const ProfileHubView = () => {
 
             <div class="flex items-center gap-2 md:gap-4 h-full">
                 <div class="flex items-center gap-3 pr-4 md:pr-6 border-r border-gray-100 h-full">
-                    <div class="text-right hidden sm:block"><div class="text-[10px] font-black text-gov-text uppercase italic leading-none">${u.username}</div><div class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">PROFIL V3</div></div>
+                    <div class="text-right hidden sm:block"><div class="text-[10px] font-black text-gov-text uppercase italic leading-none">${u.username}</div><div class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">PROFIL CERTIFIÉ</div></div>
                     <div class="relative w-10 h-10">
                         <img src="${u.avatar}" class="w-full h-full rounded-full border-2 border-gov-blue p-0.5 bg-white object-cover relative z-10">
                         ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
@@ -195,7 +235,7 @@ export const ProfileHubView = () => {
                 ${tabContent}
             </main>
             <footer class="py-12 text-center opacity-30 border-t border-gray-100">
-                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.5em]">TEAM FRENCH ROLEPLAY • V3 FINAL EDITION</p>
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.5em]">TEAM FRENCH ROLEPLAY • V3 PLATINUM EDITION</p>
             </footer>
         </div>
     </div>

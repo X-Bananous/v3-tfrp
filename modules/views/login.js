@@ -50,13 +50,14 @@ export const LoginView = () => {
                             <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span class="text-[10px] font-black text-emerald-600 uppercase">Live</span></div>
                         </div>
                         <div class="text-5xl font-mono font-black text-gov-text tracking-tighter">${erlc.currentPlayers}<span class="text-gray-300 text-2xl">/${erlc.maxPlayers}</span></div>
+                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-4">Citoyens synchronisés</div>
                     </div>
                     <div class="bg-gov-text text-white p-8 rounded-[32px] shadow-2xl relative overflow-hidden flex flex-col">
                         <div class="flex items-center gap-3 mb-6 relative z-10">
                             <div class="px-2 py-0.5 bg-gov-red text-white text-[8px] font-black uppercase tracking-widest rounded animate-pulse">INFO V3</div>
                             <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Système Unifié</span>
                         </div>
-                        <p class="text-xs text-gray-400 font-medium leading-relaxed italic">Synchronisation totale des données entre le serveur de jeu et votre profil citoyen.</p>
+                        <p class="text-xs text-gray-400 font-medium leading-relaxed italic">Synchronisation totale des données entre le serveur de jeu et votre profil citoyen California V3.</p>
                     </div>
                 </div>
             </div>
@@ -81,7 +82,7 @@ export const AccessDeniedView = () => {
         <div class="max-w-md w-full bg-white p-12 border border-gray-200 shadow-2xl text-center rounded-[40px]">
             <div class="w-24 h-24 bg-red-100 text-gov-red rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl"><i data-lucide="shield-alert" class="w-12 h-12"></i></div>
             <h2 class="text-3xl font-black text-gov-text uppercase italic tracking-tighter mb-4">Accès Restreint</h2>
-            <p class="text-gray-500 mb-10 font-medium leading-relaxed">Veuillez rejoindre le serveur Discord TFRP officiel pour accéder aux services V3.</p>
+            <p class="text-gray-500 mb-10 font-medium leading-relaxed">Veuillez rejoindre le serveur Discord TFRP officiel pour accéder aux services de l'État.</p>
             <a href="${CONFIG.INVITE_URL}" target="_blank" class="flex items-center justify-center gap-3 w-full py-5 bg-[#5865F2] text-white font-black uppercase text-xs tracking-widest hover:opacity-90 transition-all shadow-xl rounded-2xl">Rejoindre Discord</a>
         </div>
     </div>
@@ -94,7 +95,7 @@ export const DeletionPendingView = () => {
         <div class="max-w-lg w-full bg-white p-12 border-t-8 border-gov-red shadow-2xl text-center rounded-[40px]">
             <div class="w-20 h-20 bg-red-50 text-gov-red rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl"><i data-lucide="trash-2" class="w-10 h-10"></i></div>
             <h2 class="text-3xl font-black text-gov-text uppercase italic tracking-tighter mb-4">Purge V3 Active</h2>
-            <p class="text-gray-500 mb-8 leading-relaxed font-medium">Une demande d'effacement définitif est en cours sur votre identité Discord.</p>
+            <p class="text-gray-500 mb-8 leading-relaxed font-medium">Une demande d'effacement définitif est en cours. Vos accès sont suspendus pour 72h.</p>
             <button onclick="actions.cancelDataDeletion()" class="w-full py-5 bg-gov-text text-white font-black uppercase text-xs tracking-widest hover:bg-black transition-all shadow-xl mb-4 rounded-2xl">Annuler la suppression</button>
             <button onclick="actions.logout()" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-600 transition-colors">Déconnexion</button>
         </div>

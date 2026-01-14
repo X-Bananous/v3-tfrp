@@ -1,5 +1,5 @@
 /**
- * TFRP Core Application V3
+ * TFRP Core Application V3 Platinum
  * Unified Identity - California State Division
  */
 
@@ -117,7 +117,7 @@ const handleAuthenticatedSession = async (session) => {
         
         await loadCharacters();
         
-        // V3 : Redirection systématique vers le hub de profil (sélecteur) sur refresh
+        // V3 : On renvoie toujours au hub de profil lors d'un refresh/login pour validation d'identité
         router('profile_hub');
         
     } catch (e) { 

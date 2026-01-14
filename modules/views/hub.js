@@ -48,13 +48,8 @@ export const HubView = () => {
                 <button onclick="actions.setHubPanel('jobs')" class="w-full text-left py-4 border-b border-gray-100 font-black uppercase text-xs tracking-widest ${panel === 'jobs' ? 'text-gov-blue' : 'text-gray-400'}">Pôle Emploi</button>
                 <button onclick="actions.setHubPanel('assets')" class="w-full text-left py-4 border-b border-gray-100 font-black uppercase text-xs tracking-widest ${panel === 'assets' ? 'text-gov-blue' : 'text-gray-400'}">Patrimoine</button>
                 
-                ${isIllegal ? `
-                    <button onclick="actions.setHubPanel('illicit')" class="w-full text-left py-4 border-b border-red-100 font-black uppercase text-xs tracking-widest text-red-600">Réseau Clandestin</button>
-                ` : ''}
-                
-                ${hasStaffAccess ? `
-                    <button onclick="actions.setHubPanel('staff')" class="w-full text-left py-4 border-b border-purple-100 font-black uppercase text-xs tracking-widest text-purple-600">Administration</button>
-                ` : ''}
+                ${isIllegal ? `<button onclick="actions.setHubPanel('illicit')" class="w-full text-left py-4 border-b border-red-100 font-black uppercase text-xs tracking-widest text-red-600">Secteur Clandestin</button>` : ''}
+                ${hasStaffAccess ? `<button onclick="actions.setHubPanel('staff')" class="w-full text-left py-4 border-b border-purple-100 font-black uppercase text-xs tracking-widest text-purple-600">Administration</button>` : ''}
 
                 <div class="mt-auto pt-10 flex flex-col gap-4">
                     <button onclick="actions.setHubPanel('profile')" class="w-full py-4 bg-gov-light text-gov-text font-black uppercase text-[10px] tracking-widest text-center rounded-xl">Mon Profil</button>
@@ -80,35 +75,26 @@ export const HubView = () => {
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="bg-gov-light p-8 border border-gray-200 shadow-xl rounded-none relative overflow-hidden flex flex-col justify-between group">
-                            <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-700">
-                                <i data-lucide="server" class="w-24 h-24 text-black"></i>
-                            </div>
-                            <div class="flex justify-between items-center mb-6 relative z-10">
+                        <div class="bg-gov-light p-8 border border-gray-200 shadow-xl rounded-none flex flex-col justify-between group">
+                            <div class="flex justify-between items-center mb-6">
                                 <span class="text-[10px] font-black text-gov-blue uppercase tracking-[0.3em]">Signal Temps Réel</span>
                                 <div class="flex items-center gap-2">
                                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    <span class="text-[10px] font-black uppercase text-emerald-600 tracking-widest">Opérationnel</span>
+                                    <span class="text-[10px] font-black uppercase text-emerald-600">Opérationnel</span>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-2 gap-8 relative z-10">
-                                <div>
-                                    <div class="text-[9px] text-gray-500 font-black uppercase mb-1 tracking-widest">Population</div>
-                                    <div class="text-4xl font-mono font-black text-gov-text tracking-tighter">${erlc.currentPlayers}<span class="text-gray-300 text-xl">/${erlc.maxPlayers}</span></div>
-                                </div>
-                                <div>
-                                    <div class="text-[9px] text-gray-500 font-black uppercase mb-1 tracking-widest">File Douanière</div>
-                                    <div class="text-4xl font-mono font-black text-gov-text tracking-tighter">${erlc.queue?.length || 0}</div>
-                                </div>
+                            <div class="grid grid-cols-2 gap-8">
+                                <div><div class="text-[9px] text-gray-500 font-black uppercase mb-1">Population</div><div class="text-4xl font-mono font-black text-gov-text tracking-tighter">${erlc.currentPlayers}<span class="text-gray-300 text-xl">/${erlc.maxPlayers}</span></div></div>
+                                <div><div class="text-[9px] text-gray-500 font-black uppercase mb-1">File Douanière</div><div class="text-4xl font-mono font-black text-gov-text tracking-tighter">${erlc.queue?.length || 0}</div></div>
                             </div>
-                            <div class="mt-8 pt-6 border-t border-gray-200 relative z-10">
-                                <div class="text-[9px] text-gray-500 font-black uppercase mb-2 tracking-widest">Clef de raccordement universelle</div>
+                            <div class="mt-8 pt-6 border-t border-gray-200">
+                                <div class="text-[9px] text-gray-500 font-black uppercase mb-2">Clef de raccordement universelle</div>
                                 <div class="text-sm font-mono font-black text-gov-blue select-all uppercase tracking-[0.2em] bg-white p-3 border border-gray-100 text-center">${erlc.joinKey || 'INDISPONIBLE'}</div>
                             </div>
                         </div>
 
                         <div class="bg-gov-text text-white p-8 rounded-none shadow-2xl flex flex-col justify-between relative overflow-hidden group">
-                            <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/5 rounded-none blur-2xl group-hover:bg-white/10 transition-all"></div>
+                            <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/5 blur-2xl group-hover:bg-white/10 transition-all"></div>
                             <div class="relative z-10">
                                 <div class="flex items-center justify-between mb-6">
                                     <div class="flex items-center gap-3">
@@ -118,12 +104,10 @@ export const HubView = () => {
                                     <i data-lucide="megaphone" class="w-5 h-5 text-gray-500"></i>
                                 </div>
                                 <div class="flex items-center justify-center py-10 opacity-30">
-                                     <div class="text-[10px] font-black uppercase tracking-[0.4em] italic text-center">Aucun incident critique.</div>
+                                     <div class="text-[10px] font-black uppercase tracking-[0.4em] italic text-center">Aucun incident critique signalé à Los Angeles.</div>
                                 </div>
                             </div>
-                            <button onclick="actions.setHubPanel('notifications')" class="mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-all text-left relative z-10 flex items-center gap-3 border-t border-white/10 pt-4">
-                                Consulter le journal complet <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                            </button>
+                            <button onclick="actions.setHubPanel('notifications')" class="mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-all text-left relative z-10 flex items-center gap-3 border-t border-white/10 pt-4">Consulter le journal complet <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>
                         </div>
                     </div>
 
@@ -133,31 +117,18 @@ export const HubView = () => {
                         </h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             <button onclick="actions.setHubPanel('bank')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
-                                <div class="w-16 h-16 bg-gov-light rounded-none flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner">
-                                    <i data-lucide="landmark" class="w-8 h-8"></i>
-                                </div>
+                                <div class="w-16 h-16 bg-gov-light rounded-none flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner"><i data-lucide="landmark" class="w-8 h-8"></i></div>
                                 <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Banque</h4>
                             </button>
                             <button onclick="actions.setHubPanel('assets')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
-                                <div class="w-16 h-16 bg-gov-light rounded-none flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner">
-                                    <i data-lucide="gem" class="w-8 h-8"></i>
-                                </div>
+                                <div class="w-16 h-16 bg-gov-light rounded-none flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner"><i data-lucide="gem" class="w-8 h-8"></i></div>
                                 <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Patrimoine</h4>
                             </button>
                             <button onclick="actions.setHubPanel('enterprise')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
-                                <div class="w-16 h-16 bg-gov-light rounded-none flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner">
-                                    <i data-lucide="building-2" class="w-8 h-8"></i>
-                                </div>
+                                <div class="w-16 h-16 bg-gov-light rounded-none flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner"><i data-lucide="building-2" class="w-8 h-8"></i></div>
                                 <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Corporations</h4>
                             </button>
-                            ${hasStaffAccess ? `
-                                <button onclick="actions.setHubPanel('staff')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-purple-100 hover:border-purple-600 transition-all duration-500">
-                                    <div class="w-16 h-16 bg-purple-50 text-purple-600 rounded-none flex items-center justify-center mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-500 shadow-inner">
-                                        <i data-lucide="shield" class="w-8 h-8"></i>
-                                    </div>
-                                    <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Administration</h4>
-                                </button>
-                            ` : ''}
+                            ${hasStaffAccess ? `<button onclick="actions.setHubPanel('staff')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-purple-100 hover:border-purple-600 transition-all duration-500"><div class="w-16 h-16 bg-purple-50 text-purple-600 rounded-none flex items-center justify-center mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-500 shadow-inner"><i data-lucide="shield" class="w-8 h-8"></i></div><h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Administration</h4></button>` : ''}
                         </div>
                     </div>
                 </div>`;
@@ -176,7 +147,6 @@ export const HubView = () => {
     return `
     <div class="flex flex-col h-screen bg-white overflow-hidden">
         ${isMobileMenuOpen ? MobileMenuOverlay() : ''}
-        
         <nav class="terminal-nav flex items-center justify-between shrink-0 border-b border-gray-100 bg-white sticky top-0 z-[100] px-4 md:px-8 h-20">
             <div class="flex items-center gap-4 md:gap-12 h-full">
                 <div onclick="actions.setHubPanel('main')" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer transition-transform hover:scale-[0.8]">
@@ -236,10 +206,9 @@ export const HubView = () => {
                 </button>
             </div>
         </nav>
-
         <main class="flex-1 overflow-y-auto bg-white custom-scrollbar">${mainContent}</main>
         <footer class="h-8 bg-gov-light/50 border-t border-gray-100 flex items-center justify-center shrink-0">
-            <span class="text-[8px] font-black text-gray-400 uppercase tracking-[0.5em]">TFRP California Administration • V3 Platinum</span>
+            <span class="text-[8px] font-black text-gray-400 uppercase tracking-[0.5em]">TFRP California Administration • V3 Platinum Edition</span>
         </footer>
     </div>
     `;
