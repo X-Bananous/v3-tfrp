@@ -124,12 +124,11 @@ export const ProfileHubView = () => {
             </div>
         `;
     } else if (currentTab === 'security') {
-        const deletionDate = u.deletion_requested_at ? new Date(u.deletion_requested_at) : null;
         tabContent = `
             <div class="bg-white p-12 rounded-[48px] border-t-8 border-gov-red shadow-2xl animate-in max-w-3xl mx-auto text-center">
                 <h4 class="text-4xl font-black text-gov-text uppercase italic mb-4 tracking-tighter">Droit à l'Oubli</h4>
                 <p class="text-sm text-gray-500 mb-10 font-medium italic">L'exercice de ce droit entraîne la suppression irrévocable de vos données sous 72h.</p>
-                ${deletionDate ? `
+                ${u.deletion_requested_at ? `
                     <div class="bg-orange-50 border-2 border-orange-200 p-8 rounded-[32px] mb-8 inline-block w-full">
                         <div class="text-[9px] text-orange-600 font-black uppercase tracking-[0.4em] mb-4">Purge active</div>
                         <div class="text-4xl font-mono font-black text-gov-text mb-8">72:00:00</div>
@@ -143,11 +142,12 @@ export const ProfileHubView = () => {
     return `
     <div class="flex-1 flex flex-col bg-[#F6F6F6] min-h-screen">
         ${isMobileMenuOpen ? MobileMenuOverlay() : ''}
+        
         <nav class="shrink-0 bg-white border-b border-gray-100 px-4 md:px-8 flex items-center justify-between sticky top-0 z-[1000] h-20 shadow-sm">
-            <div class="flex items-center gap-6 h-full">
+            <div class="flex items-center gap-4 md:gap-6 h-full">
                 <div onclick="actions.backToLanding()" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer hover:opacity-70 transition-opacity">
-                    <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red uppercase font-black">Liberté • Égalité • Justice</div>
-                    <div class="text-md leading-none uppercase tracking-tighter italic">ÉTAT DE CALIFORNIE</div>
+                    <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red uppercase font-black">État de Californie</div>
+                    <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
                 </div>
                 <div class="hidden lg:flex items-center gap-1 h-full">
                     ${tabs.map(t => `<button onclick="actions.setProfileTab('${t.id}')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${currentTab === t.id ? 'text-gov-blue border-b-2 border-gov-blue' : 'text-gray-400 hover:text-gov-text'}">${t.label}</button>`).join('')}
@@ -162,8 +162,14 @@ export const ProfileHubView = () => {
                         ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
                     </div>
                 </div>
-                <button onclick="actions.toggleMobileMenu()" class="lg:hidden p-2.5 bg-gov-light text-gov-text rounded-full"><i data-lucide="menu" class="w-6 h-6"></i></button>
-                <button onclick="actions.confirmLogout()" class="hidden sm:flex items-center gap-2 text-[9px] font-black text-gov-red uppercase tracking-widest hover:bg-red-50 p-3 rounded-full transition-all"><i data-lucide="log-out" class="w-4 h-4"></i></button>
+                
+                <button onclick="actions.toggleMobileMenu()" class="lg:hidden p-2.5 bg-gov-light text-gov-text rounded-full">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                
+                <button onclick="actions.confirmLogout()" class="hidden sm:flex items-center gap-2 text-[9px] font-black text-gov-red uppercase tracking-widest hover:bg-red-50 p-3 rounded-full transition-all">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
             </div>
         </nav>
 
@@ -174,12 +180,23 @@ export const ProfileHubView = () => {
             </div>
             <main class="max-w-6xl mx-auto w-full px-6 md:px-8 -mt-24 relative z-10 pb-32">
                 <div class="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-10 mb-16">
-                    <div class="relative"><div class="w-40 h-40 rounded-full border-[8px] border-white bg-white shadow-2xl overflow-hidden relative"><img src="${u.avatar}" class="w-full h-full object-cover"></div><div class="absolute -bottom-1 -right-1 w-10 h-10 bg-gov-blue text-white rounded-xl flex items-center justify-center border-4 border-white shadow-xl rotate-12"><i data-lucide="verified" class="w-5 h-5"></i></div></div>
-                    <div class="text-center md:text-left"><h2 class="text-5xl font-black text-gov-text tracking-tighter uppercase italic leading-none drop-shadow-xl">${u.username}</h2><p class="text-gray-400 font-mono text-[10px] mt-4 uppercase tracking-widest">ID UNIVERSEL : ${u.id}</p></div>
+                    <div class="relative group">
+                        <div class="w-40 h-40 rounded-full border-[8px] border-white bg-white shadow-2xl overflow-hidden relative">
+                            <img src="${u.avatar}" class="w-full h-full object-cover">
+                        </div>
+                        ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
+                        <div class="absolute bottom-2 right-2 w-10 h-10 bg-gov-blue text-white rounded-full flex items-center justify-center border-4 border-white shadow-xl rotate-12 z-30"><i data-lucide="verified" class="w-5 h-5"></i></div>
+                    </div>
+                    <div class="text-center md:text-left flex-1">
+                        <h2 class="text-5xl font-black text-gov-text tracking-tighter uppercase italic leading-none drop-shadow-xl">${u.username}</h2>
+                        <p class="text-gray-400 font-mono text-[10px] mt-4 uppercase tracking-widest">ID UNIVERSEL : ${u.id}</p>
+                    </div>
                 </div>
                 ${tabContent}
             </main>
-            <footer class="py-12 text-center opacity-30 border-t border-gray-100"><p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.5em]">TEAM FRENCH ROLEPLAY • V3 FINAL</p></footer>
+            <footer class="py-12 text-center opacity-30 border-t border-gray-100">
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.5em]">TEAM FRENCH ROLEPLAY • V3 FINAL EDITION</p>
+            </footer>
         </div>
     </div>
     `;

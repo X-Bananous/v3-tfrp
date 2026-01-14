@@ -107,7 +107,7 @@ const handleAuthenticatedSession = async (session) => {
             username: discordUser.full_name || discordUser.username || discordUser.custom_claims?.global_name, 
             avatar: discordUser.avatar_url,
             banner: discordUser.banner_url || null,
-            decoration: discordUser.avatar_decoration_data?.asset || null,
+            decoration: discordUser.avatar_decoration_data?.asset || discordUser.avatar_decoration || null,
             guilds: guilds,
             permissions: profile?.permissions || {}, 
             deletion_requested_at: profile?.deletion_requested_at || null, 
@@ -117,7 +117,7 @@ const handleAuthenticatedSession = async (session) => {
         
         await loadCharacters();
         
-        // Redirection systématique vers profile_hub sur refresh comme demandé
+        // V3 : Redirection systématique vers le hub de profil (sélecteur) sur refresh
         router('profile_hub');
         
     } catch (e) { 

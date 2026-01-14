@@ -31,7 +31,7 @@ export const LoginView = () => {
             <div class="max-w-4xl mx-auto text-center animate-in">
                 <span class="inline-block px-4 py-1 bg-blue-100 text-gov-blue text-[10px] font-black uppercase tracking-[0.3em] mb-8 rounded-full border border-blue-200">Plateforme Roleplay Officielle</span>
                 <h1 class="text-6xl md:text-8xl font-black text-gov-text tracking-tighter leading-none mb-8 uppercase italic">TEAM FRENCH<br><span class="text-gov-blue">ROLEPLAY.</span></h1>
-                <div class="text-2xl font-black text-gray-400 uppercase tracking-widest mb-12 italic">Panel Administratif V3</div>
+                <div class="text-2xl font-black text-gray-400 uppercase tracking-widest mb-12 italic">Panel Administratif V3 Platinum</div>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
                     <button onclick="${state.user ? "router('profile_hub')" : "actions.login()"}" class="px-12 py-5 bg-gov-blue text-white font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-black transition-all transform hover:scale-105 flex items-center justify-center gap-3 rounded-2xl">
                         <i data-lucide="discord" class="w-5 h-5"></i> Accéder au portail
@@ -50,14 +50,13 @@ export const LoginView = () => {
                             <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span class="text-[10px] font-black text-emerald-600 uppercase">Live</span></div>
                         </div>
                         <div class="text-5xl font-mono font-black text-gov-text tracking-tighter">${erlc.currentPlayers}<span class="text-gray-300 text-2xl">/${erlc.maxPlayers}</span></div>
-                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-4">Individus connectés</div>
                     </div>
                     <div class="bg-gov-text text-white p-8 rounded-[32px] shadow-2xl relative overflow-hidden flex flex-col">
                         <div class="flex items-center gap-3 mb-6 relative z-10">
                             <div class="px-2 py-0.5 bg-gov-red text-white text-[8px] font-black uppercase tracking-widest rounded animate-pulse">INFO V3</div>
                             <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Système Unifié</span>
                         </div>
-                        <p class="text-xs text-gray-400 font-medium leading-relaxed italic">Le panel TFRP V3 offre une synchronisation totale entre vos actions sur le web et votre identité sur le serveur de jeu.</p>
+                        <p class="text-xs text-gray-400 font-medium leading-relaxed italic">Synchronisation totale des données entre le serveur de jeu et votre profil citoyen.</p>
                     </div>
                 </div>
             </div>
@@ -82,7 +81,7 @@ export const AccessDeniedView = () => {
         <div class="max-w-md w-full bg-white p-12 border border-gray-200 shadow-2xl text-center rounded-[40px]">
             <div class="w-24 h-24 bg-red-100 text-gov-red rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl"><i data-lucide="shield-alert" class="w-12 h-12"></i></div>
             <h2 class="text-3xl font-black text-gov-text uppercase italic tracking-tighter mb-4">Accès Restreint</h2>
-            <p class="text-gray-500 mb-10 font-medium leading-relaxed">Vous devez être membre du Discord officiel pour accéder aux services V3 de l'État.</p>
+            <p class="text-gray-500 mb-10 font-medium leading-relaxed">Veuillez rejoindre le serveur Discord TFRP officiel pour accéder aux services V3.</p>
             <a href="${CONFIG.INVITE_URL}" target="_blank" class="flex items-center justify-center gap-3 w-full py-5 bg-[#5865F2] text-white font-black uppercase text-xs tracking-widest hover:opacity-90 transition-all shadow-xl rounded-2xl">Rejoindre Discord</a>
         </div>
     </div>
@@ -95,7 +94,7 @@ export const DeletionPendingView = () => {
         <div class="max-w-lg w-full bg-white p-12 border-t-8 border-gov-red shadow-2xl text-center rounded-[40px]">
             <div class="w-20 h-20 bg-red-50 text-gov-red rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl"><i data-lucide="trash-2" class="w-10 h-10"></i></div>
             <h2 class="text-3xl font-black text-gov-text uppercase italic tracking-tighter mb-4">Purge V3 Active</h2>
-            <p class="text-gray-500 mb-8 leading-relaxed font-medium">Une demande d'effacement définitif est en cours. Vos accès sont suspendus pour 72h.</p>
+            <p class="text-gray-500 mb-8 leading-relaxed font-medium">Une demande d'effacement définitif est en cours sur votre identité Discord.</p>
             <button onclick="actions.cancelDataDeletion()" class="w-full py-5 bg-gov-text text-white font-black uppercase text-xs tracking-widest hover:bg-black transition-all shadow-xl mb-4 rounded-2xl">Annuler la suppression</button>
             <button onclick="actions.logout()" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-600 transition-colors">Déconnexion</button>
         </div>
