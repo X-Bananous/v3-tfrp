@@ -1,3 +1,4 @@
+
 import { state } from '../state.js';
 import { render, router } from '../utils.js';
 import { ui } from '../ui.js';
@@ -48,11 +49,16 @@ export const goToCreate = () => router('create');
 export const cancelCreate = () => router('profile_hub');
 
 export const setHubPanel = async (panel) => {
-    // Fermer le menu mobile lors d'un changement de vue
     state.ui.mobileMenuOpen = false;
 
     if (panel === 'profile') {
         state.activeProfileTab = 'identity';
+        router('profile_hub');
+        return;
+    }
+
+    if (panel === 'lootbox') {
+        state.activeProfileTab = 'lootbox';
         router('profile_hub');
         return;
     }

@@ -1,3 +1,4 @@
+
 import { state } from '../state.js';
 import { render, router } from '../utils.js';
 import { ui } from '../ui.js';
@@ -103,12 +104,12 @@ export const openCrate = async (crateIdx) => {
 const showCharacterChoiceModal = (reward) => {
     const charsHtml = state.characters.map(c => `
         <button onclick="actions.claimMoneyReward(${reward.value}, '${c.id}')" 
-            class="w-full p-5 rounded-[24px] bg-white/5 border border-white/10 hover:bg-emerald-600/20 hover:border-emerald-500/50 transition-all text-left flex items-center justify-between group">
+            class="w-full p-5 rounded-[24px] bg-gov-light border border-gray-100 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all text-left flex items-center justify-between group">
             <div>
-                <div class="font-black text-white uppercase italic group-hover:text-emerald-400">${c.first_name} ${c.last_name}</div>
-                <div class="text-[9px] text-gray-600 font-black uppercase tracking-widest mt-1">ID Citoyen : #${c.id.substring(0,8).toUpperCase()}</div>
+                <div class="font-black text-gov-text uppercase italic group-hover:text-emerald-600">${c.first_name} ${c.last_name}</div>
+                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mt-1">ID Citoyen : #${c.id.substring(0,8).toUpperCase()}</div>
             </div>
-            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-700 group-hover:text-emerald-400"></i>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 group-hover:text-emerald-500"></i>
         </button>`).join('');
 
     ui.showModal({
@@ -117,7 +118,7 @@ const showCharacterChoiceModal = (reward) => {
         content: `
             <div class="text-center mb-10">
                 <div class="text-7xl mb-6">💰</div>
-                <div class="text-4xl font-black text-emerald-400 tracking-tighter drop-shadow-2xl">+$ ${reward.value.toLocaleString()}</div>
+                <div class="text-4xl font-black text-emerald-600 tracking-tighter drop-shadow-sm">+$ ${reward.value.toLocaleString()}</div>
                 <p class="text-gray-500 text-xs mt-3 italic font-medium">Sélectionnez le bénéficiaire de ce gain immédiat :</p>
             </div>
             <div class="space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-2">${charsHtml}</div>
@@ -157,7 +158,7 @@ const showSecureScreenshotModal = (reward) => {
                 <div class="text-8xl mb-6 animate-bounce">🏆</div>
                 <div class="text-3xl font-black uppercase italic tracking-tighter" style="color: ${reward.color}">${reward.label}</div>
                 <div class="bg-red-500/10 border border-red-500/20 p-6 rounded-[28px] mt-10">
-                    <p class="text-[11px] text-red-400 font-black uppercase leading-relaxed tracking-wide">
+                    <p class="text-[11px] text-red-600 font-black uppercase leading-relaxed tracking-wide">
                         ACTION REQUISE : Prenez une capture d'écran complète incluant ce message et votre identité.<br><br>
                         Ouvrez un ticket sur le serveur Discord pour réclamer votre lot exceptionnel.
                     </p>
@@ -181,7 +182,7 @@ const showSecureScreenshotModal = (reward) => {
                 btn.disabled = false;
                 btn.textContent = "J'AI SCREENSHOT (FERMER)";
                 btn.classList.remove('opacity-40', 'cursor-wait');
-                btn.classList.add('bg-white', 'text-black');
+                btn.classList.add('bg-gov-text', 'text-white');
                 
                 btn.onclick = () => {
                     ui.forceCloseModal();
@@ -192,10 +193,10 @@ const showSecureScreenshotModal = (reward) => {
     }
 };
 
-export const openWheel = () => { state.currentView = 'wheel'; state.isOpening = false; render(); };
-export const closeWheel = () => { if (state.isOpening) return; state.currentView = 'select'; render(); };
+export const openWheel = () => { actions.setProfileTab('lootbox'); };
+export const closeWheel = () => { actions.setProfileTab('identity'); };
 export const showProbabilities = () => {
     const totalWeight = WHEEL_REWARDS.reduce((acc, r) => acc + r.weight, 0);
     const sorted = [...WHEEL_REWARDS].sort((a,b) => b.weight - a.weight);
-    ui.showModal({ title: "Algorithme de Probabilités", content: `<div class="bg-black/40 rounded-[24px] border border-white/10 overflow-hidden max-h-96 overflow-y-auto custom-scrollbar">${sorted.map(r => `<div class="flex justify-between items-center p-4 border-b border-white/5 hover:bg-white/5 transition-colors"><div class="flex items-center gap-3"><div class="w-2 h-2 rounded-full" style="background: ${r.color}"></div><span class="text-xs font-black text-white uppercase tracking-tight">${r.label}</span></div><span class="text-[10px] font-mono text-blue-400 font-bold">${((r.weight/totalWeight)*100).toFixed(1)}%</span></div>`).join('')}</div>` });
+    ui.showModal({ title: "Algorithme de Probabilités", content: `<div class="bg-gov-light rounded-[24px] border border-gray-200 overflow-hidden max-h-96 overflow-y-auto custom-scrollbar">${sorted.map(r => `<div class="flex justify-between items-center p-4 border-b border-gray-100 hover:bg-white transition-colors"><div class="flex items-center gap-3"><div class="w-2 h-2 rounded-full" style="background: ${r.color}"></div><span class="text-[10px] font-black text-gov-text uppercase tracking-tight">${r.label}</span></div><span class="text-[10px] font-mono text-gov-blue font-bold">${((r.weight/totalWeight)*100).toFixed(1)}%</span></div>`).join('')}</div>` });
 };

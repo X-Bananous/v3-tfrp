@@ -35,6 +35,8 @@ export const ProfileHubView = () => {
     const perms = u.permissions || {};
     const sanctions = state.userSanctions || [];
     const isMobileMenuOpen = state.ui.mobileMenuOpen;
+    const turns = u.whell_turn || 0;
+    const isOpening = state.isOpening;
 
     if (!state.hasFetchedSanctions) {
         state.hasFetchedSanctions = true;
@@ -45,6 +47,7 @@ export const ProfileHubView = () => {
         { id: 'identity', label: 'Dossiers', icon: 'users' },
         { id: 'perms', label: 'Accréditations', icon: 'shield-check' },
         { id: 'sanctions', label: 'Sanctions', icon: 'alert-triangle' },
+        { id: 'lootbox', label: 'Lootbox', icon: 'package' },
         { id: 'security', label: 'Sécurité', icon: 'lock' }
     ];
 
@@ -218,6 +221,91 @@ export const ProfileHubView = () => {
                         ` : '<span class="text-[8px] font-black text-gray-400 uppercase italic bg-gov-light px-3 py-1.5 rounded-lg border border-gray-200">En examen</span>'}
                     </div>
                 `).join('') : '<div class="text-center py-24 text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] border-4 border-dashed border-gray-100 rounded-[40px]">Aucun signalement</div>'}
+            </div>
+        `;
+    }
+
+    else if (currentTab === 'lootbox') {
+        const renderCrates = () => {
+            let crates = [];
+            const count = Math.max(8, turns);
+            for(let i=0; i < count; i++) {
+                const isTarget = state.openingCrateIdx === i;
+                const canOpen = turns > 0 && !isOpening;
+                
+                crates.push(`
+                    <div class="relative">
+                        <button onclick="${canOpen ? `actions.openCrate(${i})` : ''}" 
+                            ${!canOpen && !isTarget ? 'disabled' : ''}
+                            class="w-full aspect-square bg-[#0c0c0e] rounded-[32px] border border-white/5 flex flex-col items-center justify-center gap-4 transition-all duration-500 
+                            ${canOpen ? 'hover:border-blue-500/50 hover:bg-blue-600/5 hover:scale-[1.02] cursor-pointer' : 'opacity-40 cursor-not-allowed'}
+                            ${isTarget ? 'border-blue-500 bg-blue-600/20 scale-[1.05] animate-pulse shadow-[0_0_50px_rgba(59,130,246,0.3)]' : ''}">
+                            
+                            <div class="relative">
+                                <div class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 border border-blue-500/20 shadow-inner group-hover:scale-110 transition-transform">
+                                    <i data-lucide="package" class="w-8 h-8 ${isTarget ? 'animate-bounce' : ''}"></i>
+                                </div>
+                                ${canOpen ? '<div class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-emerald-500 border-2 border-[#0c0c0e] flex items-center justify-center"><i data-lucide="check" class="w-3 h-3 text-white"></i></div>' : ''}
+                            </div>
+                            
+                            <div class="text-center">
+                                <div class="text-[10px] font-black text-white uppercase tracking-widest">${isTarget ? 'DÉCRYPTAGE...' : 'UNITÉ SÉCURISÉE'}</div>
+                                <div class="text-[8px] text-gray-500 uppercase font-bold tracking-widest mt-1">LOTERIE NATIONALE</div>
+                            </div>
+                        </button>
+                    </div>
+                `);
+            }
+            return crates.join('');
+        };
+
+        tabContent = `
+            <div class="animate-in max-w-6xl mx-auto pb-20">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <!-- LEFT: CRATES GRID -->
+                    <div class="lg:col-span-8">
+                        ${turns === 0 && !isOpening ? `
+                            <div class="h-full flex flex-col items-center justify-center text-center py-20 bg-white p-12 rounded-[48px] border border-gray-100 shadow-xl">
+                                <div class="w-32 h-32 rounded-full bg-gov-light flex items-center justify-center mb-8 border border-gray-200">
+                                    <i data-lucide="lock" class="w-16 h-16 text-gray-400"></i>
+                                </div>
+                                <h3 class="text-3xl font-black text-gov-text uppercase tracking-tighter italic">Signal Interrompu</h3>
+                                <p class="text-gray-500 mt-4 max-w-md uppercase font-bold text-[10px] tracking-widest leading-relaxed">
+                                    Vous n'avez plus de clés d'accès. <br>Rejoignez le Discord ou boostez le serveur pour obtenir de nouveaux jetons.
+                                </p>
+                            </div>
+                        ` : `
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                ${renderCrates()}
+                            </div>
+                        `}
+                    </div>
+
+                    <!-- RIGHT: DASHBOARD -->
+                    <div class="lg:col-span-4 flex flex-col gap-6">
+                        <div class="bg-gov-text text-white p-8 rounded-[48px] shadow-2xl relative overflow-hidden group">
+                            <div class="absolute -right-10 -top-10 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                            <h3 class="font-black text-gray-400 text-[10px] uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
+                                <i data-lucide="key" class="w-4 h-4 text-blue-400"></i> Solde de Jetons
+                            </h3>
+                            <div class="text-6xl font-mono font-black text-white tracking-tighter mb-2">${turns}</div>
+                            <div class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Clé(s) d'accès disponible(s)</div>
+                            
+                            <button onclick="actions.showProbabilities()" class="mt-12 w-full py-4 bg-white/5 hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all flex items-center justify-center gap-3">
+                                <i data-lucide="info" class="w-4 h-4"></i> Consulter l'Algorithme
+                            </button>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-[40px] border border-gray-100 shadow-xl">
+                            <h4 class="text-[10px] font-black text-gov-blue uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <i data-lucide="shield-check" class="w-4 h-4"></i> Certification v4.6
+                            </h4>
+                            <p class="text-[11px] text-gray-500 leading-relaxed font-medium italic">
+                                "Le système de lootbox de l'État de Californie utilise un générateur de nombres pseudo-aléatoires chiffré. Les gains sont instantanés ou nécessitent une validation Discord pour les rôles exclusifs."
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
     }
