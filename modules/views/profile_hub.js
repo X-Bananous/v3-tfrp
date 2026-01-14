@@ -5,25 +5,25 @@ import { router } from '../utils.js';
 import { loadUserSanctions } from '../actions/profile.js';
 
 const ALL_PERMISSIONS = [
-    { k: 'can_approve_characters', l: 'File Whitelist', d: "Autorise l'examen des dossiers d'immigration. Permet d'accepter ou de rejeter les nouveaux citoyens." },
-    { k: 'can_manage_characters', l: 'Registre Civil', d: "Donne un accès total au Registre National (Points permis, barreau, métiers, purge)." },
-    { k: 'can_manage_economy', l: 'Pilotage Économique', d: "Permet d'ajuster les soldes bancaires et d'effectuer des saisies ou crédits globaux." },
-    { k: 'can_manage_illegal', l: 'Audit Illégal', d: "Supervision des activités criminelles, gestion des syndicats et validation des braquages." },
-    { k: 'can_manage_enterprises', l: 'Réseau Commercial', d: "Contrôle du Registre du Commerce (Fondation/Dissolution et modération articles)." },
-    { k: 'can_manage_staff', l: 'Directoire Staff', d: "Accréditation Commandement. Permet de nommer des membres staff et configurer leurs droits." },
-    { k: 'can_manage_inventory', l: 'Saisie d\'Objets', d: "Droit de perquisition administrative à distance sur le sac des citoyens." },
-    { k: 'can_change_team', l: 'Mutation Secteur', d: "Permet de basculer un citoyen du secteur Légal vers l'Illégal et vice-versa." },
-    { k: 'can_go_onduty', l: 'Badge Service', d: "Autorisation de Service Live sur le Panel pour les fonctionnalités de terrain." },
-    { k: 'can_manage_jobs', l: 'Affectation Métier', d: "Permet d'assigner arbitrairement n'importe quel métier à un citoyen." },
-    { k: 'can_bypass_login', l: 'Accès Fondation', d: "Accès Racine permettant de naviguer sans charger de personnage citoyen." },
-    { k: 'can_launch_session', l: 'Cycle de Session', d: "Autorise l'ouverture et la fermeture des sessions de jeu officielles." },
-    { k: 'can_execute_commands', l: 'Console ERLC', d: "Accès au Terminal ERLC pour envoyer des instructions directes au serveur." },
-    { k: 'can_give_wheel_turn', l: 'Maître des Roues', d: "Autorise l'attribution de tours de Roue de la Fortune aux citoyens." },
-    { k: 'can_use_dm', l: 'Messagerie Bot', d: "Autorise l'envoi de messages privés via l'identité du bot." },
-    { k: 'can_use_say', l: 'Transmission Bot', d: "Permet d'utiliser le bot pour parler dans les salons textuels publics." },
-    { k: 'can_warn', l: 'Warn System', d: "Autorise l'application d'avertissements officiels." },
-    { k: 'can_mute', l: 'Mute System', d: "Autorise la mise en sourdine des citoyens sur Discord." },
-    { k: 'can_ban', l: 'Ban System', d: "Autorise le bannissement définitif ou temporaire." }
+    { k: 'can_approve_characters', l: 'File Whitelist', d: "Autorise l'examen et la validation des nouveaux citoyens entrant sur le territoire (Whitelist)." },
+    { k: 'can_manage_characters', l: 'Registre Civil', d: "Accès total au registre national : modification des points de permis, barreau, métiers et purge de dossiers." },
+    { k: 'can_manage_economy', l: 'Pilotage Économique', d: "Pouvoir de régulation sur les masses monétaires, ajustement des soldes et prélèvements administratifs." },
+    { k: 'can_manage_illegal', l: 'Audit Illégal', d: "Supervision des syndicats criminels, gestion des gangs et validation des gains de braquages complexes." },
+    { k: 'can_manage_enterprises', l: 'Réseau Commercial', d: "Contrôle du Registre du Commerce : fondation, dissolution et modération des articles en vente." },
+    { k: 'can_manage_staff', l: 'Directoire Staff', d: "Accréditation de commandement permettant de nommer des membres staff et de configurer leurs droits." },
+    { k: 'can_manage_inventory', l: 'Saisie d\'Objets', d: "Droit de perquisition administrative à distance permettant d'altérer l'inventaire physique d'un citoyen." },
+    { k: 'can_change_team', l: 'Mutation Secteur', d: "Permet de basculer un citoyen entre le secteur Légal et Clandestin, réinitialisant ses accès." },
+    { k: 'can_go_onduty', l: 'Badge Service', d: "Autorisation de prise de service live sur le panel, indispensable pour les actions de modération terrain." },
+    { k: 'can_manage_jobs', l: 'Affectation Métier', d: "Permet d'assigner arbitrairement n'importe quelle profession à un dossier citoyen." },
+    { k: 'can_bypass_login', l: 'Accès Fondation', d: "Accès racine permettant de naviguer sur l'intégralité du terminal sans personnage actif." },
+    { k: 'can_launch_session', l: 'Cycle de Session', d: "Autorise l'ouverture et la fermeture des sessions de jeu officielles et la synchronisation CAD." },
+    { k: 'can_execute_commands', l: 'Console ERLC', d: "Accès direct au terminal de commande du serveur ERLC pour les annonces globales." },
+    { k: 'can_give_wheel_turn', l: 'Maître des Roues', d: "Autorise l'attribution de clés de lootbox aux citoyens méritants." },
+    { k: 'can_use_dm', l: 'Messagerie Bot', d: "Autorise l'envoi de messages privés sécurisés via l'identité du bot TFRP." },
+    { k: 'can_use_say', l: 'Transmission Bot', d: "Permet d'utiliser le canal vocal/textuel du bot pour des annonces officielles." },
+    { k: 'can_warn', l: 'Warn System', d: "Droit d'application d'avertissements officiels au casier administratif." },
+    { k: 'can_mute', l: 'Mute System', d: "Droit de mise en sourdine (Mute) sur les canaux de communication Discord." },
+    { k: 'can_ban', l: 'Ban System', d: "Droit de bannissement définitif ou temporaire du réseau TFRP." }
 ];
 
 export const ProfileHubView = () => {
@@ -180,8 +180,8 @@ export const ProfileHubView = () => {
                     ${ALL_PERMISSIONS.map(p => {
                         const hasPerm = perms[p.k] === true || u.isFounder;
                         return `
-                            <div class="bg-gov-light p-6 rounded-2xl border ${hasPerm ? 'border-gov-blue/20 bg-blue-50/20' : 'border-gray-100 opacity-60'} flex items-start gap-5 group transition-all">
-                                <div class="w-10 h-10 shrink-0 rounded-xl ${hasPerm ? 'bg-gov-blue text-white' : 'bg-gray-200 text-gray-400'} flex items-center justify-center shadow-md transition-transform group-hover:scale-110">
+                            <div class="bg-gov-light p-6 rounded-2xl border ${hasPerm ? 'border-gov-blue/20 bg-blue-50/20 shadow-md' : 'border-gray-100 opacity-60'} flex items-start gap-5 group transition-all">
+                                <div class="w-10 h-10 shrink-0 rounded-xl ${hasPerm ? 'bg-gov-blue text-white shadow-blue-900/20' : 'bg-gray-200 text-gray-400'} flex items-center justify-center shadow-md transition-transform group-hover:scale-110">
                                     <i data-lucide="${hasPerm ? 'shield-check' : 'shield-off'}" class="w-5 h-5"></i>
                                 </div>
                                 <div class="flex-1 min-w-0">
@@ -196,10 +196,6 @@ export const ProfileHubView = () => {
                             </div>
                         `;
                     }).join('')}
-                </div>
-                
-                <div class="mt-12 p-6 bg-blue-50 rounded-2xl border border-blue-100 text-center">
-                    <p class="text-[9px] text-blue-800 font-black uppercase tracking-[0.2em]">Pour toute demande d'accréditation supplémentaire, veuillez vous référer à la hiérarchie Fondation.</p>
                 </div>
             </div>
         `;
@@ -256,18 +252,19 @@ export const ProfileHubView = () => {
         
         ${isMobileMenuOpen ? MobileMenuOverlay() : ''}
 
-        <!-- UNIVERSAL NAVBAR (REPLICATED TERMINAL STYLE) -->
+        <!-- UNIFIED TERMINAL NAVBAR -->
         <nav class="terminal-nav flex items-center justify-between shrink-0 border-b border-gray-100 bg-white sticky top-0 z-[100] px-6 md:px-8">
-            <div class="flex items-center gap-12 h-full">
+            <div class="flex items-center gap-6 md:gap-12 h-full">
                 <div onclick="actions.backToLanding()" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer transition-transform hover:scale-[0.8]">
-                    <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red font-black">Liberté • Égalité • Justice</div>
+                    <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red font-black">État de Californie</div>
                     <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
                 </div>
 
-                <!-- Desktop Tabs Menu -->
+                <!-- Desktop Menu Tabs -->
                 <div class="hidden lg:flex items-center gap-1 h-full">
                     ${tabs.map(t => `
-                        <button onclick="actions.setProfileTab('${t.id}')" class="px-6 py-2 h-full text-[10px] font-black uppercase tracking-widest transition-all ${currentTab === t.id ? 'text-gov-blue border-b-2 border-gov-blue' : 'text-gray-400 hover:text-gov-text'} flex items-center gap-2">
+                        <button onclick="actions.setProfileTab('${t.id}')" 
+                            class="px-6 h-full text-[10px] font-black uppercase tracking-widest transition-all ${currentTab === t.id ? 'text-gov-blue border-b-2 border-gov-blue' : 'text-gray-400 hover:text-gov-text'} flex items-center gap-2">
                              <i data-lucide="${t.icon}" class="w-3.5 h-3.5"></i> ${t.label}
                         </button>
                     `).join('')}
@@ -275,7 +272,7 @@ export const ProfileHubView = () => {
             </div>
 
             <!-- Profile & Notifications Actions -->
-            <div class="flex items-center gap-4 h-full">
+            <div class="flex items-center gap-2 md:gap-4 h-full">
                 <button onclick="actions.backToLanding()" class="p-2.5 text-gray-400 hover:text-gov-blue hover:bg-gov-light rounded-sm transition-all" title="Accueil">
                     <i data-lucide="home" class="w-5 h-5"></i>
                 </button>
@@ -307,22 +304,22 @@ export const ProfileHubView = () => {
                     </div>
                 </div>
 
-                <!-- Hamburger Button (Mobile) -->
-                <button onclick="actions.toggleMobileMenu()" class="lg:hidden p-3 bg-gov-light text-gov-text rounded-sm">
-                    <i data-lucide="menu" class="w-6 h-6"></i>
+                <!-- Hamburger Button (Mobile) - Positioned Right on same line -->
+                <button onclick="actions.toggleMobileMenu()" class="lg:hidden p-2.5 bg-gov-light text-gov-text rounded-sm transition-transform active:scale-95">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
             </div>
         </nav>
 
         <div class="flex-1 overflow-y-auto custom-scrollbar">
-            <!-- BANNER -->
+            <!-- HEADER BANNER -->
             <div class="relative h-48 md:h-80 shrink-0 overflow-hidden bg-gov-blue">
                 ${u.banner ? `<img src="${u.banner}" class="w-full h-full object-cover">` : '<div class="w-full h-full bg-gradient-to-r from-gov-blue via-blue-900 to-indigo-900 opacity-90"></div>'}
                 <div class="absolute inset-0 bg-gradient-to-t from-[#F6F6F6] via-transparent to-transparent"></div>
                 <div class="absolute inset-0 bg-black/10"></div>
             </div>
 
-            <!-- HEADER CONTENT -->
+            <!-- PROFILE HEADER -->
             <div class="max-w-6xl mx-auto w-full px-6 md:px-8 -mt-16 md:-mt-24 relative z-10 mb-12">
                 <div class="flex flex-col md:flex-row items-end gap-6 md:gap-10">
                     <div class="relative group mx-auto md:mx-0 shrink-0">

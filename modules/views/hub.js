@@ -275,7 +275,7 @@ export const HubView = () => {
                         </div>
                     </div>
 
-                    <button onclick="actions.setHubPanel('assets')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${panel === 'assets' ? 'text-gov-blue' : 'text-gray-400 hover:text-gov-text'}">Patrimoine</button>
+                    <button onclick="actions.setHubPanel('assets')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${panel === 'assets' ? 'text-gov-blue' : 'text-gray-400'}">Patrimoine</button>
                     
                     <div class="h-6 w-px bg-gray-100 mx-2"></div>
                     
@@ -326,8 +326,8 @@ export const HubView = () => {
                     </div>
                 </div>
 
-                <!-- Hamburger Button (Mobile) -->
-                <button onclick="actions.toggleMobileMenu()" class="lg:hidden p-2.5 bg-gov-light text-gov-text rounded-sm">
+                <!-- Hamburger Button (Mobile) - Positioned Right on same line -->
+                <button onclick="actions.toggleMobileMenu()" class="lg:hidden p-2.5 bg-gov-light text-gov-text rounded-sm transition-transform active:scale-95">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
             </div>
