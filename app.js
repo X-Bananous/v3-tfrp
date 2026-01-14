@@ -45,7 +45,6 @@ const appRenderer = () => {
     const loading = document.getElementById('loading-screen');
     if (!app) return;
 
-    // Si on est en train de charger l'auth, on ne rend rien et on garde le loading
     if (state.isInitializingAuth) {
         if (loading) {
             loading.classList.remove('opacity-0', 'pointer-events-none');
@@ -57,13 +56,11 @@ const appRenderer = () => {
     let htmlContent = '';
     let effectiveView = state.currentView;
 
-    // PROTECTION CRITIQUE : Si pas d'user et pas sur login/legal, on force login
     if (!state.user && !['login', 'terms', 'privacy'].includes(effectiveView)) {
         effectiveView = 'login';
     }
 
-    // Redirections forcées basées sur l'état
-    if (state.user?.deletion_requested_at && effectiveView !== 'login') {
+    if (state.user?.deletion_requested_at && effectiveView !== 'login' && effectiveView !== 'terms' && effectiveView !== 'privacy') {
         effectiveView = 'deletion_pending';
     }
 
@@ -82,7 +79,6 @@ const appRenderer = () => {
 
     app.innerHTML = htmlContent;
     
-    // Masquer le loading une fois le premier rendu effectué (si pas d'auth en cours)
     if (loading) {
         loading.classList.add('opacity-0', 'pointer-events-none');
         loading.classList.remove('opacity-100');
@@ -96,7 +92,7 @@ const appRenderer = () => {
 const initApp = async () => {
     initSecurity();
     state.isInitializingAuth = true;
-    appRenderer(); // Force l'affichage du loading
+    appRenderer(); 
     
     if (window.supabase) {
         state.supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
@@ -121,6 +117,17 @@ const handleAuthenticatedSession = async (session) => {
         const discordUser = supabaseUser.user_metadata;
         const discordId = discordUser.provider_id || discordUser.sub;
         
+        const username = discordUser.full_name || discordUser.username || discordUser.custom_claims?.global_name;
+
+        // Mise à jour de l'écran de chargement
+        const userBox = document.getElementById('loading-user-box');
+        const userLabel = document.getElementById('loading-username');
+        if (userBox && userLabel) {
+            userLabel.textContent = username;
+            userBox.classList.remove('opacity-0');
+            userBox.classList.add('opacity-100');
+        }
+
         const { data: profile } = await state.supabase
             .from('profiles')
             .select('*')
@@ -129,7 +136,7 @@ const handleAuthenticatedSession = async (session) => {
 
         state.user = { 
             id: discordId, 
-            username: discordUser.full_name || discordUser.username || discordUser.custom_claims?.global_name, 
+            username: username, 
             avatar: discordUser.avatar_url,
             banner: discordUser.banner_url || null,
             decoration: discordUser.avatar_decoration || null,
@@ -146,8 +153,11 @@ const handleAuthenticatedSession = async (session) => {
             state.activeCharacter = state.characters.find(c => c.id === activeCharId);
         }
         
-        state.isInitializingAuth = false;
-        router('profile_hub');
+        // Petit délai pour laisser l'utilisateur voir son nom
+        setTimeout(() => {
+            state.isInitializingAuth = false;
+            router('profile_hub');
+        }, 800);
 
     } catch (e) { 
         console.error("Session init error:", e);

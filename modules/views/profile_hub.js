@@ -228,11 +228,11 @@ export const ProfileHubView = () => {
             <div class="bg-white p-12 rounded-[48px] border-t-8 border-gov-red shadow-2xl animate-in max-w-4xl mx-auto">
                 <div class="flex flex-col md:flex-row items-center gap-10 mb-12 border-b border-gray-100 pb-12">
                     <div class="relative shrink-0">
-                        <div class="w-32 h-32 rounded-full border-4 border-gov-light bg-white overflow-hidden relative shadow-xl">
-                            <img src="${u.avatar}" class="w-full h-full object-cover">
+                        <div class="w-32 h-32 avatar-container">
+                            <img src="${u.avatar}" class="avatar-img shadow-xl border-4 border-gov-light bg-white">
                             ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] h-[130%] max-w-none z-20 pointer-events-none">` : ''}
                         </div>
-                        <div class="absolute -bottom-1 -right-1 w-8 h-8 bg-gov-blue text-white rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+                        <div class="absolute -bottom-1 -right-1 w-8 h-8 bg-gov-blue text-white rounded-full flex items-center justify-center border-2 border-white shadow-lg z-30">
                             <i data-lucide="shield" class="w-4 h-4"></i>
                         </div>
                     </div>
@@ -277,29 +277,38 @@ export const ProfileHubView = () => {
         
         ${isMobileMenuOpen ? MobileMenuOverlay() : ''}
 
-        <!-- UNIFIED TERMINAL NAVBAR -->
+        <!-- UNIFIED TERMINAL NAVBAR (STRICT DESIGN UNIFICATION) -->
         <nav class="terminal-nav shrink-0">
             <div class="flex items-center gap-6 md:gap-12 h-full">
                 <div onclick="actions.backToLanding()" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer transition-transform hover:scale-[0.8]">
                     <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red font-black">État de Californie</div>
                     <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
                 </div>
+
+                <!-- Desktop Menu Unifié -->
+                <div class="hidden lg:flex items-center gap-1 h-full ml-4">
+                    ${tabs.map(t => `
+                        <button onclick="actions.setProfileTab('${t.id}')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${currentTab === t.id ? 'text-gov-blue border-b-2 border-gov-blue' : 'text-gray-400 hover:text-gov-text'}">
+                            ${t.label}
+                        </button>
+                    `).join('')}
+                </div>
             </div>
 
-            <!-- Profile & Notifications Actions -->
             <div class="flex items-center gap-2 md:gap-4 h-full">
                 <button onclick="actions.backToLanding()" class="p-2.5 text-gray-400 hover:text-gov-blue hover:bg-gov-light rounded-sm transition-all" title="Accueil">
                     <i data-lucide="home" class="w-5 h-5"></i>
                 </button>
                 
-                <div class="nav-item hidden lg:flex h-full">
+                <!-- Profile Block (Avec support décoration Discord) -->
+                <div class="nav-item h-full flex items-center">
                     <div class="flex items-center gap-4 cursor-pointer p-2.5 hover:bg-gov-light rounded-sm transition-all h-full">
-                        <div class="text-right">
+                        <div class="text-right hidden sm:block">
                             <div class="text-[10px] font-black uppercase text-gov-text leading-none">${u.username}</div>
-                            <div class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">PROFIL CERTIFIÉ</div>
+                            <div class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">SÉANCE IDENTITAIRE</div>
                         </div>
-                        <div class="relative w-10 h-10 shrink-0">
-                            <img src="${u.avatar}" class="w-full h-full rounded-full grayscale border border-gray-200 p-0.5 relative z-10 object-cover">
+                        <div class="avatar-container w-10 h-10 shrink-0">
+                            <img src="${u.avatar}" class="avatar-img grayscale border border-gray-200 p-0.5 relative z-10">
                             ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
                             <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white z-30"></div>
                         </div>
@@ -324,7 +333,7 @@ export const ProfileHubView = () => {
 
         <div class="flex-1 overflow-y-auto custom-scrollbar">
             <!-- HEADER BANNER -->
-            <div class="relative h-48 md:h-80 shrink-0 overflow-hidden bg-gov-blue">
+            <div class="relative h-48 md:h-64 shrink-0 overflow-hidden bg-gov-blue">
                 ${u.banner ? `<img src="${u.banner}" class="w-full h-full object-cover">` : '<div class="w-full h-full bg-gradient-to-r from-gov-blue via-blue-900 to-indigo-900 opacity-90"></div>'}
                 <div class="absolute inset-0 bg-gradient-to-t from-[#F6F6F6] via-transparent to-transparent"></div>
                 <div class="absolute inset-0 bg-black/10"></div>
@@ -333,13 +342,13 @@ export const ProfileHubView = () => {
             <!-- PROFILE HEADER -->
             <div class="max-w-6xl mx-auto w-full px-6 md:px-8 -mt-16 md:-mt-24 relative z-10 mb-12">
                 <div class="flex flex-col md:flex-row items-end gap-6 md:gap-10">
-                    <div class="relative group mx-auto md:mx-0 shrink-0">
-                        <div class="w-32 h-32 md:w-40 md:h-40 rounded-full border-[6px] md:border-[8px] border-white bg-white shadow-2xl overflow-hidden relative">
-                            <img src="${u.avatar}" class="w-full h-full object-cover">
+                    <div class="mx-auto md:mx-0 shrink-0">
+                        <div class="avatar-container w-32 h-32 md:w-40 md:h-40">
+                            <img src="${u.avatar}" class="avatar-img border-[6px] md:border-[8px] border-white bg-white shadow-2xl">
                             ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
-                        </div>
-                        <div class="absolute -bottom-1 -right-1 md:-bottom-2 md:-right-2 w-8 h-8 md:w-10 md:h-10 bg-gov-blue text-white rounded-full flex items-center justify-center border-4 border-white shadow-xl transform rotate-12 z-30">
-                            <i data-lucide="verified" class="w-4 h-4 md:w-5 md:h-5"></i>
+                            <div class="absolute bottom-4 right-4 w-8 h-8 md:w-10 md:h-10 bg-gov-blue text-white rounded-full flex items-center justify-center border-4 border-white shadow-xl z-30">
+                                <i data-lucide="verified" class="w-4 h-4 md:w-5 md:h-5"></i>
+                            </div>
                         </div>
                     </div>
                     <div class="flex-1 pb-4 text-center md:text-left w-full">
@@ -350,18 +359,6 @@ export const ProfileHubView = () => {
                             ${u.isFounder ? '<span class="text-[9px] md:text-[10px] font-black text-purple-600 uppercase tracking-widest bg-purple-50 px-4 py-1.5 border border-purple-100 rounded-lg italic">Fondation</span>' : ''}
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- UNIFIED SUB-NAV TABS (TERMINAL STYLE) -->
-            <div class="max-w-6xl mx-auto w-full px-6 md:px-8 mb-12">
-                <div class="flex flex-nowrap gap-2 bg-white/5 p-1.5 rounded-2xl overflow-x-auto no-scrollbar border border-gray-200 w-fit mx-auto md:mx-0 shadow-sm">
-                    ${tabs.map(t => `
-                        <button onclick="actions.setProfileTab('${t.id}')" 
-                            class="px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all whitespace-nowrap shrink-0 ${currentTab === t.id ? 'bg-gov-blue text-white shadow-xl shadow-blue-900/20' : 'text-gray-400 hover:text-gov-text hover:bg-gov-light'}">
-                            <i data-lucide="${t.icon}" class="w-4 h-4"></i> ${t.label}
-                        </button>
-                    `).join('')}
                 </div>
             </div>
 
