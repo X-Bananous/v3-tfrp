@@ -7,6 +7,14 @@ import { EnterpriseMyCompaniesView } from './enterprise/my_companies.js';
 import { EnterpriseAppointmentsView } from './enterprise/appointments.js';
 import { EnterpriseManageView } from './enterprise/manage.js';
 
+// Bibliothèque d'icônes pour la création d'articles
+export const ICON_LIBRARY = [
+    "package", "car", "wrench", "utensils", "coffee", "shirt", "shopping-bag", 
+    "phone", "monitor", "cpu", "zap", "flame", "shield", "briefcase", "hammer", 
+    "scissors", "camera", "music", "gift", "sandwich", "pizza", "beer", "wine", 
+    "crosshair", "target", "gem", "hard-hat", "thermometer", "droplets", "radio", "mic"
+];
+
 const refreshBanner = `
     <div class="flex flex-col md:flex-row items-center justify-between px-6 py-3 bg-blue-900/10 border-b border-blue-500/10 gap-3 shrink-0 relative">
         <div class="text-xs text-blue-200 flex items-center gap-2">

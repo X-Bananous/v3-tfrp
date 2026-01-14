@@ -1,3 +1,4 @@
+
 import { state } from '../state.js';
 import { CONFIG } from '../config.js';
 import { IllicitDashboardView } from './illicit/dashboard.js';
@@ -74,8 +75,6 @@ const refreshBanner = `
 `;
 
 export const IllicitView = () => {
-    // Correction de l'accès : On vérifie si l'utilisateur est présent sur le serveur illégal
-    // Note: state.user.guilds est un array d'IDs récupéré lors du login OAuth
     const guilds = state.user?.guilds || [];
     const hasIllegalAccess = guilds.includes(CONFIG.GUILD_ILLEGAL) || state.user?.isFounder;
 
