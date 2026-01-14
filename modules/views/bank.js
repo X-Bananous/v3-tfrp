@@ -127,8 +127,6 @@ export const BankView = () => {
     // --- TAB: SAVINGS ---
     else if (state.activeBankTab === 'savings') {
         const savingsBalance = state.bankAccount.savings_balance || 0;
-        const weeklyEstimate = Math.floor(savingsBalance * (state.savingsRate / 100));
-
         content = `
             <div class="space-y-8 animate-in pb-10">
                 <div class="p-10 rounded-[40px] bg-white border border-gray-100 shadow-2xl relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-10">
@@ -178,44 +176,33 @@ export const BankView = () => {
              <div class="flex items-center justify-center h-full animate-in pb-20">
                  <div class="p-12 rounded-[56px] w-full max-w-2xl border border-gray-100 bg-white shadow-2xl relative overflow-hidden">
                     <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-gov-blue to-blue-500"></div>
-                    
                     <div class="text-center mb-12">
-                        <div class="w-20 h-20 bg-gov-light rounded-3xl flex items-center justify-center text-gov-blue mx-auto mb-8 shadow-inner">
-                            <i data-lucide="send" class="w-10 h-10"></i>
-                        </div>
+                        <div class="w-20 h-20 bg-gov-light rounded-3xl flex items-center justify-center text-gov-blue mx-auto mb-8 shadow-inner"><i data-lucide="send" class="w-10 h-10"></i></div>
                         <h3 class="text-3xl font-black text-gov-text uppercase italic tracking-tighter">Virement de Fonds Unifié</h3>
                         <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mt-2">Protocole de transfert certifié inter-citoyens</p>
                     </div>
-
                     <form onsubmit="actions.bankTransfer(event)" class="space-y-10" autocomplete="off">
                         <div class="relative">
                             <label class="text-[9px] text-gray-400 uppercase font-black tracking-widest ml-1 mb-2 block">Cible du Transfert</label>
                             <input type="hidden" name="target_id" value="${state.selectedRecipient ? state.selectedRecipient.id : ''}" required>
                             <div class="relative group">
                                 <i data-lucide="search" class="w-5 h-5 absolute left-4 top-4 text-gray-300 group-focus-within:text-gov-blue transition-colors"></i>
-                                <input type="text" id="recipient_search" placeholder="Nom du bénéficiaire..." value="${state.selectedRecipient ? state.selectedRecipient.name : ''}" oninput="actions.searchRecipients(this.value)" class="w-full p-4 pl-12 rounded-2xl text-sm bg-gov-light border border-gray-100 focus:border-gov-blue outline-none transition-all ${state.selectedRecipient ? 'text-gov-blue font-black bg-blue-50 uppercase italic' : ''}" autocomplete="off" ${state.selectedRecipient ? 'readonly' : ''}>
+                                <input type="text" id="recipient_search" placeholder="Nom du bénéficiaire..." value="${state.selectedRecipient ? state.selectedRecipient.name : ''}" oninput="actions.searchRecipients(this.value)" class="glass-input w-full p-4 pl-12 rounded-2xl text-sm bg-gov-light border border-gray-100 focus:border-gov-blue outline-none transition-all ${state.selectedRecipient ? 'text-gov-blue font-black bg-blue-50 uppercase italic' : ''}" autocomplete="off" ${state.selectedRecipient ? 'readonly' : ''}>
                                 ${state.selectedRecipient ? `<button type="button" onclick="actions.clearRecipient()" class="absolute right-4 top-4 text-gray-400 hover:text-gov-red"><i data-lucide="x" class="w-5 h-5"></i></button>` : ''}
                             </div>
                             <div id="search-results-container" class="absolute top-full left-0 right-0 bg-white border border-gray-100 rounded-2xl mt-2 max-h-48 overflow-y-auto shadow-2xl z-50 hidden animate-in"></div>
                         </div>
-
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
-                                <label class="text-[9px] text-gray-400 uppercase font-black tracking-widest ml-1 mb-2 block">Montant du Virement ($)</label>
-                                <div class="relative">
-                                    <span class="absolute left-5 top-4 text-gov-blue font-black text-xl">$</span>
-                                    <input type="number" name="amount" placeholder="0.00" min="1" max="${state.bankAccount.bank_balance}" class="w-full p-4 pl-12 rounded-2xl font-mono text-xl font-black bg-gov-light border border-gray-100 focus:border-gov-blue outline-none" required>
-                                </div>
+                                <label class="text-[9px] text-gray-400 uppercase font-black tracking-widest ml-1 mb-2 block">Montant ($)</label>
+                                <div class="relative"><span class="absolute left-5 top-4 text-gov-blue font-black text-xl">$</span><input type="number" name="amount" placeholder="0.00" min="1" max="${state.bankAccount.bank_balance}" class="w-full p-4 pl-12 rounded-2xl font-mono text-xl font-black bg-gov-light border border-gray-100 focus:border-gov-blue outline-none" required></div>
                             </div>
                             <div>
                                 <label class="text-[9px] text-gray-400 uppercase font-black tracking-widest ml-1 mb-2 block">Motif de l'opération</label>
                                 <input type="text" name="description" placeholder="Ex: Facture #12..." maxlength="50" class="w-full p-4 rounded-2xl text-sm bg-gov-light border border-gray-100 focus:border-gov-blue outline-none italic font-medium">
                             </div>
                         </div>
-
-                        <button type="submit" class="w-full py-5 rounded-3xl font-black text-xs uppercase tracking-[0.4em] bg-gov-blue hover:bg-black text-white shadow-xl shadow-blue-900/10 flex items-center justify-center gap-3 transform active:scale-95 transition-all">
-                            EXÉCUTER LE TRANSFERT <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </button>
+                        <button type="submit" class="w-full py-5 rounded-3xl font-black text-xs uppercase tracking-[0.4em] bg-gov-blue hover:bg-black text-white shadow-xl shadow-blue-900/10 flex items-center justify-center gap-3 transform active:scale-95 transition-all">EXÉCUTER LE TRANSFERT <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
                     </form>
                  </div>
              </div>
@@ -237,18 +224,10 @@ export const BankView = () => {
             return `
                 <div class="flex items-center justify-between p-6 bg-white rounded-[28px] border border-gray-100 hover:shadow-xl transition-all group">
                     <div class="flex items-center gap-6">
-                        <div class="w-14 h-14 rounded-2xl ${bgIcon} flex items-center justify-center ${color} border border-transparent shadow-sm group-hover:scale-110 transition-transform">
-                            <i data-lucide="${icon}" class="w-7 h-7"></i>
-                        </div>
-                        <div>
-                            <div class="font-black text-gov-text text-base uppercase italic tracking-tight mb-1">${label}</div>
-                            <div class="text-[10px] text-gray-400 font-mono uppercase font-bold">${new Date(t.created_at).toLocaleString()}</div>
-                        </div>
+                        <div class="w-14 h-14 rounded-2xl ${bgIcon} flex items-center justify-center ${color} border border-transparent shadow-sm group-hover:scale-110 transition-transform"><i data-lucide="${icon}" class="w-7 h-7"></i></div>
+                        <div><div class="font-black text-gov-text text-base uppercase italic tracking-tight mb-1">${label}</div><div class="text-[10px] text-gray-400 font-mono uppercase font-bold">${new Date(t.created_at).toLocaleString()}</div></div>
                     </div>
-                    <div class="text-right">
-                        <div class="font-mono font-black text-2xl ${color} tracking-tighter">${sign} $${Math.abs(t.amount).toLocaleString()}</div>
-                        <div class="text-[9px] text-gray-300 font-black uppercase tracking-widest mt-1">Protocole CAD-OS</div>
-                    </div>
+                    <div class="text-right"><div class="font-mono font-black text-2xl ${color} tracking-tighter">${sign} $${Math.abs(t.amount).toLocaleString()}</div><div class="text-[9px] text-gray-300 font-black uppercase tracking-widest mt-1">Protocole CAD-OS</div></div>
                 </div>
             `;
         }).join('') 
@@ -256,9 +235,7 @@ export const BankView = () => {
 
         content = `
             <div class="flex flex-col h-full animate-in max-w-5xl mx-auto pb-10">
-                <div class="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-4 pb-12">
-                    ${historyHtml}
-                </div>
+                <div class="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-4 pb-12">${historyHtml}</div>
             </div>
         `;
     }

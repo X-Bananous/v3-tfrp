@@ -48,6 +48,14 @@ export const HEIST_DATA = [
     { id: 'bank', name: 'Banque Centrale', min: 600000, max: 900000, time: 1200, icon: 'landmark', requiresValidation: true, teamMin: 7, teamMax: 13 }
 ];
 
+export const HEIST_LOCATIONS = {
+    atm: ["7001 Highway 55", "7005 Hillview Road", "Independence Parkway (ATM 2)", "Medical Way (Central ATM)"],
+    house: ["101 Academy Place", "105 Arbor Lane", "202 Cedar Street", "404 Franklin Court"],
+    gas: ["Shell Station Durham Road", "Chevron Lee Street", "7-Eleven Madison Court"],
+    jewelry: ["Luxury Row - Diamond District"],
+    bank: ["Main Street National Bank"]
+};
+
 export const DRUG_DATA = {
     coke: { name: 'Cocaïne', harvest: { 100: 5, 500: 7, 1000: 35 }, process: { 100: 5, 500: 10, 1000: 30 }, sell: { 100: 7, 500: 13, 1000: 25 }, pricePerG: 60 },
     weed: { name: 'Cannabis', harvest: { 100: 3, 500: 5, 1000: 25 }, process: { 100: 5, 500: 7, 1000: 25 }, sell: { 100: 5, 500: 10, 1000: 25 }, pricePerG: 20 }
@@ -115,7 +123,7 @@ export const IllicitView = () => {
                             Réseau Clandestin
                         </h2>
                         <div class="flex items-center gap-3 mt-4">
-                             <span class="text-[10px] text-red-500/60 font-black uppercase tracking-widest bg-red-900/20 px-3 py-1 rounded-lg border border-red-500/30">Signal Crypté AES-256</span>
+                             <span class="text-[10px] text-red-500/60 font-black uppercase tracking-widest">Signal Crypté AES-256</span>
                              <span class="w-1.5 h-1.5 bg-gray-800 rounded-full"></span>
                              <span class="text-[10px] text-gray-600 font-black uppercase tracking-widest italic">Anonymisation Active</span>
                         </div>
