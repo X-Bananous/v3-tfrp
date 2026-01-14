@@ -309,9 +309,6 @@ export const ProfileHubView = () => {
                             <div class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Identité Discord</div>
                             <div class="text-[11px] font-black text-gov-text uppercase">${u.id}</div>
                         </div>
-                        <button onclick="actions.setHubPanel('main')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors text-gov-blue">
-                            <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard Citoyen
-                        </button>
                         <div class="h-px bg-gray-50 my-1"></div>
                         <button onclick="actions.confirmLogout()" class="w-full text-left p-4 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-red-600 transition-colors">
                             <i data-lucide="log-out" class="w-4 h-4"></i> Déconnexion
@@ -374,7 +371,7 @@ export const ProfileHubView = () => {
             </main>
             
             <footer class="py-12 text-center opacity-30">
-                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.5em]">Terminal de Gestion Identitaire • v6.3 Platinum</p>
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.5em]">Terminal de Gestion Identitaire • v6.3 Platinum • Propriété de MatMat</p>
             </footer>
         </div>
     </div>

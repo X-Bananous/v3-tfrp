@@ -1,3 +1,4 @@
+
 export const state = {
     user: null, 
     accessToken: null,
@@ -17,6 +18,7 @@ export const state = {
     },
     isLoggingIn: false,
     isPanelLoading: false, 
+    isInitializingAuth: true, // Nouvel état pour le chargement initial
     _completingDrugBatch: false,
     advisorMode: 'moderate',
     activeGovTab: 'dashboard',

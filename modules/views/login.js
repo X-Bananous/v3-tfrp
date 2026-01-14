@@ -49,9 +49,6 @@ export const LoginView = () => {
                             <button onclick="router('profile_hub')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors text-gov-blue">
                                 <i data-lucide="user" class="w-4 h-4"></i> Mon Profil
                             </button>
-                            <button onclick="actions.setHubPanel('main')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors">
-                                <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard Citoyen
-                            </button>
                             <div class="h-px bg-gray-50 my-1"></div>
                             <button onclick="actions.confirmLogout()" class="w-full text-left p-4 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-red-600 transition-colors">
                                 <i data-lucide="log-out" class="w-4 h-4"></i> Déconnexion

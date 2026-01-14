@@ -42,10 +42,25 @@ window.router = router;
 
 const appRenderer = () => {
     const app = document.getElementById('app');
+    const loading = document.getElementById('loading-screen');
     if (!app) return;
+
+    // Si on est en train de charger l'auth, on ne rend rien et on garde le loading
+    if (state.isInitializingAuth) {
+        if (loading) {
+            loading.classList.remove('opacity-0', 'pointer-events-none');
+            loading.classList.add('opacity-100');
+        }
+        return;
+    }
 
     let htmlContent = '';
     let effectiveView = state.currentView;
+
+    // PROTECTION CRITIQUE : Si pas d'user et pas sur login/legal, on force login
+    if (!state.user && !['login', 'terms', 'privacy'].includes(effectiveView)) {
+        effectiveView = 'login';
+    }
 
     // Redirections forcées basées sur l'état
     if (state.user?.deletion_requested_at && effectiveView !== 'login') {
@@ -66,6 +81,13 @@ const appRenderer = () => {
     }
 
     app.innerHTML = htmlContent;
+    
+    // Masquer le loading une fois le premier rendu effectué (si pas d'auth en cours)
+    if (loading) {
+        loading.classList.add('opacity-0', 'pointer-events-none');
+        loading.classList.remove('opacity-100');
+    }
+
     if (window.lucide) {
         setTimeout(() => lucide.createIcons(), 50);
     }
@@ -73,6 +95,8 @@ const appRenderer = () => {
 
 const initApp = async () => {
     initSecurity();
+    state.isInitializingAuth = true;
+    appRenderer(); // Force l'affichage du loading
     
     if (window.supabase) {
         state.supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
@@ -86,6 +110,7 @@ const initApp = async () => {
     if (result.data.session) {
         await handleAuthenticatedSession(result.data.session);
     } else {
+        state.isInitializingAuth = false;
         router('login');
     }
 };
@@ -96,9 +121,6 @@ const handleAuthenticatedSession = async (session) => {
         const discordUser = supabaseUser.user_metadata;
         const discordId = discordUser.provider_id || discordUser.sub;
         
-        // Récupération des guildes et des assets cosmétiques
-        const guilds = discordUser.guilds || [];
-
         const { data: profile } = await state.supabase
             .from('profiles')
             .select('*')
@@ -109,10 +131,9 @@ const handleAuthenticatedSession = async (session) => {
             id: discordId, 
             username: discordUser.full_name || discordUser.username || discordUser.custom_claims?.global_name, 
             avatar: discordUser.avatar_url,
-            // Données cosmétiques étendues Discord
             banner: discordUser.banner_url || null,
             decoration: discordUser.avatar_decoration || null,
-            guilds: guilds,
+            guilds: discordUser.guilds || [],
             permissions: profile?.permissions || {}, 
             deletion_requested_at: profile?.deletion_requested_at || null, 
             isFounder: state.adminIds.includes(discordId)
@@ -120,17 +141,17 @@ const handleAuthenticatedSession = async (session) => {
         
         await loadCharacters();
         
-        // Par défaut, rediriger vers le Hub Profils après un login ou refresh pour satisfaire la demande
         const activeCharId = sessionStorage.getItem('tfrp_active_char');
         if (activeCharId) {
             state.activeCharacter = state.characters.find(c => c.id === activeCharId);
         }
         
-        // On force le hub de profil sur un refresh/load complet
+        state.isInitializingAuth = false;
         router('profile_hub');
 
     } catch (e) { 
         console.error("Session init error:", e);
+        state.isInitializingAuth = false;
         router('login'); 
     }
 };
