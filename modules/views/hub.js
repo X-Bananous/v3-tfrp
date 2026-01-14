@@ -28,7 +28,25 @@ export const HubView = () => {
     const isMobileMenuOpen = state.ui.mobileMenuOpen;
 
     if (state.isPanelLoading) {
-        return `<div class="flex h-screen w-full bg-white items-center justify-center animate-in"><div class="text-center"><div class="w-12 h-12 border-4 border-gov-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p class="text-[10px] font-black text-gov-blue uppercase tracking-[0.3em]">Synchronisation CAD...</p></div></div>`;
+        return `
+        <div class="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center animate-in">
+            <div class="marianne-block uppercase font-black tracking-tight text-gov-text scale-110 mb-12">
+                <div class="text-[10px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 uppercase">Liberté • Égalité • Justice</div>
+                <div class="text-lg leading-none uppercase">ÉTAT DE CALIFORNIE<br>LOS ANGELES</div>
+            </div>
+            
+            <div class="flex flex-col items-center gap-4">
+                <div class="transition-opacity duration-300 flex flex-col items-center">
+                    <p class="text-[10px] font-black text-gov-blue uppercase tracking-[0.3em] mb-2">Synchronisation Dossier</p>
+                    <p class="text-sm font-bold text-gray-400 uppercase italic">${char.first_name} ${char.last_name}</p>
+                </div>
+                
+                <div class="w-64 h-1 bg-gov-light rounded-full overflow-hidden relative border border-gray-100">
+                    <div class="h-full bg-gov-blue animate-loading-bar absolute left-0 top-0 shadow-[0_0_10px_rgba(0,0,145,0.4)]"></div>
+                </div>
+                <p class="text-[8px] font-black text-gray-300 uppercase tracking-widest mt-2">Accès CAD-OS v6.1 Platinum</p>
+            </div>
+        </div>`;
     }
 
     // --- FULLSCREEN MOBILE MENU ---
@@ -302,8 +320,8 @@ export const HubView = () => {
                             <div class="text-[10px] font-black uppercase text-gov-text leading-none">${char.first_name}</div>
                             <div class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">${char.job ? char.job.toUpperCase() : 'CIVIL'}</div>
                         </div>
-                        <div class="relative w-10 h-10 shrink-0">
-                            <img src="${u.avatar}" class="w-full h-full rounded-full grayscale border border-gray-200 p-0.5 relative z-10 object-cover">
+                        <div class="avatar-container w-10 h-10 shrink-0">
+                            <img src="${u.avatar}" class="avatar-img grayscale border border-gray-200 p-0.5 relative z-10 object-cover">
                             ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
                             <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white z-30"></div>
                         </div>
