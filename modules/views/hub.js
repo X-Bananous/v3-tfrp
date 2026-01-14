@@ -235,8 +235,8 @@ export const HubView = () => {
         
         ${isMobileMenuOpen ? MobileMenuOverlay() : ''}
 
-        <!-- UNIVERSAL NAVBAR -->
-        <nav class="terminal-nav flex items-center justify-between shrink-0 border-b border-gray-100 bg-white sticky top-0 z-[100] px-6 md:px-8">
+        <!-- UNIFIED TERMINAL NAVBAR -->
+        <nav class="terminal-nav shrink-0">
             <div class="flex items-center gap-6 md:gap-12 h-full">
                 <div onclick="actions.setHubPanel('main')" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer transition-transform hover:scale-[0.8]">
                     <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red font-black">État de Californie</div>
@@ -296,19 +296,19 @@ export const HubView = () => {
                     ${state.notifications.length > 0 ? '<span class="absolute top-2 right-2 w-2 h-2 bg-red-600 rounded-full border-2 border-white"></span>' : ''}
                 </button>
                 
-                <div class="nav-item hidden lg:flex">
-                    <div class="flex items-center gap-4 cursor-pointer p-2.5 hover:bg-gov-light rounded-sm transition-all">
+                <div class="nav-item hidden lg:flex h-full">
+                    <div class="flex items-center gap-4 cursor-pointer p-2.5 hover:bg-gov-light rounded-sm transition-all h-full">
                         <div class="text-right">
                             <div class="text-[10px] font-black uppercase text-gov-text leading-none">${char.first_name}</div>
                             <div class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">${char.job ? char.job.toUpperCase() : 'CIVIL'}</div>
                         </div>
-                        <div class="relative w-10 h-10">
+                        <div class="relative w-10 h-10 shrink-0">
                             <img src="${u.avatar}" class="w-full h-full rounded-full grayscale border border-gray-200 p-0.5 relative z-10 object-cover">
                             ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
                             <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white z-30"></div>
                         </div>
                     </div>
-                    <div class="nav-dropdown right-0 left-auto rounded-none">
+                    <div class="nav-dropdown right-0 left-auto rounded-none shadow-2xl">
                         <div class="px-4 py-3 border-b border-gray-50 bg-gov-light/30">
                             <div class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Identité Discord</div>
                             <div class="text-[11px] font-black text-gov-text uppercase">${u.username}</div>
@@ -326,7 +326,6 @@ export const HubView = () => {
                     </div>
                 </div>
 
-                <!-- Hamburger Button (Mobile) - Positioned Right on same line -->
                 <button onclick="actions.toggleMobileMenu()" class="lg:hidden p-2.5 bg-gov-light text-gov-text rounded-sm transition-transform active:scale-95">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>

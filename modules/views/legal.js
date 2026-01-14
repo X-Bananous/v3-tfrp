@@ -2,17 +2,19 @@
 import { state } from '../state.js';
 import { router } from '../utils.js';
 
-const refreshBanner = (title) => `
-    <div class="flex flex-col md:flex-row items-center justify-between px-6 py-3 bg-gov-blue/5 border-b border-gov-blue/10 gap-3 shrink-0 relative z-20">
-        <div class="text-[10px] text-gov-blue flex items-center gap-2 font-black uppercase tracking-[0.2em]">
-             <div class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-gov-blue"></span>
+const LegalNavbar = (title) => `
+    <nav class="terminal-nav shrink-0">
+        <div class="flex items-center gap-6 md:gap-12">
+            <div onclick="router('login')" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer transition-transform hover:scale-[0.8]">
+                <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red font-black">Liberté • Égalité • Justice</div>
+                <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
             </div>
-            <span><span class="font-bold">CAD SYSTEM</span> • PROTECTION JURIDIQUE CERTIFIÉE</span>
         </div>
-        <div class="text-[9px] text-gray-400 font-mono uppercase tracking-widest">${title}</div>
-    </div>
+        <div class="flex items-center gap-4">
+            <span class="hidden md:block text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] italic">${title}</span>
+            <button onclick="router('login')" class="px-6 py-2 bg-gov-text text-white font-black uppercase text-[10px] tracking-widest hover:bg-black transition-all rounded-sm shadow-lg">RETOUR PORTAIL</button>
+        </div>
+    </nav>
 `;
 
 const LEGAL_FOOTER = `
@@ -21,110 +23,172 @@ const LEGAL_FOOTER = `
             <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red">Liberté • Égalité • Justice</div>
             <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES ADMINISTRATION</div>
         </div>
-        <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.5em]">DOCUMENT OFFICIEL • TEAM FRENCH ROLEPLAY • v6.3</p>
+        <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.5em]">DOCUMENT OFFICIEL • TEAM FRENCH ROLEPLAY • PROPRIÉTÉ DE MATMAT</p>
     </footer>
 `;
 
 const TERMS_CONTENT = `
-    <div class="space-y-16 text-gray-600 leading-relaxed font-medium animate-in max-w-4xl mx-auto">
+    <div class="space-y-16 text-gray-600 leading-relaxed font-medium animate-in max-w-4xl mx-auto pb-20">
+        <div class="bg-gov-light p-10 rounded-[40px] border border-gray-200 mb-10">
+            <p class="text-xs text-gov-blue font-black uppercase tracking-[0.3em] mb-2 italic">Avertissement Juridique</p>
+            <p class="text-sm">Le présent document constitue le contrat social unifiant les citoyens au sein de la simulation TFRP. L'accès au panel implique une acceptation irrévocable de ces clauses.</p>
+        </div>
+
         <section class="relative">
             <div class="absolute -left-8 top-0 w-1 h-full bg-gov-blue/20 rounded-full"></div>
-            <h3 class="text-3xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">1. PRÉAMBULE ET OBJET</h3>
-            <p class="mb-4">Le présent terminal, dénommé "Panel TFRP", constitue l'interface logicielle officielle de gestion citoyenne pour la communauté Team French Roleplay. Il assure la persistance des données liées à l'État de Californie (Emergency Response: Liberty County).</p>
-            <p>L'utilisation de ce service est conditionnée par l'adhésion totale aux présentes Conditions Générales. Tout accès via Discord constitue une signature numérique de ce contrat social virtuel.</p>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 1 : Propriété Intellectuelle (Clause MatMat)</h3>
+            <p>L'intégralité du code source, du design graphique, des algorithmes de gestion CAD et de l'interface utilisateur est la <b>propriété exclusive de MatMat</b>. Toute reproduction, même partielle, sans autorisation écrite constitue un délit de contrefaçon.</p>
         </section>
 
         <section class="relative">
             <div class="absolute -left-8 top-0 w-1 h-full bg-gov-blue/20 rounded-full"></div>
-            <h3 class="text-3xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">2. NATURE DE L'ÉCONOMIE VIRTUELLE</h3>
-            <p class="mb-4">Les fonds monétaires ($) et actifs (biens, entreprises, stocks) répertoriés sur ce panel sont strictement fictifs et destinés uniquement à l'expérience Roleplay. Ils ne possèdent aucune valeur fiduciaire réelle.</p>
-            <div class="bg-gov-red/5 border border-gov-red/20 p-6 rounded-3xl mb-4">
-                <p class="text-[10px] text-gov-red font-black uppercase tracking-widest mb-2">CLAUSE DE TOLÉRANCE ZÉRO :</p>
-                <p class="text-sm italic text-gov-red/80">Toute transaction d'actifs virtuels contre de l'argent réel (RMT) entraînera un bannissement définitif et immédiat de l'intégralité du réseau TFRP.</p>
-            </div>
-            <p>L'Administration se réserve le droit de procéder à des purges monétaires (Wipes) pour des raisons d'équilibre systémique.</p>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 2 : Objet du Service</h3>
+            <p>Le Panel TFRP fournit des services numériques de gestion Roleplay (ERLC). Il est destiné à assurer la persistance des données économiques et administratives de l'État de Californie au sein de la simulation.</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-gov-blue/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 3 : Adhésion et Capacité</h3>
+            <p>Conformément à l'Article 1101 du Code Civil français, l'utilisation du service vaut signature du contrat. L'utilisateur doit être membre actif du serveur Discord TFRP pour jouir de ses droits d'accès.</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-gov-blue/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 4 : Valeur de l'Économie Virtuelle</h3>
+            <p>La monnaie virtuelle ($) et les actifs répertoriés sont fictifs. Ils n'ont aucune valeur fiduciaire réelle. Toute conversion contre devises réelles (Euro/Dollar/Robux) est formellement interdite (Loi sur les jeux de hasard numériques).</p>
         </section>
 
         <section class="relative">
             <div class="absolute -left-8 top-0 w-1 h-full bg-gov-red/20 rounded-full"></div>
-            <h3 class="text-3xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">3. ÉTHIQUE ET SÉCURITÉ DES SYSTÈMES</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="space-y-4">
-                    <h4 class="font-black text-gov-blue text-xs uppercase tracking-widest">LUTTE CONTRE L'EXPLOITATION</h4>
-                    <p class="text-sm">L'exploitation de bugs, de failles de duplication ou de scripts d'automatisation non autorisés est considérée comme un sabotage du service.</p>
-                </div>
-                <div class="space-y-4">
-                    <h4 class="font-black text-gov-blue text-xs uppercase tracking-widest">CONFIDENTIALITÉ CAD</h4>
-                    <p class="text-sm">Les agents publics (LEO, EMS, Justice) sont tenus au secret professionnel concernant les données consultées sur le CAD. Le meta-gaming est proscrit.</p>
-                </div>
-            </div>
+            <h3 class="text-2xl font-black text-gov-red mb-6 uppercase italic tracking-tighter leading-none">Article 5 : Clause Anti-Sabotage</h3>
+            <p>L'exploitation de failles techniques (SQLi, XSS, Brute force) est passible de poursuites. Conformément à la Loi Godfrain (Loi n°88-19 du 5 janvier 1988), l'accès frauduleux à un système de traitement de données est sévèrement puni.</p>
         </section>
 
         <section class="relative">
             <div class="absolute -left-8 top-0 w-1 h-full bg-gov-blue/20 rounded-full"></div>
-            <h3 class="text-3xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">4. RESPONSABILITÉ</h3>
-            <p>L'équipe TFRP s'engage à une obligation de moyens pour maintenir le service en ligne. Toutefois, nous ne pourrons être tenus responsables en cas de perte accidentelle de données liée à des instabilités d'hébergement ou de synchronisation avec l'API Roblox/ERLC.</p>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 6 : Devoir de Respect (Code de Conduite)</h3>
+            <p>L'utilisateur s'engage à maintenir un comportement civil sur le panel. Les insultes envers l'administration ou les autres citoyens via les modules de communication (bot, rapports) entraîneront une sanction administrative immédiate.</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-gov-blue/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 7 : Droit de Modification Souverain</h3>
+            <p>La Fondation (MatMat et Administrateurs) se réserve le droit de modifier, suspendre ou supprimer n'importe quelle donnée citoyenne (Wipe) pour des nécessités d'équilibrage ou de mise à jour système.</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-gov-blue/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 8 : Accréditations Staff</h3>
+            <p>Le personnel staff accrédité dispose d'un droit de regard sur les dossiers privés (Banque, Inventaire) dans le seul but de la modération et du bon déroulement des opérations de police (CAD).</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-gov-blue/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 9 : Force Majeure et Disponibilité</h3>
+            <p>TFRP n'est pas tenu par une obligation de résultat concernant la disponibilité 24/7 du service. Les incidents liés à l'hébergeur Supabase ou à l'API Roblox ne sauraient engager la responsabilité de MatMat.</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-gov-blue/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 10 : Liaisons Factionnelles</h3>
+            <p>L'appartenance à une faction (LSPD, Gangs, Entreprises) est soumise aux règlements spécifiques de ces dernières, qui viennent compléter mais ne peuvent déroger aux présentes CGU.</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-gov-blue/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 11 : Clause de Juridiction</h3>
+            <p>En cas de litige non résolu à l'amiable via le Conseil de la Fondation, les données et logs système feront foi. L'utilisateur accepte la souveraineté décisionnelle de MatMat en dernier recours.</p>
         </section>
     </div>
 `;
 
 const PRIVACY_CONTENT = `
-    <div class="space-y-16 text-gray-600 leading-relaxed font-medium animate-in max-w-4xl mx-auto">
+    <div class="space-y-16 text-gray-600 leading-relaxed font-medium animate-in max-w-4xl mx-auto pb-20">
+        <div class="bg-emerald-50 p-10 rounded-[40px] border border-emerald-100 mb-10">
+            <p class="text-xs text-emerald-600 font-black uppercase tracking-[0.3em] mb-2 italic">Protection de la vie privée</p>
+            <p class="text-sm">Votre identité numérique est sacrée. Ce document détaille comment nous protégeons vos octets conformément au <b>RGPD (Règlement 2016/679)</b>.</p>
+        </div>
+
         <section class="relative">
             <div class="absolute -left-8 top-0 w-1 h-full bg-emerald-500/20 rounded-full"></div>
-            <h3 class="text-3xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">1. COLLECTE DES DONNÉES DISCORD</h3>
-            <p class="mb-4">Conformément aux standards OAuth2, nous collectons les informations strictement nécessaires à votre identification :</p>
-            <ul class="space-y-3 font-mono text-[11px] uppercase tracking-wider text-emerald-700 bg-emerald-50 p-6 rounded-3xl border border-emerald-100">
-                <li class="flex items-center gap-3"><i data-lucide="check" class="w-3 h-3"></i> Identifiant Discord Unique (UID)</li>
-                <li class="flex items-center gap-3"><i data-lucide="check" class="w-3 h-3"></i> Pseudonyme Global et Avatar</li>
-                <li class="flex items-center gap-3"><i data-lucide="check" class="w-3 h-3"></i> Appartenance au serveur (Vérification d'accès)</li>
-            </ul>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 1 : Identité du Responsable (Propriété MatMat)</h3>
+            <p>Le traitement des données est opéré sous la responsabilité technique de <b>MatMat</b>, propriétaire exclusif du système. Les données sont hébergées sur des serveurs sécurisés AES-256.</p>
         </section>
 
         <section class="relative">
             <div class="absolute -left-8 top-0 w-1 h-full bg-emerald-500/20 rounded-full"></div>
-            <h3 class="text-3xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">2. USAGE DES MÉTRIPHONES CITOYENS</h3>
-            <p>Vos données de personnages (Noms, Inventaires, Transactions, Casiers) sont stockées pour assurer la continuité de votre expérience. Ces données sont accessibles uniquement au personnel staff accrédité et aux services publics compétents (LEO/Justice) dans le cadre de leurs fonctions RP.</p>
-        </section>
-
-        <section class="relative">
-            <div class="absolute -left-8 top-0 w-1 h-full bg-orange-500/20 rounded-full"></div>
-            <h3 class="text-3xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">3. DROITS ET PURGE (RGPD)</h3>
-            <p class="mb-6">Vous disposez d'un droit souverain sur vos informations. L'onglet "Sécurité" de votre profil permet de déclencher une purge totale.</p>
-            <div class="bg-orange-50 border border-orange-200 p-8 rounded-[32px] flex items-start gap-6">
-                <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-orange-500 shadow-sm shrink-0 border border-orange-100">
-                    <i data-lucide="trash-2" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <h4 class="font-black text-orange-700 text-sm uppercase tracking-widest mb-2">PROCÉDURE DE SUPPRESSION</h4>
-                    <p class="text-xs italic leading-relaxed">Une fois la demande validée, vos données sont marquées pour destruction. Un délai de 72h est appliqué avant l'effacement définitif et irréversible de nos serveurs.</p>
-                </div>
-            </div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 2 : Collecte via l'API Discord</h3>
+            <p>Nous utilisons le protocole OAuth2 pour collecter votre Identifiant Unique (UID), Pseudo et Avatar. Aucune donnée confidentielle Discord (mot de passe, email) n'est jamais transmise au panel.</p>
         </section>
 
         <section class="relative">
             <div class="absolute -left-8 top-0 w-1 h-full bg-emerald-500/20 rounded-full"></div>
-            <h3 class="text-3xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">4. TRANSMISSION À DES TIERS</h3>
-            <p>Team French Roleplay s'engage solennellement à ne jamais vendre, louer ou céder vos données à des entités tierces. Le Panel est un projet communautaire non-lucratif.</p>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 3 : Finalité du Traitement</h3>
+            <p>Conformément au principe de minimisation des données, nous ne stockons que les informations nécessaires à la gestion du Roleplay : personnages, économie virtuelle et archives judiciaires CAD.</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-emerald-500/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 4 : Base Légale du Consentement</h3>
+            <p>Le clic sur "Connexion Discord" constitue un acte positif clair manifestant votre consentement libre, spécifique et éclairé (Article 7 du RGPD).</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-emerald-500/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 5 : Durée de Conservation</h3>
+            <p>Les données actives sont conservées tant que l'utilisateur est membre du réseau TFRP. Les dossiers inactifs depuis plus de 6 mois sont automatiquement archivés ou purgés.</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-emerald-500/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 6 : Destinataires des Données</h3>
+            <p>Vos données ne sont transmises à aucun partenaire commercial. Elles sont uniquement accessibles au responsable technique (MatMat) et aux administrateurs staff accrédités.</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-emerald-500/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 7 : Mesures de Sécurité Digitale</h3>
+            <p>L'architecture Supabase garantit un chiffrement au repos et en transit. Le système de protection contre le débuggage empêche toute lecture illicite des données volatiles par des tiers.</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-emerald-500/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 8 : Local Storage et Cookies</h3>
+            <p>Le panel utilise exclusivement des cookies techniques (JWT) pour maintenir votre session ouverte. Aucune donnée de traçage publicitaire n'est utilisée.</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-emerald-500/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 9 : Le Droit à l'Oubli (Purge Digitale)</h3>
+            <p>Conformément à l'Article 17 du RGPD, vous disposez d'un bouton de suppression automatique dans l'onglet "Sécurité". L'effacement est total et définitif après un délai de latence de 72h.</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-emerald-500/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 10 : Droit de Rectification</h3>
+            <p>Chaque citoyen peut modifier ses informations d'état civil (Prénom, Nom) via le module de recensement, sous réserve de validation par les services de l'Immigration.</p>
+        </section>
+
+        <section class="relative">
+            <div class="absolute -left-8 top-0 w-1 h-full bg-emerald-500/20 rounded-full"></div>
+            <h3 class="text-2xl font-black text-gov-text mb-6 uppercase italic tracking-tighter leading-none">Article 11 : Réclamations et Contact</h3>
+            <p>Pour toute question relative à vos données personnelles, veuillez contacter l'administration via le ticket-système sur le serveur Discord officiel.</p>
         </section>
     </div>
 `;
 
 export const TermsView = () => `
     <div class="min-h-screen flex flex-col bg-white overflow-hidden animate-fade-in">
-        ${refreshBanner("CONDITIONS GÉNÉRALES")}
+        ${LegalNavbar("Conditions Générales")}
         
         <header class="w-full px-8 py-12 md:py-20 flex flex-col md:flex-row justify-between items-end gap-8 bg-gov-light border-b border-gray-200 shrink-0">
             <div class="max-w-3xl">
                 <div class="text-[10px] font-black text-gov-blue uppercase tracking-[0.5em] mb-4 flex items-center gap-3">
-                    <span class="w-8 h-0.5 bg-gov-blue"></span> RÉGLEMENTATION OFFICIELLE
+                    <span class="w-8 h-0.5 bg-gov-blue"></span> RÉGLEMENTATION DE L'ÉTAT
                 </div>
                 <h2 class="text-5xl md:text-7xl font-black text-gov-text tracking-tighter uppercase italic leading-none">Contrat de<br><span class="text-gov-blue">Service.</span></h2>
-                <p class="text-gray-500 text-lg font-medium mt-6 uppercase tracking-widest">Règles fondamentales de la communauté Los Angeles Division</p>
+                <p class="text-gray-500 text-lg font-medium mt-6 uppercase tracking-widest">Référentiel juridique de la communauté Los Angeles Division</p>
             </div>
-            <button onclick="router('login')" class="px-10 py-5 bg-gov-text text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-black transition-all transform active:scale-95">
-                RETOUR AU PORTAIL
-            </button>
         </header>
 
         <main class="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-20">
@@ -136,19 +200,16 @@ export const TermsView = () => `
 
 export const PrivacyView = () => `
     <div class="min-h-screen flex flex-col bg-white overflow-hidden animate-fade-in">
-        ${refreshBanner("POLITIQUE DE CONFIDENTIALITÉ")}
+        ${LegalNavbar("Confidentialité")}
         
         <header class="w-full px-8 py-12 md:py-20 flex flex-col md:flex-row justify-between items-end gap-8 bg-gov-light border-b border-gray-200 shrink-0">
             <div class="max-w-3xl">
                 <div class="text-[10px] font-black text-emerald-600 uppercase tracking-[0.5em] mb-4 flex items-center gap-3">
-                    <span class="w-8 h-0.5 bg-emerald-600"></span> PROTECTION DES DONNÉES
+                    <span class="w-8 h-0.5 bg-emerald-600"></span> SÉCURITÉ DES OCTETS
                 </div>
-                <h2 class="text-5xl md:text-7xl font-black text-gov-text tracking-tighter uppercase italic leading-none">Sûreté de<br><span class="text-emerald-600">l'Identité.</span></h2>
-                <p class="text-gray-500 text-lg font-medium mt-6 uppercase tracking-widest">Conformité RGPD et respect de la vie privée numérique</p>
+                <h2 class="text-5xl md:text-7xl font-black text-gov-text tracking-tighter uppercase italic leading-none">Protection de<br><span class="text-emerald-600">l'Identité.</span></h2>
+                <p class="text-gray-500 text-lg font-medium mt-6 uppercase tracking-widest">Transparence des données et conformité RGPD</p>
             </div>
-            <button onclick="router('login')" class="px-10 py-5 bg-gov-text text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-black transition-all transform active:scale-95">
-                RETOUR AU PORTAIL
-            </button>
         </header>
 
         <main class="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-20">
