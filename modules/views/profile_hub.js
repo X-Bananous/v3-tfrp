@@ -1,7 +1,30 @@
+
 import { CONFIG } from '../config.js';
 import { state } from '../state.js';
 import { router } from '../utils.js';
 import { loadUserSanctions } from '../actions/profile.js';
+
+const ALL_PERMISSIONS = [
+    { k: 'can_approve_characters', l: 'File Whitelist', d: "Autorise l'examen des dossiers d'immigration. Permet d'accepter ou de rejeter les nouveaux citoyens." },
+    { k: 'can_manage_characters', l: 'Registre Civil', d: "Donne un accès total au Registre National (Points permis, barreau, métiers, purge)." },
+    { k: 'can_manage_economy', l: 'Pilotage Économique', d: "Permet d'ajuster les soldes bancaires et d'effectuer des saisies ou crédits globaux." },
+    { k: 'can_manage_illegal', l: 'Audit Illégal', d: "Supervision des activités criminelles, gestion des syndicats et validation des braquages." },
+    { k: 'can_manage_enterprises', l: 'Réseau Commercial', d: "Contrôle du Registre du Commerce (Fondation/Dissolution et modération articles)." },
+    { k: 'can_manage_staff', l: 'Directoire Staff', d: "Accréditation Commandement. Permet de nommer des membres staff et configurer leurs droits." },
+    { k: 'can_manage_inventory', l: 'Saisie d\'Objets', d: "Droit de perquisition administrative à distance sur le sac des citoyens." },
+    { k: 'can_change_team', l: 'Mutation Secteur', d: "Permet de basculer un citoyen du secteur Légal vers l'Illégal et vice-versa." },
+    { k: 'can_go_onduty', l: 'Badge Service', d: "Autorisation de Service Live sur le Panel pour les fonctionnalités de terrain." },
+    { k: 'can_manage_jobs', l: 'Affectation Métier', d: "Permet d'assigner arbitrairement n'importe quel métier à un citoyen." },
+    { k: 'can_bypass_login', l: 'Accès Fondation', d: "Accès Racine permettant de naviguer sans charger de personnage citoyen." },
+    { k: 'can_launch_session', l: 'Cycle de Session', d: "Autorise l'ouverture et la fermeture des sessions de jeu officielles." },
+    { k: 'can_execute_commands', l: 'Console ERLC', d: "Accès au Terminal ERLC pour envoyer des instructions directes au serveur." },
+    { k: 'can_give_wheel_turn', l: 'Maître des Roues', d: "Autorise l'attribution de tours de Roue de la Fortune aux citoyens." },
+    { k: 'can_use_dm', l: 'Messagerie Bot', d: "Autorise l'envoi de messages privés via l'identité du bot." },
+    { k: 'can_use_say', l: 'Transmission Bot', d: "Permet d'utiliser le bot pour parler dans les salons textuels publics." },
+    { k: 'can_warn', l: 'Warn System', d: "Autorise l'application d'avertissements officiels." },
+    { k: 'can_mute', l: 'Mute System', d: "Autorise la mise en sourdine des citoyens sur Discord." },
+    { k: 'can_ban', l: 'Ban System', d: "Autorise le bannissement définitif ou temporaire." }
+];
 
 export const ProfileHubView = () => {
     const u = state.user;
@@ -10,8 +33,8 @@ export const ProfileHubView = () => {
     const currentTab = state.activeProfileTab || 'identity';
     const characters = state.characters || [];
     const perms = u.permissions || {};
-    const permKeys = Object.keys(perms).filter(k => perms[k] === true);
     const sanctions = state.userSanctions || [];
+    const isMobileMenuOpen = state.ui.mobileMenuOpen;
 
     if (!state.hasFetchedSanctions) {
         state.hasFetchedSanctions = true;
@@ -25,9 +48,36 @@ export const ProfileHubView = () => {
         { id: 'security', label: 'Sécurité', icon: 'lock' }
     ];
 
+    const MobileMenuOverlay = () => `
+        <div class="fixed inset-0 z-[2000] bg-white flex flex-col animate-in">
+            <div class="h-20 px-6 border-b border-gray-100 flex items-center justify-between shrink-0">
+                <div class="marianne-block uppercase font-black text-gov-text scale-75 origin-left">
+                    <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red uppercase font-black">État de Californie</div>
+                    <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
+                </div>
+                <button onclick="actions.toggleMobileMenu()" class="p-3 bg-gov-light text-gov-text rounded-sm">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-8 flex flex-col gap-6">
+                ${tabs.map(t => `
+                    <button onclick="actions.setProfileTab('${t.id}')" class="w-full text-left py-4 border-b border-gray-100 font-black uppercase text-xs tracking-widest ${currentTab === t.id ? 'text-gov-blue' : 'text-gray-400'}">
+                        <div class="flex items-center gap-4">
+                            <i data-lucide="${t.icon}" class="w-5 h-5"></i>
+                            ${t.label}
+                        </div>
+                    </button>
+                `).join('')}
+                <div class="mt-auto pt-10 flex flex-col gap-4">
+                    <button onclick="actions.backToLanding()" class="w-full py-4 bg-gov-light text-gov-text font-black uppercase text-[10px] tracking-widest text-center">Accueil</button>
+                    <button onclick="actions.confirmLogout()" class="w-full py-4 bg-red-50 text-red-600 font-black uppercase text-[10px] tracking-widest text-center">Déconnexion</button>
+                </div>
+            </div>
+        </div>
+    `;
+
     let tabContent = '';
 
-    // --- TAB: DOSSIERS (GRID RE-STYLED) ---
     if (currentTab === 'identity') {
         tabContent = `
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 animate-in pb-20">
@@ -113,22 +163,43 @@ export const ProfileHubView = () => {
 
     else if (currentTab === 'perms') {
         tabContent = `
-            <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-2xl animate-in max-w-4xl mx-auto">
-                <h4 class="text-[10px] font-black text-gov-blue uppercase tracking-[0.4em] mb-10 flex items-center gap-4">
-                    <span class="w-8 h-0.5 bg-gov-blue opacity-30"></span> Privilèges du Profil
-                </h4>
+            <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-2xl animate-in max-w-5xl mx-auto">
+                <div class="flex items-center justify-between mb-10 border-b border-gray-100 pb-8">
+                    <div>
+                        <h4 class="text-[10px] font-black text-gov-blue uppercase tracking-[0.4em] mb-2">Privilèges & Accréditations</h4>
+                        <p class="text-xs text-gray-500 font-medium">Répertoire complet des autorisations administratives liées à votre identité Discord.</p>
+                    </div>
+                    ${u.isFounder ? `
+                        <div class="px-4 py-2 bg-purple-100 text-purple-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-purple-200 flex items-center gap-2 shadow-sm animate-pulse">
+                            <i data-lucide="shield-alert" class="w-4 h-4"></i> Accès Fondation (Root)
+                        </div>
+                    ` : ''}
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    ${permKeys.length > 0 ? permKeys.map(k => `
-                        <div class="bg-gov-light p-4 rounded-xl border border-gray-100 flex items-center gap-4 group hover:border-gov-blue/20 transition-all">
-                            <div class="w-9 h-9 bg-gov-blue text-white rounded-lg flex items-center justify-center shadow-lg"><i data-lucide="check" class="w-4 h-4"></i></div>
-                            <span class="text-[10px] font-black text-gov-text uppercase tracking-widest">${k.replace('can_', '').replace(/_/g, ' ')}</span>
-                        </div>
-                    `).join('') : `
-                        <div class="col-span-full py-20 text-center flex flex-col items-center opacity-20">
-                            <i data-lucide="lock" class="w-12 h-12 mb-6 text-gov-blue"></i>
-                            <p class="text-[10px] font-black uppercase tracking-[0.3em]">Accès Citoyen Standard</p>
-                        </div>
-                    `}
+                    ${ALL_PERMISSIONS.map(p => {
+                        const hasPerm = perms[p.k] === true || u.isFounder;
+                        return `
+                            <div class="bg-gov-light p-6 rounded-2xl border ${hasPerm ? 'border-gov-blue/20 bg-blue-50/20' : 'border-gray-100 opacity-60'} flex items-start gap-5 group transition-all">
+                                <div class="w-10 h-10 shrink-0 rounded-xl ${hasPerm ? 'bg-gov-blue text-white' : 'bg-gray-200 text-gray-400'} flex items-center justify-center shadow-md transition-transform group-hover:scale-110">
+                                    <i data-lucide="${hasPerm ? 'shield-check' : 'shield-off'}" class="w-5 h-5"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between gap-2 mb-1">
+                                        <span class="text-[11px] font-black text-gov-text uppercase tracking-widest truncate">${p.l}</span>
+                                        <span class="text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${hasPerm ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">
+                                            ${hasPerm ? 'ACTIF' : 'INACTIF'}
+                                        </span>
+                                    </div>
+                                    <p class="text-[10px] text-gray-500 leading-relaxed font-medium italic">"${p.d}"</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                
+                <div class="mt-12 p-6 bg-blue-50 rounded-2xl border border-blue-100 text-center">
+                    <p class="text-[9px] text-blue-800 font-black uppercase tracking-[0.2em]">Pour toute demande d'accréditation supplémentaire, veuillez vous référer à la hiérarchie Fondation.</p>
                 </div>
             </div>
         `;
@@ -159,7 +230,7 @@ export const ProfileHubView = () => {
         const deletionDate = u.deletion_requested_at ? new Date(u.deletion_requested_at) : null;
         tabContent = `
             <div class="bg-white p-12 rounded-[48px] border-t-8 border-gov-red shadow-2xl animate-in max-w-3xl mx-auto text-center">
-                <div class="w-16 h-16 bg-red-50 text-gov-red rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg border border-red-100">
+                <div class="w-16 h-16 bg-red-50 text-gov-red rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg border border-red-100">
                     <i data-lucide="shield-alert" class="w-8 h-8"></i>
                 </div>
                 <h4 class="text-4xl font-black text-gov-text uppercase italic mb-4 tracking-tighter">Droit à l'Oubli</h4>
@@ -181,50 +252,65 @@ export const ProfileHubView = () => {
     }
 
     return `
-    <div class="flex-1 flex flex-col bg-[#F6F6F6] min-h-screen">
+    <div class="flex-1 flex flex-col bg-[#F6F6F6] min-h-screen overflow-hidden">
         
-        <!-- UNIVERSAL NAVBAR DU PROFIL (RESPONSIVE) -->
-        <nav class="shrink-0 bg-white border-b border-gray-100 px-4 md:px-8 flex flex-col md:flex-row items-center justify-between sticky top-0 z-[1000] shadow-sm py-4 md:py-0 md:h-20">
-            <div class="flex items-center gap-6 w-full md:w-auto h-full">
-                <div onclick="actions.backToLanding()" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer hover:opacity-70 transition-opacity">
-                    <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red uppercase font-black">Liberté • Égalité • Justice</div>
-                    <div class="text-md leading-none uppercase tracking-tighter italic">ÉTAT DE CALIFORNIE</div>
-                </div>
-                
-                <div class="hidden md:block h-8 w-px bg-gray-100"></div>
+        ${isMobileMenuOpen ? MobileMenuOverlay() : ''}
 
-                <!-- Tabs (Terminal Style) -->
-                <div class="flex flex-nowrap items-center gap-1 h-full overflow-x-auto no-scrollbar md:static absolute bottom-0 left-0 w-full px-4 md:px-0 md:bg-transparent bg-white border-t md:border-t-0 border-gray-100">
+        <!-- UNIVERSAL NAVBAR (REPLICATED TERMINAL STYLE) -->
+        <nav class="terminal-nav flex items-center justify-between shrink-0 border-b border-gray-100 bg-white sticky top-0 z-[100] px-6 md:px-8">
+            <div class="flex items-center gap-12 h-full">
+                <div onclick="actions.backToLanding()" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer transition-transform hover:scale-[0.8]">
+                    <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red font-black">Liberté • Égalité • Justice</div>
+                    <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
+                </div>
+
+                <!-- Desktop Tabs Menu -->
+                <div class="hidden lg:flex items-center gap-1 h-full">
                     ${tabs.map(t => `
-                        <button onclick="actions.setProfileTab('${t.id}')" 
-                            class="px-4 md:px-6 h-10 md:h-12 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 whitespace-nowrap ${currentTab === t.id ? 'bg-gov-blue text-white shadow-lg' : 'text-gray-400 hover:text-gov-text hover:bg-gray-50'}">
-                            <i data-lucide="${t.icon}" class="w-3.5 h-3.5"></i>
-                            ${t.label}
+                        <button onclick="actions.setProfileTab('${t.id}')" class="px-6 py-2 h-full text-[10px] font-black uppercase tracking-widest transition-all ${currentTab === t.id ? 'text-gov-blue border-b-2 border-gov-blue' : 'text-gray-400 hover:text-gov-text'} flex items-center gap-2">
+                             <i data-lucide="${t.icon}" class="w-3.5 h-3.5"></i> ${t.label}
                         </button>
                     `).join('')}
                 </div>
             </div>
 
-            <div class="flex items-center gap-3 md:gap-6 mt-4 md:mt-0 w-full md:w-auto justify-between md:justify-end">
-                <div class="flex gap-2">
-                    <button onclick="actions.backToLanding()" class="flex items-center gap-2 text-[9px] font-black text-gov-text uppercase tracking-widest hover:underline px-4 py-2 bg-gray-50 rounded-lg border border-gray-200 transition-all">
-                        <i data-lucide="home" class="w-3.5 h-3.5"></i> Accueil
-                    </button>
-                    <button onclick="actions.confirmLogout()" class="flex items-center gap-2 text-[9px] font-black text-gov-red uppercase tracking-widest hover:underline px-4 py-2 bg-red-50 rounded-lg border border-red-100 transition-all">
-                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Quitter
-                    </button>
-                </div>
+            <!-- Profile & Notifications Actions -->
+            <div class="flex items-center gap-4 h-full">
+                <button onclick="actions.backToLanding()" class="p-2.5 text-gray-400 hover:text-gov-blue hover:bg-gov-light rounded-sm transition-all" title="Accueil">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                </button>
                 
-                <div class="flex items-center gap-3 pl-4 md:pl-6 border-l border-gray-100">
-                    <div class="text-right hidden sm:block">
-                        <div class="text-[10px] font-black text-gov-text uppercase italic leading-none">${u.username}</div>
-                        <div class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">PROFIL CERTIFIÉ</div>
+                <div class="nav-item hidden lg:flex h-full">
+                    <div class="flex items-center gap-4 cursor-pointer p-2.5 hover:bg-gov-light rounded-sm transition-all h-full">
+                        <div class="text-right">
+                            <div class="text-[10px] font-black uppercase text-gov-text leading-none">${u.username}</div>
+                            <div class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">PROFIL CERTIFIÉ</div>
+                        </div>
+                        <div class="relative w-10 h-10">
+                            <img src="${u.avatar}" class="w-full h-full rounded-full grayscale border border-gray-200 p-0.5 relative z-10 object-cover">
+                            ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
+                            <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white z-30"></div>
+                        </div>
                     </div>
-                    <div class="relative w-9 h-9 md:w-10 md:h-10">
-                        <img src="${u.avatar}" class="w-full h-full rounded-xl border-2 border-gov-blue p-0.5 bg-white object-cover">
-                        ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
+                    <div class="nav-dropdown right-0 left-auto rounded-none shadow-2xl">
+                        <div class="px-4 py-3 border-b border-gray-50 bg-gov-light/30">
+                            <div class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Identité Discord</div>
+                            <div class="text-[11px] font-black text-gov-text uppercase">${u.id}</div>
+                        </div>
+                        <button onclick="actions.setHubPanel('main')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors text-gov-blue">
+                            <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard Citoyen
+                        </button>
+                        <div class="h-px bg-gray-50 my-1"></div>
+                        <button onclick="actions.confirmLogout()" class="w-full text-left p-4 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-red-600 transition-colors">
+                            <i data-lucide="log-out" class="w-4 h-4"></i> Déconnexion
+                        </button>
                     </div>
                 </div>
+
+                <!-- Hamburger Button (Mobile) -->
+                <button onclick="actions.toggleMobileMenu()" class="lg:hidden p-3 bg-gov-light text-gov-text rounded-sm">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
             </div>
         </nav>
 
@@ -239,11 +325,12 @@ export const ProfileHubView = () => {
             <!-- HEADER CONTENT -->
             <div class="max-w-6xl mx-auto w-full px-6 md:px-8 -mt-16 md:-mt-24 relative z-10 mb-12">
                 <div class="flex flex-col md:flex-row items-end gap-6 md:gap-10">
-                    <div class="relative group mx-auto md:mx-0">
-                        <div class="w-32 h-32 md:w-40 md:h-40 rounded-[32px] border-[6px] md:border-[8px] border-white bg-white shadow-2xl overflow-hidden relative">
+                    <div class="relative group mx-auto md:mx-0 shrink-0">
+                        <div class="w-32 h-32 md:w-40 md:h-40 rounded-full border-[6px] md:border-[8px] border-white bg-white shadow-2xl overflow-hidden relative">
                             <img src="${u.avatar}" class="w-full h-full object-cover">
+                            ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
                         </div>
-                        <div class="absolute -bottom-1 -right-1 md:-bottom-2 md:-right-2 w-8 h-8 md:w-10 md:h-10 bg-gov-blue text-white rounded-xl flex items-center justify-center border-4 border-white shadow-xl transform rotate-12">
+                        <div class="absolute -bottom-1 -right-1 md:-bottom-2 md:-right-2 w-8 h-8 md:w-10 md:h-10 bg-gov-blue text-white rounded-full flex items-center justify-center border-4 border-white shadow-xl transform rotate-12 z-30">
                             <i data-lucide="verified" class="w-4 h-4 md:w-5 md:h-5"></i>
                         </div>
                     </div>
@@ -264,7 +351,7 @@ export const ProfileHubView = () => {
             </main>
             
             <footer class="py-12 text-center opacity-30">
-                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.5em]">Terminal de Gestion Identitaire • v6.2</p>
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.5em]">Terminal de Gestion Identitaire • v6.3 Platinum</p>
             </footer>
         </div>
     </div>

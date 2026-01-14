@@ -1,152 +1,149 @@
+
 import { state } from '../state.js';
 import { router } from '../utils.js';
 
-const refreshBanner = `
-    <div class="flex flex-col md:flex-row items-center justify-between px-6 py-3 bg-blue-900/10 border-b border-blue-500/10 gap-3 shrink-0 relative">
-        <div class="text-xs text-blue-200 flex items-center gap-2">
+const refreshBanner = (title) => `
+    <div class="flex flex-col md:flex-row items-center justify-between px-6 py-3 bg-blue-900/10 border-b border-blue-500/10 gap-3 shrink-0 relative z-20">
+        <div class="text-[10px] text-blue-200 flex items-center gap-2 font-black uppercase tracking-[0.2em]">
              <div class="relative flex h-2 w-2">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </div>
-            <span><span class="font-bold">CAD SYSTEM</span> • Protection des Données Certifiée</span>
+            <span><span class="font-bold">CAD SYSTEM</span> • PROTECTION JURIDIQUE CERTIFIÉE</span>
         </div>
-        <button onclick="window.location.reload()" class="text-xs text-blue-400 hover:text-white flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap">
-            <i data-lucide="refresh-cw" class="w-3 h-3"></i> Synchroniser
-        </button>
+        <div class="text-[9px] text-gray-500 font-mono uppercase tracking-widest">${title}</div>
     </div>
 `;
 
 const TERMS_CONTENT = `
-    <div class="space-y-8 text-gray-300 leading-relaxed">
-        <section>
-            <h3 class="text-xl font-bold text-white mb-3">1. Préambule</h3>
-            <p>Les présentes Conditions Générales d'Utilisation (ci-après "CGU") régissent l'utilisation de la plateforme web "TFRP Panel" (ci-après "le Site"), mise à disposition de la communauté Team French RolePlay évoluant sur le jeu Emergency Response: Liberty County (Roblox). En accédant à ce Site, vous acceptez sans réserve les présentes conditions.</p>
+    <div class="space-y-12 text-gray-400 leading-relaxed font-medium animate-in">
+        <section class="relative">
+            <div class="absolute -left-6 top-0 w-1 h-full bg-blue-600/30"></div>
+            <h3 class="text-2xl font-black text-white mb-4 uppercase italic tracking-tighter">1. Objet du Service</h3>
+            <p>Le présent terminal (ci-après "Panel TFRP") constitue l'interface officielle de gestion pour la communauté Team French Roleplay. Il centralise les données économiques, administratives et judiciaires nécessaires au bon déroulement des sessions de jeu sur Emergency Response: Liberty County.</p>
         </section>
 
-        <section>
-            <h3 class="text-xl font-bold text-white mb-3">2. Accès au Service</h3>
-            <p>L'accès au Site est réservé aux membres du serveur Discord officiel TFRP. L'authentification s'effectue via le protocole OAuth2 de Discord. Tout utilisateur ne disposant pas des rôles requis ou ayant été banni de la communauté se verra refuser l'accès.</p>
+        <section class="relative">
+            <div class="absolute -left-6 top-0 w-1 h-full bg-blue-600/30"></div>
+            <h3 class="text-2xl font-black text-white mb-4 uppercase italic tracking-tighter">2. Accès & Authentification</h3>
+            <p>L'accès est strictement réservé aux membres actifs du serveur Discord TFRP. L'utilisation du protocole OAuth2 Discord est obligatoire pour l'identification. Tout bannissement du serveur Discord entraîne la suspension immédiate et définitive de l'accès au Panel.</p>
         </section>
 
-        <section>
-            <h3 class="text-xl font-bold text-white mb-3">3. Règles de Conduite (Roleplay)</h3>
-            <p>L'utilisation du Site est indissociable de l'expérience de jeu. Les utilisateurs s'engagent à :</p>
-            <ul class="list-disc pl-5 mt-2 space-y-1 text-gray-400">
-                <li>Ne pas utiliser les informations du Site (Soldes, Emplacements, Casier) pour faire du "Meta-Gaming" en jeu sans justification RP valable.</li>
-                <li>Respecter la cohérence de leur personnage lors des transactions bancaires ou de la gestion d'entreprise.</li>
-                <li>Ne pas exploiter d'éventuels bugs (duplication d'argent, items) sous peine de bannissement définitif et irrévocable.</li>
-            </ul>
+        <section class="relative">
+            <div class="absolute -left-6 top-0 w-1 h-full bg-blue-600/30"></div>
+            <h3 class="text-2xl font-black text-white mb-4 uppercase italic tracking-tighter">3. Économie Virtuelle</h3>
+            <p>Toute monnaie ($) affichée sur ce panel est purement fictive et n'a aucune valeur marchande réelle. Elle ne peut en aucun cas être convertie en devises réelles. L'administration se réserve le droit de réinitialiser tout ou partie des soldes pour des raisons d'équilibrage ou de "Wipe" communautaire.</p>
         </section>
 
-        <section>
-            <h3 class="text-xl font-bold text-white mb-3">4. Monnaie Virtuelle et Transactions</h3>
-            <p>Le Site gère une économie purement virtuelle. L'argent affiché ($) n'a aucune valeur réelle, ne peut être échangé contre des devises réelles (Euros, Dollars, Robux) et reste la propriété exclusive de TFRP dans le cadre du jeu de rôle. L'administration se réserve le droit de réinitialiser (Wipe) l'économie à tout moment pour des raisons d'équilibrage.</p>
+        <section class="relative">
+            <div class="absolute -left-6 top-0 w-1 h-full bg-red-600/30"></div>
+            <h3 class="text-2xl font-black text-white mb-4 uppercase italic tracking-tighter text-red-500">4. Lutte contre l'Exploitation</h3>
+            <p>L'utilisation de failles de sécurité, bugs de duplication ou toute manipulation technique visant à altérer les données sans autorisation est passible d'une exclusion définitive de la communauté. Le "Meta-Gaming" via les informations du panel est strictement encadré par le règlement général.</p>
         </section>
 
-        <section>
-            <h3 class="text-xl font-bold text-white mb-3">5. Propriété Intellectuelle</h3>
-            <p>L'ensemble des éléments graphiques, du code source et des fonctionnalités du Site sont la propriété de l'équipe de développement TFRP. Toute reproduction, modification ou distribution non autorisée est strictement interdite.</p>
-        </section>
-
-        <section>
-            <h3 class="text-xl font-bold text-white mb-3">6. Responsabilité</h3>
-            <p>TFRP ne saurait être tenu responsable des interruptions de service, des pertes de données accidentelles ou des conséquences d'une mauvaise utilisation du compte par l'utilisateur. L'utilisateur est seul responsable de la confidentialité de ses accès Discord.</p>
+        <section class="relative">
+            <div class="absolute -left-6 top-0 w-1 h-full bg-blue-600/30"></div>
+            <h3 class="text-2xl font-black text-white mb-4 uppercase italic tracking-tighter">5. Responsabilité Administrative</h3>
+            <p>L'équipe TFRP ne pourra être tenue responsable en cas de perte accidentelle de données liée à une maintenance technique ou à un incident serveur. Le Panel est fourni "en l'état" pour l'amélioration de l'expérience utilisateur.</p>
         </section>
     </div>
 `;
 
 const PRIVACY_CONTENT = `
-    <div class="space-y-8 text-gray-300 leading-relaxed">
-        <section>
-            <h3 class="text-xl font-bold text-white mb-3">1. Collecte des Données</h3>
-            <p>Dans le cadre de votre utilisation du Panel TFRP, nous collectons les informations suivantes via l'API Discord et nos bases de données internes :</p>
-            <ul class="list-disc pl-5 mt-2 space-y-1 text-gray-400">
-                <li><strong>Identité Discord :</strong> ID unique, Nom d'utilisateur, Avatar, Appartenance au serveur (Guilds).</li>
-                <li><strong>Données de Jeu :</strong> Personnages créés (Nom, Prénom, Age), Inventaires, Comptes bancaires, Historique des transactions.</li>
-                <li><strong>Journaux d'activité :</strong> Logs de connexion, actions administratives, rapports de police.</li>
+    <div class="space-y-12 text-gray-400 leading-relaxed font-medium animate-in">
+        <section class="relative">
+            <div class="absolute -left-6 top-0 w-1 h-full bg-emerald-600/30"></div>
+            <h3 class="text-2xl font-black text-white mb-4 uppercase italic tracking-tighter">1. Données Collectées</h3>
+            <p>Conformément au fonctionnement du protocole Discord, nous collectons uniquement :</p>
+            <ul class="list-disc pl-5 mt-4 space-y-2 text-sm italic">
+                <li>Votre identifiant unique Discord (UID).</li>
+                <li>Votre pseudonyme et avatar public.</li>
+                <li>Votre appartenance au serveur (pour les accès).</li>
+                <li>Les métadonnées de vos personnages (noms, inventaires, transactions).</li>
             </ul>
         </section>
 
-        <section>
-            <h3 class="text-xl font-bold text-white mb-3">2. Finalité du Traitement</h3>
-            <p>Ces données sont collectées uniquement pour :</p>
-            <ul class="list-disc pl-5 mt-2 space-y-1 text-gray-400">
-                <li>Permettre votre authentification et sécuriser l'accès.</li>
-                <li>Gérer la persistance de vos données de jeu (Roleplay).</li>
-                <li>Assurer la modération et la sécurité de la communauté (lutte contre la triche).</li>
-            </ul>
+        <section class="relative">
+            <div class="absolute -left-6 top-0 w-1 h-full bg-emerald-600/30"></div>
+            <h3 class="text-2xl font-black text-white mb-4 uppercase italic tracking-tighter">2. Finalité du Traitement</h3>
+            <p>Vos données servent exclusivement à la persistance de votre progression Roleplay. Elles permettent aux services de police (LEO) de consulter vos antécédents, aux banques de gérer vos fonds et au staff d'assurer la modération globale.</p>
         </section>
 
-        <section>
-            <h3 class="text-xl font-bold text-white mb-3">3. Partage des Données</h3>
-            <p>Vos données sont strictement confidentielles et ne sont jamais vendues, louées ou partagées à des tiers commerciaux. Elles sont accessibles uniquement par l'équipe d'administration technique de TFRP dans le cadre strict de la maintenance et de la modération.</p>
+        <section class="relative">
+            <div class="absolute -left-6 top-0 w-1 h-full bg-emerald-600/30"></div>
+            <h3 class="text-2xl font-black text-white mb-4 uppercase italic tracking-tighter">3. Confidentialité et Tiers</h3>
+            <p>TFRP s'engage à ne jamais vendre, louer ou partager vos données avec des entités commerciales tierces. L'accès aux informations est restreint au personnel staff accrédité selon les niveaux de permissions définis.</p>
         </section>
 
-        <section>
-            <h3 class="text-xl font-bold text-white mb-3">4. Sécurité</h3>
-            <p>Nous mettons en œuvre des mesures de sécurité techniques (chiffrement SSL, bases de données sécurisées Supabase) pour protéger vos informations contre tout accès non autorisé.</p>
-        </section>
-
-        <section>
-            <h3 class="text-xl font-bold text-white mb-3">5. Vos Droits (RGPD)</h3>
-            <p>Conformément à la réglementation, vous disposez d'un droit d'accès, de rectification et d'effacement de vos données ("Droit à l'oubli"). Pour exercer ce droit et demander la suppression complète de votre compte joueur, veuillez ouvrir un ticket "Support Technique" sur notre serveur Discord.</p>
+        <section class="relative">
+            <div class="absolute -left-6 top-0 w-1 h-full bg-orange-600/30"></div>
+            <h3 class="text-2xl font-black text-white mb-4 uppercase italic tracking-tighter text-orange-500">4. Droit à l'Oubli (RGPD)</h3>
+            <p>Chaque utilisateur dispose d'un droit total de suppression de ses données. Cette procédure peut être initiée directement depuis l'onglet "Sécurité" du Hub Profils. Une période de latence de 72h est appliquée avant l'effacement définitif et irréversible.</p>
         </section>
     </div>
 `;
 
 export const TermsView = () => `
-    <div class="flex flex-col h-full bg-[#050505] overflow-hidden animate-fade-in relative">
-        <!-- Header Block -->
+    <div class="h-full flex flex-col bg-[#050505] overflow-hidden animate-fade-in relative">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(59,130,246,0.05),transparent_70%)] pointer-events-none"></div>
+        
         <div class="flex flex-col shrink-0">
-            ${refreshBanner}
+            ${refreshBanner("CONDITIONS GÉNÉRALES")}
             
-            <div class="px-8 py-6 flex justify-between items-center border-b border-white/5 bg-[#050505] relative">
+            <div class="px-8 py-10 flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 bg-[#050505] relative z-10">
                 <div>
-                    <h1 class="text-2xl font-bold text-white flex items-center gap-3">
-                        <i data-lucide="scale" class="w-6 h-6 text-blue-500"></i>
-                        Conditions Générales
-                    </h1>
-                    <p class="text-gray-500 text-xs mt-1 uppercase tracking-widest">Dernière mise à jour : 15/12/2025</p>
+                    <h2 class="text-4xl font-black text-white flex items-center gap-4 uppercase italic tracking-tighter leading-none">
+                        <i data-lucide="scale" class="w-10 h-10 text-blue-500"></i>
+                        Contrat de<br>Service
+                    </h2>
+                    <div class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em] mt-3">RÈGLEMENT DE LA COMMUNAUTÉ TFRP v6.3</div>
                 </div>
-                <button onclick="actions.goBackFromLegal()" class="glass-btn-secondary px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-white/10 transition-colors">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Retour
+                <button onclick="router('login')" class="glass-btn px-10 py-4 rounded-2xl bg-white text-black font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-600 hover:text-white transition-all transform active:scale-95">
+                    FERMER LE TERMINAL
                 </button>
             </div>
         </div>
 
-        <!-- Content -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-8 md:px-16 lg:px-32">
-            <div class="max-w-4xl mx-auto pb-20">
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-8 md:px-20 lg:px-40 relative z-10">
+            <div class="max-w-4xl mx-auto py-12">
                 ${TERMS_CONTENT}
+                
+                <div class="mt-20 pt-10 border-t border-white/5 text-center opacity-30">
+                    <p class="text-[9px] font-black text-gray-500 uppercase tracking-[0.5em]">DOCUMENT OFFICIEL • TEAM FRENCH ROLEPLAY</p>
+                </div>
             </div>
         </div>
     </div>
 `;
 
 export const PrivacyView = () => `
-    <div class="flex flex-col h-full bg-[#050505] overflow-hidden animate-fade-in relative">
-        <!-- Header Block -->
+    <div class="h-full flex flex-col bg-[#050505] overflow-hidden animate-fade-in relative">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(16,185,129,0.05),transparent_70%)] pointer-events-none"></div>
+
         <div class="flex flex-col shrink-0">
-            ${refreshBanner}
+            ${refreshBanner("CONFIDENTIALITÉ & RGPD")}
             
-            <div class="px-8 py-6 flex justify-between items-center border-b border-white/5 bg-[#050505] relative">
+            <div class="px-8 py-10 flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 bg-[#050505] relative z-10">
                 <div>
-                    <h1 class="text-2xl font-bold text-white flex items-center gap-3">
-                        <i data-lucide="shield-check" class="w-6 h-6 text-emerald-500"></i>
-                        Politique de Confidentialité
-                    </h1>
-                    <p class="text-gray-500 text-xs mt-1 uppercase tracking-widest">Protection des données & RGPD</p>
+                    <h2 class="text-4xl font-black text-white flex items-center gap-4 uppercase italic tracking-tighter leading-none">
+                        <i data-lucide="shield-check" class="w-10 h-10 text-emerald-500"></i>
+                        Protection des<br>Données
+                    </h2>
+                    <div class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em] mt-3">CONFORMITÉ EUROPÉENNE & RGPD</div>
                 </div>
-                <button onclick="actions.goBackFromLegal()" class="glass-btn-secondary px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-white/10 transition-colors">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Retour
+                <button onclick="router('login')" class="glass-btn px-10 py-4 rounded-2xl bg-white text-black font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-emerald-600 hover:text-white transition-all transform active:scale-95">
+                    RETOUR ACCUEIL
                 </button>
             </div>
         </div>
 
-        <!-- Content -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-8 md:px-16 lg:px-32">
-            <div class="max-w-4xl mx-auto pb-20">
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-8 md:px-20 lg:px-40 relative z-10">
+            <div class="max-w-4xl mx-auto py-12">
                 ${PRIVACY_CONTENT}
+
+                <div class="mt-20 pt-10 border-t border-white/5 text-center opacity-30">
+                    <p class="text-[9px] font-black text-gray-500 uppercase tracking-[0.5em]">LIAISON CHIFFRÉE • SERVICES JURIDIQUES TFRP</p>
+                </div>
             </div>
         </div>
     </div>

@@ -1,3 +1,4 @@
+
 /**
  * TFRP Core Application v6.0
  * Unified Identity - California State Division
@@ -119,17 +120,15 @@ const handleAuthenticatedSession = async (session) => {
         
         await loadCharacters();
         
-        // Restaurer la vue si existante en session, sinon hub de profil
-        const savedView = sessionStorage.getItem('tfrp_current_view');
+        // Par défaut, rediriger vers le Hub Profils après un login ou refresh pour satisfaire la demande
         const activeCharId = sessionStorage.getItem('tfrp_active_char');
-        
         if (activeCharId) {
             state.activeCharacter = state.characters.find(c => c.id === activeCharId);
-            state.activeHubPanel = sessionStorage.getItem('tfrp_hub_panel') || 'main';
-            router('hub');
-        } else {
-            router('profile_hub');
         }
+        
+        // On force le hub de profil sur un refresh/load complet
+        router('profile_hub');
+
     } catch (e) { 
         console.error("Session init error:", e);
         router('login'); 

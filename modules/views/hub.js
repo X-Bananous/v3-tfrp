@@ -1,3 +1,4 @@
+
 import { state } from '../state.js';
 import { BankView } from './bank.js';
 import { StaffView } from './staff.js';
@@ -236,7 +237,7 @@ export const HubView = () => {
 
         <!-- UNIVERSAL NAVBAR -->
         <nav class="terminal-nav flex items-center justify-between shrink-0 border-b border-gray-100 bg-white sticky top-0 z-[100] px-6 md:px-8">
-            <div class="flex items-center gap-12 h-full">
+            <div class="flex items-center gap-6 md:gap-12 h-full">
                 <div onclick="actions.setHubPanel('main')" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer transition-transform hover:scale-[0.8]">
                     <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red font-black">État de Californie</div>
                     <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
@@ -288,8 +289,8 @@ export const HubView = () => {
                 </div>
             </div>
 
-            <!-- Profile & Notifications (Desktop) -->
-            <div class="flex items-center gap-4 h-full">
+            <!-- Profile & Notifications -->
+            <div class="flex items-center gap-2 md:gap-4 h-full">
                 <button onclick="actions.setHubPanel('notifications')" class="p-2.5 text-gray-400 hover:text-gov-blue hover:bg-gov-light rounded-sm transition-all relative">
                     <i data-lucide="bell" class="w-5 h-5"></i>
                     ${state.notifications.length > 0 ? '<span class="absolute top-2 right-2 w-2 h-2 bg-red-600 rounded-full border-2 border-white"></span>' : ''}
@@ -302,8 +303,9 @@ export const HubView = () => {
                             <div class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">${char.job ? char.job.toUpperCase() : 'CIVIL'}</div>
                         </div>
                         <div class="relative w-10 h-10">
-                            <img src="${u.avatar}" class="w-full h-full rounded-none grayscale border border-gray-200 p-0.5 relative z-10">
-                            <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-none border-2 border-white z-30"></div>
+                            <img src="${u.avatar}" class="w-full h-full rounded-full grayscale border border-gray-200 p-0.5 relative z-10 object-cover">
+                            ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
+                            <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white z-30"></div>
                         </div>
                     </div>
                     <div class="nav-dropdown right-0 left-auto rounded-none">
@@ -325,8 +327,8 @@ export const HubView = () => {
                 </div>
 
                 <!-- Hamburger Button (Mobile) -->
-                <button onclick="actions.toggleMobileMenu()" class="lg:hidden p-3 bg-gov-light text-gov-text rounded-sm">
-                    <i data-lucide="menu" class="w-6 h-6"></i>
+                <button onclick="actions.toggleMobileMenu()" class="lg:hidden p-2.5 bg-gov-light text-gov-text rounded-sm">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
             </div>
         </nav>
