@@ -30,33 +30,32 @@ const SoundEngine = {
     }
 };
 
-// WHEEL_REWARDS avec nerf de 35% sur les items rares/mythiques/legendaires/etc
+// Nerf de 35% appliqué sur les poids des récompenses non-communes (multiplicateur x0.65)
 export const WHEEL_REWARDS = [
-    { label: '1 000 $', weight: 20, type: 'money', value: 1000, color: '#10b981', rarity: 'Commun' },
-    { label: '5 000 $', weight: 15, type: 'money', value: 5000, color: '#10b981', rarity: 'Commun' },
-    { label: '7 500 $', weight: 12, type: 'money', value: 7500, color: '#10b981', rarity: 'Commun' },
-    { label: '10 000 $', weight: 10, type: 'money', value: 10000, color: '#10b981', rarity: 'Commun' },
-    { label: '12 500 $', weight: 8, type: 'money', value: 12500, color: '#10b981', rarity: 'Commun' },
-    // Nerf appliqué ci-dessous (weight * 0.65)
-    { label: '15 000 $', weight: 3.9, type: 'money', value: 15000, color: '#059669', rarity: 'Peu Commun' },
-    { label: '20 000 $', weight: 3.9, type: 'money', value: 20000, color: '#059669', rarity: 'Peu Commun' },
-    { label: '25 000 $', weight: 3.25, type: 'money', value: 25000, color: '#3b82f6', rarity: 'Rare' },
-    { label: '30 000 $', weight: 3.25, type: 'money', value: 30000, color: '#3b82f6', rarity: 'Rare' },
-    { label: '40 000 $', weight: 2.6, type: 'money', value: 40000, color: '#3b82f6', rarity: 'Rare' },
-    { label: '50 000 $', weight: 2.6, type: 'money', value: 50000, color: '#3b82f6', rarity: 'Très Rare' },
-    { label: '60 000 $', weight: 1.95, type: 'money', value: 60000, color: '#8b5cf6', rarity: 'Mythique' },
-    { label: '75 000 $', weight: 1.95, type: 'money', value: 75000, color: '#8b5cf6', rarity: 'Mythique' },
-    { label: '100 000 $', weight: 1.95, type: 'money', value: 100000, color: '#8b5cf6', rarity: 'Mythique' },
-    { label: '150 000 $', weight: 1.3, type: 'money', value: 150000, color: '#fbbf24', rarity: 'Légendaire' },
-    { label: '200 000 $', weight: 1.3, type: 'money', value: 200000, color: '#fbbf24', rarity: 'Légendaire' },
-    { label: '300 000 $', weight: 0.65, type: 'money', value: 300000, color: '#ef4444', rarity: 'Relique' },
-    { label: '500 000 $', weight: 0.32, type: 'money', value: 500000, color: '#ef4444', rarity: 'Ancestral' },
-    { label: 'VIP Bronze', weight: 3.25, type: 'role', color: '#cd7f32', rarity: 'Premium' },
-    { label: 'VIP Argent', weight: 2.6, type: 'role', color: '#c0c0c0', rarity: 'Premium' },
-    { label: 'VIP Or', weight: 1.95, type: 'role', color: '#ffd700', rarity: 'Premium' },
-    { label: 'VIP Platine', weight: 1.3, type: 'role', color: '#e5e4e2', rarity: 'Elite' },
-    { label: 'Rôle Légende', weight: 0.65, type: 'role', color: '#a855f7', rarity: 'Divin' },
-    { label: '???', weight: 0.97, type: 'special', color: '#f472b6', rarity: 'Unique' }
+    { label: '1 000 $', weight: 12, type: 'money', value: 1000, color: '#10b981', rarity: 'Commun' },
+    { label: '5 000 $', weight: 10, type: 'money', value: 5000, color: '#10b981', rarity: 'Commun' },
+    { label: '7 500 $', weight: 8, type: 'money', value: 7500, color: '#10b981', rarity: 'Commun' },
+    { label: '10 000 $', weight: 8, type: 'money', value: 10000, color: '#10b981', rarity: 'Commun' },
+    { label: '12 500 $', weight: 6, type: 'money', value: 12500, color: '#10b981', rarity: 'Commun' },
+    { label: '15 000 $', weight: 3.9, type: 'money', value: 15000, color: '#059669', rarity: 'Peu Commun' }, // 6 * 0.65
+    { label: '20 000 $', weight: 3.9, type: 'money', value: 20000, color: '#059669', rarity: 'Peu Commun' }, // 6 * 0.65
+    { label: '25 000 $', weight: 3.25, type: 'money', value: 25000, color: '#3b82f6', rarity: 'Rare' },      // 5 * 0.65
+    { label: '30 000 $', weight: 3.25, type: 'money', value: 30000, color: '#3b82f6', rarity: 'Rare' },      // 5 * 0.65
+    { label: '40 000 $', weight: 2.6, type: 'money', value: 40000, color: '#3b82f6', rarity: 'Rare' },       // 4 * 0.65
+    { label: '50 000 $', weight: 2.6, type: 'money', value: 50000, color: '#3b82f6', rarity: 'Très Rare' },  // 4 * 0.65
+    { label: '60 000 $', weight: 1.95, type: 'money', value: 60000, color: '#8b5cf6', rarity: 'Mythique' },  // 3 * 0.65
+    { label: '75 000 $', weight: 1.95, type: 'money', value: 75000, color: '#8b5cf6', rarity: 'Mythique' },  // 3 * 0.65
+    { label: '100 000 $', weight: 1.95, type: 'money', value: 100000, color: '#8b5cf6', rarity: 'Mythique' }, // 3 * 0.65
+    { label: '150 000 $', weight: 1.3, type: 'money', value: 150000, color: '#fbbf24', rarity: 'Légendaire' }, // 2 * 0.65
+    { label: '200 000 $', weight: 1.3, type: 'money', value: 200000, color: '#fbbf24', rarity: 'Légendaire' }, // 2 * 0.65
+    { label: '300 000 $', weight: 0.65, type: 'money', value: 300000, color: '#ef4444', rarity: 'Relique' },   // 1 * 0.65
+    { label: '500 000 $', weight: 0.325, type: 'money', value: 500000, color: '#ef4444', rarity: 'Ancestral' }, // 0.5 * 0.65
+    { label: 'VIP Bronze', weight: 3.25, type: 'role', color: '#cd7f32', rarity: 'Premium' },                  // 5 * 0.65
+    { label: 'VIP Argent', weight: 2.6, type: 'role', color: '#c0c0c0', rarity: 'Premium' },                   // 4 * 0.65
+    { label: 'VIP Or', weight: 1.95, type: 'role', color: '#ffd700', rarity: 'Premium' },                      // 3 * 0.65
+    { label: 'VIP Platine', weight: 1.3, type: 'role', color: '#e5e4e2', rarity: 'Elite' },                    // 2 * 0.65
+    { label: 'Rôle Légende', weight: 0.65, type: 'role', color: '#a855f7', rarity: 'Divin' },                  // 1 * 0.65
+    { label: '???', weight: 0.975, type: 'special', color: '#f472b6', rarity: 'Unique' }                      // 1.5 * 0.65
 ];
 
 export const openCrate = async (crateIdx) => {
@@ -69,6 +68,7 @@ export const openCrate = async (crateIdx) => {
     state.openingCrateIdx = crateIdx;
     render();
 
+    // Simulation de décryptage / ouverture
     setTimeout(async () => {
         const totalWeight = WHEEL_REWARDS.reduce((acc, r) => acc + r.weight, 0);
         let randomVal = Math.random() * totalWeight;
