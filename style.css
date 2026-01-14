@@ -75,9 +75,10 @@ html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; fo
     .terminal-nav { 
         height: 70px; 
         padding: 0 1rem; 
-        flex-direction: row !important; /* Force alignement horizontal sur mobile */
+        flex-direction: row !important; /* Force alignement horizontal strict sur mobile */
         justify-content: space-between !important;
         gap: 0 !important;
+        display: flex !important;
     }
     .nav-dropdown { position: static; opacity: 1; pointer-events: auto; transform: none; box-shadow: none; border: none; width: 100%; }
 }

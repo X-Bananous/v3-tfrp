@@ -135,3 +135,51 @@ export const LoginView = () => {
     </div>
     `;
 };
+
+export const AccessDeniedView = () => `
+    <div class="flex-1 flex flex-col bg-white animate-in">
+        <nav class="terminal-nav shrink-0">
+            <div class="marianne-block uppercase font-black text-gov-text scale-75 origin-left">
+                <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red font-black">Liberté • Égalité • Justice</div>
+                <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
+            </div>
+            <button onclick="actions.logout()" class="px-6 py-2 bg-gov-light text-gov-text font-black uppercase text-[10px] tracking-widest rounded-sm">Déconnexion</button>
+        </nav>
+        <div class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <div class="w-24 h-24 bg-red-50 text-gov-red rounded-full flex items-center justify-center mb-8 shadow-xl">
+                <i data-lucide="shield-off" class="w-12 h-12"></i>
+            </div>
+            <h2 class="text-4xl font-black text-gov-text uppercase italic mb-4 tracking-tighter">Accès Non Autorisé</h2>
+            <p class="text-gray-500 max-w-md mx-auto mb-10 leading-relaxed font-medium italic">
+                Votre identité Discord n'est pas répertoriée sur nos serveurs. L'accès au Panel TFRP est strictement réservé aux membres de la communauté.
+            </p>
+            <a href="${CONFIG.INVITE_URL}" target="_blank" class="px-10 py-5 bg-gov-blue text-white font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-black transition-all transform hover:scale-105">
+                Rejoindre le Discord Officiel
+            </a>
+        </div>
+    </div>
+`;
+
+export const DeletionPendingView = () => `
+    <div class="flex-1 flex flex-col bg-white animate-in">
+        <nav class="terminal-nav shrink-0">
+            <div class="marianne-block uppercase font-black text-gov-text scale-75 origin-left">
+                <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red font-black">Liberté • Égalité • Justice</div>
+                <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
+            </div>
+            <button onclick="actions.logout()" class="px-6 py-2 bg-gov-light text-gov-text font-black uppercase text-[10px] tracking-widest rounded-sm">Déconnexion</button>
+        </nav>
+        <div class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <div class="w-24 h-24 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mb-8 shadow-xl animate-pulse">
+                <i data-lucide="trash-2" class="w-12 h-12"></i>
+            </div>
+            <h2 class="text-4xl font-black text-gov-text uppercase italic mb-4 tracking-tighter">Identité en cours de purge</h2>
+            <p class="text-gray-500 max-w-md mx-auto mb-10 leading-relaxed font-medium italic">
+                Vous avez demandé la suppression de vos données. Conformément au RGPD, vos accès sont suspendus durant la phase de latence de 72h.
+            </p>
+            <button onclick="actions.cancelDataDeletion()" class="px-10 py-5 bg-gov-text text-white font-black uppercase text-xs tracking-widest shadow-2xl hover:bg-black transition-all">
+                Annuler la suppression
+            </button>
+        </div>
+    </div>
+`;
