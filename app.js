@@ -1,5 +1,5 @@
 /**
- * TFRP Core Application v6.0
+ * TFRP Core Application V3
  * Unified Identity - California State Division
  */
 
@@ -46,7 +46,6 @@ const appRenderer = () => {
     let htmlContent = '';
     let effectiveView = state.currentView;
 
-    // Redirections forcées basées sur l'état
     if (state.user?.deletion_requested_at && effectiveView !== 'login') {
         effectiveView = 'deletion_pending';
     }
@@ -95,7 +94,6 @@ const handleAuthenticatedSession = async (session) => {
         const discordUser = supabaseUser.user_metadata;
         const discordId = discordUser.provider_id || discordUser.sub;
         
-        // Récupération des guildes et des assets cosmétiques
         const guilds = discordUser.guilds || [];
 
         const { data: profile } = await state.supabase
@@ -108,28 +106,20 @@ const handleAuthenticatedSession = async (session) => {
             id: discordId, 
             username: discordUser.full_name || discordUser.username || discordUser.custom_claims?.global_name, 
             avatar: discordUser.avatar_url,
-            // Données cosmétiques étendues Discord
             banner: discordUser.banner_url || null,
-            decoration: discordUser.avatar_decoration || null,
+            decoration: discordUser.avatar_decoration_data?.asset || null,
             guilds: guilds,
             permissions: profile?.permissions || {}, 
             deletion_requested_at: profile?.deletion_requested_at || null, 
-            isFounder: state.adminIds.includes(discordId)
+            isFounder: state.adminIds.includes(discordId),
+            whell_turn: profile?.whell_turn || 0
         };
         
         await loadCharacters();
         
-        // Restaurer la vue si existante en session, sinon hub de profil
-        const savedView = sessionStorage.getItem('tfrp_current_view');
-        const activeCharId = sessionStorage.getItem('tfrp_active_char');
+        // Redirection systématique vers profile_hub sur refresh comme demandé
+        router('profile_hub');
         
-        if (activeCharId) {
-            state.activeCharacter = state.characters.find(c => c.id === activeCharId);
-            state.activeHubPanel = sessionStorage.getItem('tfrp_hub_panel') || 'main';
-            router('hub');
-        } else {
-            router('profile_hub');
-        }
     } catch (e) { 
         console.error("Session init error:", e);
         router('login'); 
