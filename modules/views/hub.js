@@ -23,6 +23,11 @@ export const HubView = () => {
     const isFounder = state.user?.isFounder || state.adminIds.includes(state.user?.id);
     const hasStaffAccess = Object.keys(state.user.permissions || {}).some(k => state.user.permissions[k] === true) || isFounder;
     const isIllegal = char.alignment === 'illegal';
+    
+    // Restriction CAD System
+    const allowedCADJobs = ['leo', 'lafd', 'ladot', 'lawyer', 'maire', 'adjoint', 'juge', 'procureur'];
+    const hasCADAccess = !isIllegal && allowedCADJobs.includes(char.job);
+
     const erlc = state.erlcData || { currentPlayers: 0, maxPlayers: 42, queue: [], joinKey: '?????' };
     const heists = state.globalActiveHeists || [];
     const isMobileMenuOpen = state.ui.mobileMenuOpen;
@@ -38,19 +43,19 @@ export const HubView = () => {
                 <div class="w-64 h-1 bg-gov-light rounded-full overflow-hidden relative border border-gray-100">
                     <div class="h-full bg-gov-blue animate-loading-bar absolute left-0 top-0 shadow-[0_0_10px_rgba(0,0,145,0.4)]"></div>
                 </div>
-                <p class="text-[8px] font-black text-gray-300 uppercase tracking-widest mt-2">Accès CAD-OS v6.1 Platinum</p>
+                <p class="text-[8px] font-black text-gray-300 uppercase tracking-widest mt-2">Initialisation de l'interface...</p>
             </div>
         </div>`;
     }
 
-    const navSubItem = (label, icon, onClickAction, isActive = false) => `
-        <button onclick="${onClickAction}" class="w-full text-left py-3 px-4 rounded-xl flex items-center gap-3 transition-all ${isActive ? 'bg-gov-blue/5 text-gov-blue font-bold' : 'text-gray-500 hover:bg-gray-50'}">
+    const navSubItemMobile = (label, icon, action, isActive) => `
+        <button onclick="${action}" class="w-full text-left py-3 px-4 rounded-2xl flex items-center gap-3 transition-all ${isActive ? 'bg-gov-blue text-white shadow-lg' : 'text-gray-500 hover:bg-gray-100'}">
             <i data-lucide="${icon}" class="w-4 h-4"></i>
-            <span class="text-[11px] uppercase tracking-wider">${label}</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">${label}</span>
         </button>
     `;
 
-    // --- FULLSCREEN MOBILE MENU REFONDUE ---
+    // --- MOBILE MENU OVERLAY ---
     const MobileMenuOverlay = () => `
         <div class="fixed inset-0 z-[2000] bg-white flex flex-col animate-in">
             <div class="h-20 px-6 border-b border-gray-100 flex items-center justify-between shrink-0">
@@ -65,51 +70,52 @@ export const HubView = () => {
             <div class="flex-1 overflow-y-auto p-6 space-y-8">
                 <!-- ACCUEIL -->
                 <div>
-                    <button onclick="actions.setHubPanel('main')" class="w-full text-left py-2 font-black uppercase text-sm tracking-widest ${panel === 'main' ? 'text-gov-blue' : 'text-gray-400'}">Tableau de bord</button>
+                    <button onclick="actions.setHubPanel('main')" class="w-full text-left py-3 px-4 rounded-2xl font-black uppercase text-xs tracking-widest ${panel === 'main' ? 'bg-gov-blue text-white' : 'text-gray-400'}">
+                        Tableau de bord
+                    </button>
                 </div>
 
-                <!-- GROUPE ECONOMIE -->
+                <!-- ECONOMIE -->
                 <div class="space-y-2">
-                    <div class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] mb-4">Économie & Finances</div>
-                    <div class="pl-2 space-y-1">
-                        ${navSubItem('Banque (Accueil)', 'landmark', "actions.setHubPanel('bank'); actions.setBankTab('overview')", panel === 'bank' && state.activeBankTab === 'overview')}
-                        ${navSubItem('Livret Épargne', 'piggy-bank', "actions.setHubPanel('bank'); actions.setBankTab('savings')", panel === 'bank' && state.activeBankTab === 'savings')}
-                        ${navSubItem('Virements', 'send', "actions.setHubPanel('bank'); actions.setBankTab('operations')", panel === 'bank' && state.activeBankTab === 'operations')}
-                        ${navSubItem('Entreprises', 'building-2', "actions.setHubPanel('enterprise')", panel === 'enterprise')}
-                    </div>
+                    <div class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] ml-4 mb-2">Finance & Marché</div>
+                    ${navSubItemMobile('Banque', 'landmark', "actions.setHubPanel('bank'); actions.setBankTab('overview')", panel === 'bank' && state.activeBankTab === 'overview')}
+                    ${navSubItemMobile('Épargne', 'piggy-bank', "actions.setHubPanel('bank'); actions.setBankTab('savings')", panel === 'bank' && state.activeBankTab === 'savings')}
+                    ${navSubItemMobile('Virements', 'send', "actions.setHubPanel('bank'); actions.setBankTab('operations')", panel === 'bank' && state.activeBankTab === 'operations')}
+                    ${navSubItemMobile('Boutiques', 'shopping-bag', "actions.setHubPanel('enterprise')", panel === 'enterprise')}
                 </div>
 
-                <!-- GROUPE SERVICES -->
+                <!-- SERVICES PUBLICS (Conditionnel) -->
                 <div class="space-y-2">
-                    <div class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] mb-4">Services Publics</div>
-                    <div class="pl-2 space-y-1">
-                        ${navSubItem('Dispatch CAD', 'radio', "actions.setHubPanel('services'); actions.setServicesTab('dispatch')", panel === 'services' && state.activeServicesTab === 'dispatch')}
-                        ${navSubItem('Annuaire Civil', 'users', "actions.setHubPanel('services'); actions.setServicesTab('directory')", panel === 'services' && state.activeServicesTab === 'directory')}
-                        ${navSubItem('Pôle Emploi', 'briefcase', "actions.setHubPanel('jobs')", panel === 'jobs')}
-                    </div>
+                    <div class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] ml-4 mb-2">Services & Emploi</div>
+                    ${hasCADAccess ? navSubItemMobile('Central CAD', 'shield-check', "actions.setHubPanel('services')", panel === 'services') : ''}
+                    ${navSubItemMobile('Pôle Emploi', 'briefcase', "actions.setHubPanel('jobs')", panel === 'jobs')}
                 </div>
 
-                <!-- PATRIMOINE -->
+                <!-- PERSONNEL -->
                 <div class="space-y-2">
-                    <div class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] mb-4">Personnel</div>
-                    <div class="pl-2 space-y-1">
-                        ${navSubItem('Mon Sac', 'backpack', "actions.setHubPanel('assets'); actions.setAssetsTab('inventory')", panel === 'assets' && state.activeAssetsTab === 'inventory')}
-                        ${navSubItem('Mes Factures', 'file-text', "actions.setHubPanel('assets'); actions.setAssetsTab('invoices')", panel === 'assets' && state.activeAssetsTab === 'invoices')}
-                    </div>
+                    <div class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] ml-4 mb-2">Citoyenneté</div>
+                    ${navSubItemMobile('Patrimoine', 'gem', "actions.setHubPanel('assets'); actions.setAssetsTab('overview')", panel === 'assets' && state.activeAssetsTab === 'overview')}
+                    ${navSubItemMobile('Inventaire', 'backpack', "actions.setHubPanel('assets'); actions.setAssetsTab('inventory')", panel === 'assets' && state.activeAssetsTab === 'inventory')}
+                    ${navSubItemMobile('Mes Factures', 'file-text', "actions.setHubPanel('assets'); actions.setAssetsTab('invoices')", panel === 'assets' && state.activeAssetsTab === 'invoices')}
                 </div>
 
                 ${isIllegal ? `
                 <div class="space-y-2">
-                    <div class="text-[10px] font-black text-red-300 uppercase tracking-[0.2em] mb-4">Réseau Clandestin</div>
-                    <div class="pl-2 space-y-1">
-                        ${navSubItem('Dashboard', 'layout-dashboard', "actions.setHubPanel('illicit')", panel === 'illicit')}
-                    </div>
+                    <div class="text-[10px] font-black text-red-400 uppercase tracking-[0.2em] ml-4 mb-2">Fréquences Cryptées</div>
+                    ${navSubItemMobile('Dashboard Clandestin', 'skull', "actions.setHubPanel('illicit')", panel === 'illicit')}
+                </div>
+                ` : ''}
+
+                ${hasStaffAccess ? `
+                <div class="space-y-2">
+                    <div class="text-[10px] font-black text-purple-400 uppercase tracking-[0.2em] ml-4 mb-2">Administration</div>
+                    ${navSubItemMobile('Panel Staff', 'shield', "actions.setHubPanel('staff')", panel === 'staff')}
                 </div>
                 ` : ''}
 
                 <div class="mt-auto pt-10 flex flex-col gap-3">
-                    <button onclick="actions.setHubPanel('profile')" class="w-full py-4 bg-gov-light text-gov-text font-black uppercase text-[10px] tracking-widest text-center rounded-xl">Mon Profil</button>
-                    <button onclick="actions.confirmLogout()" class="w-full py-4 bg-red-50 text-red-600 font-black uppercase text-[10px] tracking-widest text-center rounded-xl">Déconnexion</button>
+                    <button onclick="actions.setHubPanel('profile')" class="w-full py-4 bg-gov-light text-gov-text font-black uppercase text-[10px] tracking-widest text-center rounded-2xl">Paramètres du profil</button>
+                    <button onclick="actions.confirmLogout()" class="w-full py-4 bg-red-50 text-red-600 font-black uppercase text-[10px] tracking-widest text-center rounded-2xl">Déconnexion</button>
                 </div>
             </div>
         </div>
@@ -201,6 +207,7 @@ export const HubView = () => {
         case 'staff': mainContent = StaffView(); break;
     }
 
+    // Helper pour les menus volants (desktop)
     const navFlyoutItem = (label, icon, onClickAction, subItems) => `
         <div class="nav-sub-item">
             <button onclick="${onClickAction}" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center justify-between transition-colors text-gov-text">
@@ -223,7 +230,6 @@ export const HubView = () => {
     <div class="flex flex-col h-screen bg-white overflow-hidden">
         ${isMobileMenuOpen ? MobileMenuOverlay() : ''}
 
-        <!-- UNIFIED TERMINAL NAVBAR -->
         <nav class="terminal-nav shrink-0">
             <div class="flex items-center gap-6 md:gap-12 h-full">
                 <div onclick="actions.setHubPanel('main')" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer transition-transform hover:scale-[0.8]">
@@ -240,17 +246,15 @@ export const HubView = () => {
                             Économie <i data-lucide="chevron-down" class="w-3 h-3"></i>
                         </button>
                         <div class="nav-dropdown rounded-none">
-                            ${navFlyoutItem('Banque de l\'État', 'landmark', "actions.setHubPanel('bank'); actions.setBankTab('overview');", [
+                            ${navFlyoutItem('Banque Nationale', 'landmark', "actions.setHubPanel('bank'); actions.setBankTab('overview');", [
                                 { label: 'Comptes Courants', icon: 'layout-grid', action: "actions.setHubPanel('bank'); actions.setBankTab('overview');" },
                                 { label: 'Livret d\'Épargne', icon: 'piggy-bank', action: "actions.setHubPanel('bank'); actions.setBankTab('savings');" },
-                                { label: 'Nouveau Virement', icon: 'send', action: "actions.setHubPanel('bank'); actions.setBankTab('operations');" },
-                                { label: 'Archives Flux', icon: 'scroll-text', action: "actions.setHubPanel('bank'); actions.setBankTab('history');" }
+                                { label: 'Opérations', icon: 'send', action: "actions.setHubPanel('bank'); actions.setBankTab('operations');" },
+                                { label: 'Historique Flux', icon: 'scroll-text', action: "actions.setHubPanel('bank'); actions.setBankTab('history');" }
                             ])}
-                            ${navFlyoutItem('Registre Commercial', 'building-2', "actions.setHubPanel('enterprise'); actions.setEnterpriseTab('market');", [
-                                { label: 'Marché Public', icon: 'shopping-cart', action: "actions.setHubPanel('enterprise'); actions.setEnterpriseTab('market');" },
-                                { label: 'Annuaire Corp.', icon: 'building', action: "actions.setHubPanel('enterprise'); actions.setEnterpriseTab('directory');" },
-                                { label: 'Mes Affiliations', icon: 'briefcase', action: "actions.setHubPanel('enterprise'); actions.setEnterpriseTab('my_companies');" }
-                            ])}
+                            <button onclick="actions.setHubPanel('enterprise')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors text-gov-text">
+                                <i data-lucide="shopping-bag" class="w-4 h-4 text-gov-blue"></i> Boutiques & Commerces
+                            </button>
                         </div>
                     </div>
 
@@ -259,12 +263,26 @@ export const HubView = () => {
                             Services Publics <i data-lucide="chevron-down" class="w-3 h-3"></i>
                         </button>
                         <div class="nav-dropdown rounded-none">
-                            ${navFlyoutItem('Services Civils (CAD)', 'shield-check', "actions.setHubPanel('services');", [
-                                { label: 'Terminal Dispatch', icon: 'radio', action: "actions.setHubPanel('services'); actions.setServicesTab('dispatch');" },
-                                { label: 'Annuaire Citoyen', icon: 'folder-search', action: "actions.setHubPanel('services'); actions.setServicesTab('directory');" }
-                            ])}
+                            ${hasCADAccess ? navFlyoutItem('Terminal CAD', 'shield-check', "actions.setHubPanel('services');", [
+                                { label: 'Dispatch', icon: 'radio', action: "actions.setHubPanel('services'); actions.setServicesTab('dispatch');" },
+                                { label: 'Annuaire Citoyen', icon: 'users', action: "actions.setHubPanel('services'); actions.setServicesTab('directory');" }
+                            ]) : ''}
                             <button onclick="actions.setHubPanel('jobs')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors text-gov-text">
                                 <i data-lucide="briefcase" class="w-4 h-4 text-gov-blue"></i> Pôle Emploi
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <button class="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${panel === 'assets' ? 'text-gov-blue' : 'text-gray-400 hover:text-gov-text'} flex items-center gap-2">
+                            Patrimoine <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                        </button>
+                        <div class="nav-dropdown rounded-none">
+                            <button onclick="actions.setHubPanel('assets'); actions.setAssetsTab('overview');" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-gov-text">
+                                <i data-lucide="pie-chart" class="w-4 h-4 text-gov-blue"></i> Vue d'ensemble
+                            </button>
+                            <button onclick="actions.setHubPanel('assets'); actions.setAssetsTab('inventory');" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-gov-text">
+                                <i data-lucide="backpack" class="w-4 h-4 text-gov-blue"></i> Inventaire Sac
                             </button>
                         </div>
                     </div>
@@ -279,6 +297,24 @@ export const HubView = () => {
                 <button onclick="actions.toggleMobileMenu()" class="lg:hidden p-2.5 bg-gov-light text-gov-text rounded-sm transition-transform active:scale-95">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
+                
+                <div class="nav-item hidden lg:flex h-full">
+                    <div class="flex items-center gap-4 cursor-pointer p-2.5 hover:bg-gov-light rounded-sm transition-all h-full">
+                        <div class="avatar-container w-10 h-10 shrink-0">
+                            <img src="${u.avatar}" class="avatar-img grayscale border border-gray-200 p-0.5 relative z-10 object-cover">
+                            ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] max-w-none z-20 pointer-events-none">` : ''}
+                            <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white z-30"></div>
+                        </div>
+                    </div>
+                    <div class="nav-dropdown right-0 left-auto rounded-none shadow-2xl">
+                        <button onclick="actions.setHubPanel('profile')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors">
+                            <i data-lucide="user" class="w-4 h-4 text-gov-blue"></i> Mon Profil
+                        </button>
+                        <button onclick="actions.confirmLogout()" class="w-full text-left p-4 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-red-600 transition-colors">
+                            <i data-lucide="log-out" class="w-4 h-4"></i> Déconnexion
+                        </button>
+                    </div>
+                </div>
             </div>
         </nav>
 
