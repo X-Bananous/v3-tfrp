@@ -49,6 +49,27 @@ export const HubView = () => {
         </div>`;
     }
 
+    // Menu Item Helper with nested support
+    const navSubItem = (label, icon, onClickAction) => `
+        <button onclick="${onClickAction}" class="w-full text-left p-3 hover:bg-gov-light text-[9px] font-black uppercase tracking-widest flex items-center gap-3 transition-colors text-gray-600 hover:text-gov-blue">
+            <i data-lucide="${icon}" class="w-3.5 h-3.5"></i> ${label}
+        </button>
+    `;
+
+    const navFlyoutItem = (label, icon, onClickAction, subItems) => `
+        <div class="nav-sub-item">
+            <button onclick="${onClickAction}" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center justify-between transition-colors text-gov-text">
+                <div class="flex items-center gap-4">
+                    <i data-lucide="${icon}" class="w-4 h-4 text-gov-blue"></i> ${label}
+                </div>
+                <i data-lucide="chevron-right" class="w-3 h-3 text-gray-400"></i>
+            </button>
+            <div class="nav-sub-dropdown">
+                ${subItems.map(item => navSubItem(item.label, item.icon, item.action)).join('')}
+            </div>
+        </div>
+    `;
+
     // --- FULLSCREEN MOBILE MENU ---
     const MobileMenuOverlay = () => `
         <div class="fixed inset-0 z-[2000] bg-white flex flex-col animate-in">
@@ -90,8 +111,6 @@ export const HubView = () => {
         case 'main':
             mainContent = `
                 <div class="animate-in p-8 max-w-7xl mx-auto w-full space-y-12 pb-24">
-                    
-                    <!-- Header Welcome Section -->
                     <div class="flex flex-col justify-start gap-4 border-b border-gray-100 pb-12">
                         <div>
                             <div class="text-[10px] font-black text-gov-blue uppercase tracking-[0.5em] mb-4">Portail Officiel de l'État</div>
@@ -102,10 +121,7 @@ export const HubView = () => {
                         </div>
                     </div>
 
-                    <!-- PRIORITY ROW: SERVER INFO & NEWS (SIDE-BY-SIDE ON PC) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        
-                        <!-- ERLC SERVER STATUS WIDGET -->
                         <div class="bg-gov-light p-8 border border-gray-200 shadow-xl rounded-none relative overflow-hidden flex flex-col justify-between group">
                             <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-700">
                                 <i data-lucide="server" class="w-24 h-24 text-black"></i>
@@ -133,7 +149,6 @@ export const HubView = () => {
                             </div>
                         </div>
 
-                        <!-- LIVE NEWS CARD -->
                         <div class="bg-gov-text text-white p-8 rounded-none shadow-2xl flex flex-col justify-between relative overflow-hidden group">
                             <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/5 rounded-none blur-2xl group-hover:bg-white/10 transition-all"></div>
                             <div class="relative z-10">
@@ -165,74 +180,35 @@ export const HubView = () => {
                         </div>
                     </div>
 
-                    <!-- GRID DES BULLES (Quick Access) -->
                     <div class="space-y-6">
                         <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.4em] flex items-center gap-4 px-2">
                              <span class="w-8 h-px bg-gray-200"></span> TERMINAUX ACCRÉDITÉS
                         </h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            
                             <button onclick="actions.setHubPanel('bank')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
                                 <div class="w-16 h-16 bg-gov-light rounded-none flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner">
                                     <i data-lucide="landmark" class="w-8 h-8"></i>
                                 </div>
                                 <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Banque</h4>
-                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Trésorerie & Flux</p>
                             </button>
-
                             <button onclick="actions.setHubPanel('assets')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
                                 <div class="w-16 h-16 bg-gov-light rounded-none flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner">
                                     <i data-lucide="gem" class="w-8 h-8"></i>
                                 </div>
                                 <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Patrimoine</h4>
-                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Biens & Documents</p>
                             </button>
-
                             <button onclick="actions.setHubPanel('jobs')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
                                 <div class="w-16 h-16 bg-gov-light rounded-none flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner">
                                     <i data-lucide="briefcase" class="w-8 h-8"></i>
                                 </div>
                                 <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Emploi</h4>
-                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Marché du Travail</p>
                             </button>
-
                             <button onclick="actions.setHubPanel('enterprise')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
                                 <div class="w-16 h-16 bg-gov-light rounded-none flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner">
                                     <i data-lucide="building-2" class="w-8 h-8"></i>
                                 </div>
                                 <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Corporations</h4>
-                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Registre Commercial</p>
                             </button>
-
-                            ${['leo', 'lafd', 'ladot', 'lawyer', 'maire', 'adjoint', 'juge', 'procureur'].includes(char.job) ? `
-                                <button onclick="actions.setHubPanel('services')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-blue-100 hover:border-blue-500 transition-all duration-500">
-                                    <div class="w-16 h-16 bg-blue-50 text-gov-blue rounded-none flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner">
-                                        <i data-lucide="shield-check" class="w-8 h-8"></i>
-                                    </div>
-                                    <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Service Public</h4>
-                                    <p class="text-[10px] text-blue-400 font-black uppercase tracking-widest mt-2">Terminal CAD-OS</p>
-                                </button>
-                            ` : ''}
-
-                            ${isIllegal ? `
-                                <button onclick="actions.setHubPanel('illicit')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-red-100 hover:border-gov-red transition-all duration-500">
-                                    <div class="w-16 h-16 bg-red-50 text-gov-red rounded-none flex items-center justify-center mb-6 group-hover:bg-gov-red group-hover:text-white transition-all duration-500 shadow-inner">
-                                        <i data-lucide="skull" class="w-8 h-8"></i>
-                                    </div>
-                                    <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Clandestinité</h4>
-                                    <p class="text-[10px] text-gov-red font-black uppercase tracking-widest mt-2">Fréquence Cryptée</p>
-                                </button>
-                            ` : ''}
-
-                            ${hasStaffAccess ? `
-                                <button onclick="actions.setHubPanel('staff')" class="gov-card p-8 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-purple-100 hover:border-purple-600 transition-all duration-500">
-                                    <div class="w-16 h-16 bg-purple-50 text-purple-600 rounded-none flex items-center justify-center mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-500 shadow-inner">
-                                        <i data-lucide="shield" class="w-8 h-8"></i>
-                                    </div>
-                                    <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Administration</h4>
-                                    <p class="text-[10px] text-purple-500 font-black uppercase tracking-widest mt-2">Fondation TFRP</p>
-                                </button>
-                            ` : ''}
                         </div>
                     </div>
                 </div>`;
@@ -250,7 +226,6 @@ export const HubView = () => {
 
     return `
     <div class="flex flex-col h-screen bg-white overflow-hidden">
-        
         ${isMobileMenuOpen ? MobileMenuOverlay() : ''}
 
         <!-- UNIFIED TERMINAL NAVBAR -->
@@ -261,7 +236,7 @@ export const HubView = () => {
                     <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
                 </div>
 
-                <!-- Desktop Menu -->
+                <!-- Desktop Menu Nested Dropdowns -->
                 <div class="hidden lg:flex items-center gap-1 h-full">
                     <button onclick="actions.setHubPanel('main')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${panel === 'main' ? 'text-gov-blue border-b-2 border-gov-blue' : 'text-gray-400 hover:text-gov-text'}">Tableau de bord</button>
                     
@@ -270,12 +245,18 @@ export const HubView = () => {
                             Économie <i data-lucide="chevron-down" class="w-3 h-3"></i>
                         </button>
                         <div class="nav-dropdown rounded-none">
-                            <button onclick="actions.setHubPanel('bank')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors">
-                                <i data-lucide="landmark" class="w-4 h-4 text-gov-blue"></i> Banque de l'État
-                            </button>
-                            <button onclick="actions.setHubPanel('enterprise')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors">
-                                <i data-lucide="building-2" class="w-4 h-4 text-gov-blue"></i> Registre Commercial
-                            </button>
+                            ${navFlyoutItem('Banque de l\'État', 'landmark', "actions.setHubPanel('bank'); actions.setBankTab('overview');", [
+                                { label: 'Comptes Courants', icon: 'layout-grid', action: "actions.setHubPanel('bank'); actions.setBankTab('overview');" },
+                                { label: 'Livret d\'Épargne', icon: 'piggy-bank', action: "actions.setHubPanel('bank'); actions.setBankTab('savings');" },
+                                { label: 'Nouveau Virement', icon: 'send', action: "actions.setHubPanel('bank'); actions.setBankTab('operations');" },
+                                { label: 'Archives Flux', icon: 'scroll-text', action: "actions.setHubPanel('bank'); actions.setBankTab('history');" }
+                            ])}
+                            ${navFlyoutItem('Registre Commercial', 'building-2', "actions.setHubPanel('enterprise'); actions.setEnterpriseTab('market');", [
+                                { label: 'Marché Public', icon: 'shopping-cart', action: "actions.setHubPanel('enterprise'); actions.setEnterpriseTab('market');" },
+                                { label: 'Annuaire Corp.', icon: 'building', action: "actions.setHubPanel('enterprise'); actions.setEnterpriseTab('directory');" },
+                                { label: 'Mes Affiliations', icon: 'briefcase', action: "actions.setHubPanel('enterprise'); actions.setEnterpriseTab('my_companies');" },
+                                { label: 'Mes Rendez-vous', icon: 'calendar-clock', action: "actions.setHubPanel('enterprise'); actions.setEnterpriseTab('appointments');" }
+                            ])}
                         </div>
                     </div>
 
@@ -284,30 +265,89 @@ export const HubView = () => {
                             Services Publics <i data-lucide="chevron-down" class="w-3 h-3"></i>
                         </button>
                         <div class="nav-dropdown rounded-none">
-                            <button onclick="actions.setHubPanel('services')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors">
-                                <i data-lucide="shield-check" class="w-4 h-4 text-gov-blue"></i> Services Civils (CAD)
-                            </button>
-                            <button onclick="actions.setHubPanel('jobs')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors">
+                            ${navFlyoutItem('Services Civils (CAD)', 'shield-check', "actions.setHubPanel('services');", [
+                                { label: 'Terminal Dispatch', icon: 'radio', action: "actions.setHubPanel('services'); actions.setServicesTab('dispatch');" },
+                                { label: 'Annuaire Citoyen', icon: 'folder-search', action: "actions.setHubPanel('services'); actions.setServicesTab('directory');" },
+                                { label: 'Rapports & Décrets', icon: 'file-plus', action: "actions.setHubPanel('services'); actions.setServicesTab('reports');" },
+                                { label: 'Radar Véhicules', icon: 'car-front', action: "actions.setHubPanel('services'); actions.setServicesTab('map');" }
+                            ])}
+                            <button onclick="actions.setHubPanel('jobs')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors text-gov-text">
                                 <i data-lucide="briefcase" class="w-4 h-4 text-gov-blue"></i> Pôle Emploi California
                             </button>
                         </div>
                     </div>
 
-                    <button onclick="actions.setHubPanel('assets')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${panel === 'assets' ? 'text-gov-blue' : 'text-gray-400'}">Patrimoine</button>
+                    <div class="nav-item">
+                        <button class="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${panel === 'assets' ? 'text-gov-blue' : 'text-gray-400 hover:text-gov-text'} flex items-center gap-2">
+                            Patrimoine <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                        </button>
+                        <div class="nav-dropdown rounded-none">
+                            <button onclick="actions.setHubPanel('assets'); actions.setAssetsTab('overview');" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-gov-text">
+                                <i data-lucide="pie-chart" class="w-4 h-4 text-gov-blue"></i> Dashboard Fortune
+                            </button>
+                            <button onclick="actions.setHubPanel('assets'); actions.setAssetsTab('inventory');" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-gov-text">
+                                <i data-lucide="backpack" class="w-4 h-4 text-gov-blue"></i> Contenu du Sac
+                            </button>
+                            <button onclick="actions.setHubPanel('assets'); actions.setAssetsTab('invoices');" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-gov-text">
+                                <i data-lucide="file-text" class="w-4 h-4 text-gov-blue"></i> Registre Factures
+                            </button>
+                        </div>
+                    </div>
                     
                     <div class="h-6 w-px bg-gray-100 mx-2"></div>
                     
                     ${isIllegal ? `
-                        <button onclick="actions.setHubPanel('illicit')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all">Réseau Clandestin</button>
+                        <div class="nav-item">
+                            <button class="px-6 py-2 text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all flex items-center gap-2">
+                                Réseau Clandestin <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                            </button>
+                            <div class="nav-dropdown rounded-none border-red-100">
+                                <button onclick="actions.setHubPanel('illicit'); actions.setIllicitTab('dashboard');" class="w-full text-left p-4 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-red-600">
+                                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard Réseau
+                                </button>
+                                <button onclick="actions.setHubPanel('illicit'); actions.setIllicitTab('gangs');" class="w-full text-left p-4 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-red-600">
+                                    <i data-lucide="users" class="w-4 h-4"></i> Syndicats
+                                </button>
+                                <button onclick="actions.setHubPanel('illicit'); actions.setIllicitTab('heists');" class="w-full text-left p-4 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-red-600">
+                                    <i data-lucide="timer" class="w-4 h-4"></i> Opérations
+                                </button>
+                                <button onclick="actions.setHubPanel('illicit'); actions.setIllicitTab('drugs');" class="w-full text-left p-4 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-red-600">
+                                    <i data-lucide="flask-conical" class="w-4 h-4"></i> Laboratoires
+                                </button>
+                                <button onclick="actions.setHubPanel('illicit'); actions.setIllicitTab('market');" class="w-full text-left p-4 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-red-600">
+                                    <i data-lucide="shopping-cart" class="w-4 h-4"></i> Marché de l'Ombre
+                                </button>
+                            </div>
+                        </div>
                     ` : ''}
                     
                     ${hasStaffAccess ? `
-                        <button onclick="actions.setHubPanel('staff')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest text-purple-600 hover:bg-purple-50 border border-transparent hover:border-purple-100 transition-all">Administration</button>
+                        <div class="nav-item">
+                            <button class="px-6 py-2 text-[10px] font-black uppercase tracking-widest text-purple-600 hover:bg-purple-50 border border-transparent hover:border-purple-100 transition-all flex items-center gap-2">
+                                Administration <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                            </button>
+                            <div class="nav-dropdown rounded-none border-purple-100">
+                                <button onclick="actions.setHubPanel('staff'); actions.setStaffTab('citizens');" class="w-full text-left p-4 hover:bg-purple-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-purple-600">
+                                    <i data-lucide="users" class="w-4 h-4"></i> Population
+                                </button>
+                                <button onclick="actions.setHubPanel('staff'); actions.setStaffTab('economy');" class="w-full text-left p-4 hover:bg-purple-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-purple-600">
+                                    <i data-lucide="coins" class="w-4 h-4"></i> Finances
+                                </button>
+                                <button onclick="actions.setHubPanel('staff'); actions.setStaffTab('illegal');" class="w-full text-left p-4 hover:bg-purple-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-purple-600">
+                                    <i data-lucide="skull" class="w-4 h-4"></i> Criminel
+                                </button>
+                                <button onclick="actions.setHubPanel('staff'); actions.setStaffTab('sanctions');" class="w-full text-left p-4 hover:bg-purple-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-purple-600">
+                                    <i data-lucide="shield-alert" class="w-4 h-4"></i> Sanctions
+                                </button>
+                                <button onclick="actions.setHubPanel('staff'); actions.setStaffTab('sessions');" class="w-full text-left p-4 hover:bg-purple-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-purple-600">
+                                    <i data-lucide="server" class="w-4 h-4"></i> Cycles Session
+                                </button>
+                            </div>
+                        </div>
                     ` : ''}
                 </div>
             </div>
 
-            <!-- Profile & Notifications -->
             <div class="flex items-center gap-2 md:gap-4 h-full">
                 <button onclick="actions.setHubPanel('notifications')" class="p-2.5 text-gray-400 hover:text-gov-blue hover:bg-gov-light rounded-sm transition-all relative">
                     <i data-lucide="bell" class="w-5 h-5"></i>
@@ -354,7 +394,6 @@ export const HubView = () => {
         <main class="flex-1 overflow-y-auto bg-white custom-scrollbar">
             ${mainContent}
         </main>
-
     </div>
     `;
 };

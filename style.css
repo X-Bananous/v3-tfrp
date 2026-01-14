@@ -36,7 +36,7 @@ html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; fo
     background: #fff;
     border: 1px solid #E5E5E5;
     box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-    min-width: 220px;
+    min-width: 240px;
     opacity: 0;
     transform: translateY(10px);
     pointer-events: none;
@@ -48,6 +48,30 @@ html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; fo
 .nav-item:hover .nav-dropdown {
     opacity: 1;
     transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Sub-dropdown (Flyout) */
+.nav-sub-item { position: relative; width: 100%; }
+.nav-sub-dropdown {
+    position: absolute;
+    top: -8px;
+    left: 100%;
+    background: #fff;
+    border: 1px solid #E5E5E5;
+    box-shadow: 15px 15px 40px rgba(0,0,0,0.1);
+    min-width: 200px;
+    opacity: 0;
+    transform: translateX(10px);
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 8px;
+    padding: 0.5rem;
+}
+
+.nav-sub-item:hover .nav-sub-dropdown {
+    opacity: 1;
+    transform: translateX(0);
     pointer-events: auto;
 }
 
@@ -69,7 +93,6 @@ html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; fo
 /* Fix pour l'avatar et les décorations Discord */
 .avatar-container {
     position: relative;
-    /* On ne met pas overflow: hidden ici pour laisser la décoration dépasser */
 }
 
 .avatar-img {
@@ -77,7 +100,7 @@ html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; fo
     height: 100%;
     border-radius: 9999px;
     object-cover: cover;
-    overflow: hidden; /* Le cercle est ici */
+    overflow: hidden;
 }
 
 /* Barre de chargement ultra nerveuse */
