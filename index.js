@@ -101,10 +101,11 @@ client.once("ready", async () => {
 
 /**
  * GESTION DES NOUVEAUX JOUEURS
+ * Suppression de l'attribution automatique de clé lootbox
  */
 client.on("guildMemberAdd", async member => {
     if (member.user.bot) return;
-    console.log(`[Système] Nouvel utilisateur : ${member.user.tag}. Pas de récompense automatique.`);
+    console.log(`[Système] Nouvel utilisateur : ${member.user.tag}. Pas de clé attribuée.`);
 });
 
 /**
@@ -118,12 +119,17 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
         const boostDiff = newBoosts - oldBoosts;
         try {
             await addWheelKey(newMember.id, boostDiff);
+            console.log(`[Lootbox] ${boostDiff} Clé(s) offerte(s) à ${newMember.user.username} pour boost.`);
+            
             const boostEmbed = new EmbedBuilder()
                 .setTitle("🚀 Merci pour le Boost !")
                 .setColor(0xFF73FA)
                 .setDescription(`Incroyable ! Vous avez boosté le serveur **TFRP**.\n\nEn récompense, vous recevez **${boostDiff} Clé(s) de Lootbox**.\n\nUtilisez-les dès maintenant sur le panel : ${BOT_CONFIG.SITE_URL}`)
                 .setTimestamp();
-            await newMember.send({ embeds: [boostEmbed] }).catch(() => {});
+                
+            await newMember.send({ embeds: [boostEmbed] }).catch(() => {
+                console.log(`[Lootbox] Impossible d'envoyer le MP de boost à ${newMember.user.tag}`);
+            });
         } catch (e) {
             console.error("[Lootbox] Erreur don clé boost:", e);
         }
@@ -152,6 +158,7 @@ client.on("interactionCreate", async interaction => {
       await interaction.deferUpdate();
       await updateCustomsStatus(client);
     }
+    
     if (interaction.customId === 'btn_back_to_list') {
       await interaction.deferUpdate();
       await personnagesCommand.execute(interaction, true);

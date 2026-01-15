@@ -14,8 +14,8 @@ export const BankView = () => {
             if (t.type === 'deposit') { icon = 'plus'; color = 'text-emerald-500'; label = 'Crédit Cash'; sign = '+'; bgIcon = 'bg-emerald-50 text-emerald-600'; }
             else if (t.type === 'withdraw') { icon = 'minus'; color = 'text-gray-400'; label = 'Débit Cash'; sign = '-'; bgIcon = 'bg-gray-100 text-gray-400'; }
             else if (t.type === 'transfer') {
-                if (t.receiver_id === state.activeCharacter.id) { icon = 'arrow-down-left'; color = 'text-blue-500'; label = 'Virement Reçu'; sign = '+'; bgIcon = 'bg-blue-50 text-blue-600'; }
-                else { icon = 'arrow-up-right'; color = 'text-red-500'; label = 'Virement Envoyé'; sign = '-'; bgIcon = 'bg-red-50 text-red-600'; }
+                if (t.receiver_id === state.activeCharacter.id) { icon = 'arrow-down-left'; color = 'text-blue-500'; label = 'Reçu'; sign = '+'; bgIcon = 'bg-blue-50 text-blue-600'; }
+                else { icon = 'arrow-up-right'; color = 'text-red-500'; label = 'Envoyé'; sign = '-'; bgIcon = 'bg-red-50 text-red-600'; }
             } else { icon = 'shield-check'; label = 'Ajustement'; color = t.amount >= 0 ? 'text-emerald-500' : 'text-red-500'; sign = t.amount >= 0 ? '+' : '-'; bgIcon = 'bg-purple-50 text-purple-600'; }
 
             return `
@@ -55,7 +55,7 @@ export const BankView = () => {
                 </div>
             </div>
 
-            <!-- DASHBOARD UNIQUE : Pas de sous-navbar, tout par scroll -->
+            <!-- DASHBOARD UNIQUE : Pas d'onglets, tout par scroll vertical -->
             <div class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12">
                 <div class="max-w-7xl mx-auto space-y-16 pb-32">
                     

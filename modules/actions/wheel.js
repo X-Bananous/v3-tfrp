@@ -6,13 +6,13 @@ import { ui } from '../ui.js';
 const SoundEngine = {
     ctx: null,
     init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-    tick() {
+    tick(freq = 150) {
         if (!this.ctx) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.1);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.5, this.ctx.currentTime + 0.1);
         gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
         osc.connect(gain); gain.connect(this.ctx.destination);
         osc.start(); osc.stop(this.ctx.currentTime + 0.1);
@@ -67,7 +67,15 @@ export const openCrate = async (crateIdx) => {
     state.openingCrateIdx = crateIdx;
     render();
 
+    // Séquence audio Sonar
+    let currentFreq = 200;
+    const audioInterval = setInterval(() => {
+        SoundEngine.tick(currentFreq);
+        currentFreq += 100;
+    }, 150);
+
     setTimeout(async () => {
+        clearInterval(audioInterval);
         const totalWeight = WHEEL_REWARDS.reduce((acc, r) => acc + r.weight, 0);
         let randomVal = Math.random() * totalWeight;
         let winner = WHEEL_REWARDS[0];
