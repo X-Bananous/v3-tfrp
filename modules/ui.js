@@ -1,3 +1,4 @@
+
 import { state } from './state.js';
 
 // --- BUTTON LOADER HELPER ---
@@ -108,45 +109,45 @@ export const showModal = ({ title, content, confirmText = 'Confirmer', cancelTex
     const isConfirmOnly = !onConfirm && !onCancel;
 
     const html = `
-        <div id="global-modal" data-closable="${isClosable}" class="fixed inset-0 z-[2000] flex items-center justify-center p-4 transition-all duration-300 bg-black/70 backdrop-blur-sm">
+        <div id="global-modal" data-closable="${isClosable}" class="fixed inset-0 z-[2000] flex items-center justify-center p-2 md:p-4 transition-all duration-300 bg-black/70 backdrop-blur-sm">
             <div class="absolute inset-0" onclick="${isClosable ? 'ui.closeModal()' : ''}"></div>
             
-            <div class="glass-panel w-full max-w-lg rounded-none overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)] transition-all duration-300 relative z-10 flex flex-col border border-white/10 bg-white border-t-8 ${theme.borderTop}">
+            <div class="glass-panel w-full max-w-lg rounded-[32px] md:rounded-none overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)] transition-all duration-300 relative z-10 flex flex-col border border-white/10 bg-white border-t-8 ${theme.borderTop}">
                 
-                <div class="p-10 pt-12">
+                <div class="p-6 md:p-10 pt-8 md:pt-12">
                     <div class="flex flex-col items-center text-center mb-8">
-                        <div class="w-20 h-20 rounded-none ${theme.bg} flex items-center justify-center ${theme.color} mb-6 border ${theme.border} shadow-xl transform -rotate-3">
-                            <i data-lucide="${theme.icon}" class="w-10 h-10"></i>
+                        <div class="w-16 h-16 md:w-20 md:h-20 rounded-[24px] md:rounded-none ${theme.bg} flex items-center justify-center ${theme.color} mb-6 border ${theme.border} shadow-xl transform -rotate-3">
+                            <i data-lucide="${theme.icon}" class="w-8 h-8 md:w-10 md:h-10"></i>
                         </div>
-                        <h3 class="text-3xl font-black text-gov-text mb-2 tracking-tighter uppercase italic leading-none">${title}</h3>
-                        <div class="text-[9px] font-black uppercase tracking-[0.3em] ${theme.color} opacity-80 flex items-center gap-2">
+                        <h3 class="text-2xl md:text-3xl font-black text-gov-text mb-2 tracking-tighter uppercase italic leading-none">${title}</h3>
+                        <div class="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] ${theme.color} opacity-80 flex items-center gap-2">
                              <span class="w-4 h-px bg-current opacity-30"></span> 
                              Protocole de l'État de Californie
                              <span class="w-4 h-px bg-current opacity-30"></span>
                         </div>
                     </div>
 
-                    <div class="text-gray-500 text-sm leading-relaxed max-h-[40vh] overflow-y-auto custom-scrollbar px-4 mb-10 font-medium text-center italic">
+                    <div class="text-gray-500 text-xs md:text-sm leading-relaxed max-h-[45vh] overflow-y-auto custom-scrollbar px-2 md:px-4 mb-10 font-medium text-center italic">
                         ${content}
                     </div>
 
                     <div class="flex flex-col gap-3">
                         ${confirmText ? `
-                            <button id="modal-confirm" class="w-full py-5 rounded-none font-black text-[11px] uppercase tracking-[0.2em] text-white transition-all shadow-xl ${theme.btn} transform active:scale-95">
+                            <button id="modal-confirm" class="w-full py-4 md:py-5 rounded-2xl md:rounded-none font-black text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-white transition-all shadow-xl ${theme.btn} transform active:scale-95">
                                 ${confirmText}
                             </button>
                         ` : ''}
                         
                         ${(onConfirm || cancelText) && !isConfirmOnly && isClosable ? `
-                            <button id="modal-cancel" class="w-full py-4 rounded-none text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gov-text transition-all border border-transparent">
+                            <button id="modal-cancel" class="w-full py-3 md:py-4 rounded-none text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gov-text transition-all border border-transparent">
                                 ${cancelText}
                             </button>
                         ` : ''}
                     </div>
                 </div>
                 
-                <div class="bg-gov-light/50 py-5 px-10 flex justify-center items-center border-t border-gray-100">
-                    <div class="marianne-block uppercase font-black text-gov-text scale-[0.6] opacity-40">
+                <div class="bg-gov-light/50 py-4 md:py-5 px-10 flex justify-center items-center border-t border-gray-100">
+                    <div class="marianne-block uppercase font-black text-gov-text scale-[0.5] md:scale-[0.6] opacity-40">
                         <div class="text-[10px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red font-black">Liberté • Égalité • Justice</div>
                         <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES ADMINISTRATION</div>
                     </div>

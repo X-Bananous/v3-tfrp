@@ -1,3 +1,4 @@
+
 import {
   Client,
   GatewayIntentBits,
@@ -100,25 +101,11 @@ client.once("ready", async () => {
 
 /**
  * GESTION DES NOUVEAUX JOUEURS
+ * Suppression de l'attribution automatique de clé lootbox
  */
 client.on("guildMemberAdd", async member => {
     if (member.user.bot) return;
-    try {
-        await addWheelKey(member.id, 1);
-        console.log(`[Lootbox] 1 Clé offerte à ${member.user.username} (Nouveau joueur)`);
-        
-        const welcomeEmbed = new EmbedBuilder()
-            .setTitle("🎁 Cadeau de Bienvenue")
-            .setColor(0x00FF00)
-            .setDescription(`Bienvenue sur **Team French Roleplay** <@${member.id}> !\n\nUne **Clé de Lootbox** vient d'être ajoutée à votre compte pour fêter votre arrivée.\n\nTentez votre chance sur le panel : ${BOT_CONFIG.SITE_URL}`)
-            .setTimestamp();
-            
-        await member.send({ embeds: [welcomeEmbed] }).catch(() => {
-            console.log(`[Lootbox] Impossible d'envoyer le MP de bienvenue à ${member.user.tag}`);
-        });
-    } catch (e) {
-        console.error("[Lootbox] Erreur don clé nouveau joueur:", e);
-    }
+    console.log(`[Système] Nouvel utilisateur : ${member.user.tag}. Pas de clé attribuée.`);
 });
 
 /**
