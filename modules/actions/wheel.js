@@ -131,10 +131,23 @@ const generateClaimCertificate = (reward) => {
     canvas.width = 800;
     canvas.height = 500;
     const ctx = canvas.getContext('2d');
+    const verificationCode = Math.random().toString(36).substring(2, 12).toUpperCase();
 
     // Background
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, 800, 500);
+
+    // Diagonal Watermark Pattern (Anti-falsification)
+    ctx.save();
+    ctx.rotate(-Math.PI / 6);
+    ctx.font = 'black 14px Inter';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+    for (let x = -500; x < 1500; x += 150) {
+        for (let y = -500; y < 1500; y += 80) {
+            ctx.fillText('TFRP OFFICIAL CLAIM • ', x, y);
+        }
+    }
+    ctx.restore();
 
     // Border
     ctx.strokeStyle = reward.color || '#3b82f6';
@@ -147,12 +160,12 @@ const generateClaimCertificate = (reward) => {
     ctx.fillText('CERTIFICAT DE GAIN OFFICIEL', 50, 60);
     ctx.fillStyle = reward.color || '#3b82f6';
     ctx.font = 'black 12px Inter';
-    ctx.fillText('TEAM FRENCH ROLEPLAY • LOOTBOX v4.6', 50, 85);
+    ctx.fillText('TEAM FRENCH ROLEPLAY • PROTOCOLE v6.4', 50, 85);
 
     // Identity
     ctx.fillStyle = '#64748b';
     ctx.font = 'bold 14px Inter';
-    ctx.fillText('IDENTITÉ DISCORD', 50, 150);
+    ctx.fillText('IDENTITÉ DISCORD VÉRIFIÉE', 50, 150);
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 28px Inter';
     ctx.fillText(state.user.username.toUpperCase(), 50, 185);
@@ -163,7 +176,7 @@ const generateClaimCertificate = (reward) => {
     // Reward
     ctx.fillStyle = '#64748b';
     ctx.font = 'bold 14px Inter';
-    ctx.fillText('LOT REMPORTÉ', 50, 280);
+    ctx.fillText('LOT ATTRIBUÉ', 50, 280);
     ctx.fillStyle = reward.color || '#ffffff';
     ctx.font = 'italic black 48px Inter';
     ctx.fillText(reward.label.toUpperCase(), 50, 340);
@@ -175,85 +188,85 @@ const generateClaimCertificate = (reward) => {
     ctx.fillText('GÉNÉRÉ LE : ' + dateStr, 50, 450);
     ctx.fillText('VALIDE UNIQUEMENT VIA TICKET SUPPORT DISCORD', 50, 465);
 
+    // Verification Code (Unique)
+    ctx.fillStyle = reward.color || '#ffffff';
+    ctx.font = 'mono 10px Courier';
+    ctx.fillText('AUTH_CODE: ' + verificationCode, 550, 465);
+
     // Download
     const link = document.createElement('a');
-    link.download = `TFRP_GAIN_${state.user.username}_${Date.now()}.png`;
+    link.download = `TFRP_CERTIFICATE_${verificationCode}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
+    
+    return verificationCode;
 };
 
 const showSecureScreenshotModal = (reward) => {
-    let timeLeft = 10;
-    const ticketId = Math.random().toString(36).substring(2, 10).toUpperCase();
+    let downloaded = false;
     
     ui.showModal({
-        title: "RÉCOMPENSE D'EXCEPTION",
+        title: "LOT D'EXCEPTION DÉVÉROUILLÉ",
         isClosable: false,
         type: 'warning',
         content: `
-            <div id="reward-certificate" class="text-center p-6 bg-[#0f172a] rounded-[32px] border border-white/5 relative overflow-hidden shadow-2xl">
-                <div class="absolute -right-10 -top-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
+            <div id="reward-certificate-box" class="text-center p-8 bg-[#0f172a] rounded-[40px] border border-white/5 relative overflow-hidden shadow-2xl">
+                <div class="absolute -right-20 -top-20 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl"></div>
                 
-                <div class="mb-6">
-                    <div class="text-[9px] text-blue-400 font-black uppercase tracking-[0.4em] mb-1">Dossier Certifié</div>
-                    <div class="text-3xl font-black text-white italic tracking-tighter uppercase" style="color: ${reward.color}">${reward.label}</div>
+                <div class="mb-8">
+                    <div class="text-[10px] text-blue-400 font-black uppercase tracking-[0.4em] mb-2">Preuve de Gain Certifiée</div>
+                    <div class="text-4xl font-black text-white italic tracking-tighter uppercase leading-none" style="color: ${reward.color}">${reward.label}</div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 text-left border-t border-b border-white/5 py-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left border-t border-b border-white/5 py-8 mb-8">
                     <div>
                         <div class="text-[8px] text-gray-500 font-black uppercase tracking-widest mb-1">Bénéficiaire</div>
-                        <div class="text-xs font-bold text-white truncate">${state.user.username}</div>
+                        <div class="text-sm font-bold text-white truncate">${state.user.username}</div>
                     </div>
                     <div>
                         <div class="text-[8px] text-gray-500 font-black uppercase tracking-widest mb-1">UID Discord</div>
-                        <div class="text-xs font-mono font-bold text-blue-400">${state.user.id}</div>
+                        <div class="text-sm font-mono font-bold text-blue-400">${state.user.id}</div>
                     </div>
                 </div>
 
-                <div class="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl">
-                    <p class="text-[9px] text-red-400 font-black uppercase leading-relaxed">
-                        Le système va générer une preuve d'identité.<br>Transmettez le fichier téléchargé sur le Discord.
+                <div class="bg-red-500/10 border border-red-500/20 p-5 rounded-3xl">
+                    <p class="text-[10px] text-red-400 font-black uppercase leading-relaxed">
+                        VERROUILLAGE SYSTÈME : <br>Téléchargez votre certificat pour débloquer la session.
                     </p>
                 </div>
             </div>
             
-            <div class="mt-6">
-                <button id="download-btn" onclick="actions.captureReward('${reward.label}')" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue-900/40 transition-all flex items-center justify-center gap-3">
-                    <i data-lucide="download" class="w-4 h-4"></i> GÉNÉRER MON CERTIFICAT
+            <div class="mt-8">
+                <button id="download-btn-secure" onclick="actions.handleSecureDownload('${reward.label}')" class="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-blue-900/40 transition-all flex items-center justify-center gap-3">
+                    <i data-lucide="download" class="w-5 h-5"></i> TÉLÉCHARGER LE CERTIFICAT
                 </button>
             </div>
         `,
-        confirmText: `Attente (${timeLeft}s)`
+        confirmText: "Fermer (Verrouillé)"
     });
 
-    window.actions.captureReward = () => {
-        generateClaimCertificate(reward);
-        ui.showToast("Certificat généré avec succès !", "success");
-    };
-
-    const btn = document.getElementById('modal-confirm');
-    if (btn) {
-        btn.disabled = true;
-        btn.classList.add('opacity-40');
-        
-        const timer = setInterval(() => {
-            timeLeft--;
-            btn.textContent = `Fermer (${timeLeft}s)`;
-            
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                btn.disabled = false;
-                btn.textContent = "TERMINER";
-                btn.classList.remove('opacity-40');
-                btn.classList.add('bg-gov-text', 'text-white');
-                
-                btn.onclick = () => {
-                    ui.forceCloseModal();
-                    render();
-                };
-            }
-        }, 1000);
+    const confirmBtn = document.getElementById('modal-confirm');
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.classList.add('opacity-30', 'cursor-not-allowed');
     }
+
+    window.actions.handleSecureDownload = () => {
+        generateClaimCertificate(reward);
+        downloaded = true;
+        ui.showToast("Certificat authentifié et téléchargé.", "success");
+        
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.classList.remove('opacity-30', 'cursor-not-allowed');
+            confirmBtn.classList.add('bg-emerald-600', 'text-white');
+            confirmBtn.textContent = "SESSION TERMINÉE";
+            confirmBtn.onclick = () => {
+                ui.forceCloseModal();
+                render();
+            };
+        }
+    };
 };
 
 export const claimMoneyReward = async (value, charId) => {
