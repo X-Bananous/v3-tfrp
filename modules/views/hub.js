@@ -23,6 +23,9 @@ export const HubView = () => {
     const isFounder = state.user?.isFounder || state.adminIds.includes(state.user?.id);
     const hasStaffAccess = Object.keys(state.user.permissions || {}).some(k => state.user.permissions[k] === true) || isFounder;
     const isIllegal = char.alignment === 'illegal';
+    const job = char.job || 'unemployed';
+    const hasServicesAccess = !isIllegal && ['leo', 'lafd', 'ladot', 'lawyer', 'maire', 'adjoint', 'juge', 'procureur'].includes(job);
+    
     const erlc = state.erlcData || { currentPlayers: 0, maxPlayers: 42, queue: [], joinKey: '?????' };
     const heists = state.globalActiveHeists || [];
     const isMobileMenuOpen = state.ui.mobileMenuOpen;
@@ -72,7 +75,7 @@ export const HubView = () => {
 
     // --- FULLSCREEN MOBILE MENU ---
     const MobileMenuOverlay = () => `
-        <div class="fixed inset-0 z-[2000] bg-white flex flex-col animate-in">
+        <div class="fixed inset-0 z-[2000] bg-white flex flex-col animate-in overflow-hidden">
             <div class="h-20 px-6 border-b border-gray-100 flex items-center justify-between shrink-0">
                 <div class="marianne-block uppercase font-black text-gov-text scale-75 origin-left">
                     <div class="text-[8px] tracking-widest border-b-2 border-gov-red pb-0.5 mb-1 text-gov-red uppercase font-black">État de Californie</div>
@@ -82,25 +85,81 @@ export const HubView = () => {
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
             </div>
-            <div class="flex-1 overflow-y-auto p-8 flex flex-col gap-6">
-                <button onclick="actions.setHubPanel('main')" class="w-full text-left py-4 border-b border-gray-100 font-black uppercase text-xs tracking-widest ${panel === 'main' ? 'text-gov-blue' : 'text-gray-400'}">Tableau de bord</button>
-                <button onclick="actions.setHubPanel('bank')" class="w-full text-left py-4 border-b border-gray-100 font-black uppercase text-xs tracking-widest ${panel === 'bank' ? 'text-gov-blue' : 'text-gray-400'}">Banque</button>
-                <button onclick="actions.setHubPanel('enterprise')" class="w-full text-left py-4 border-b border-gray-100 font-black uppercase text-xs tracking-widest ${panel === 'enterprise' ? 'text-gov-blue' : 'text-gray-400'}">Entreprises</button>
-                <button onclick="actions.setHubPanel('services')" class="w-full text-left py-4 border-b border-gray-100 font-black uppercase text-xs tracking-widest ${panel === 'services' ? 'text-gov-blue' : 'text-gray-400'}">Services Publics</button>
-                <button onclick="actions.setHubPanel('jobs')" class="w-full text-left py-4 border-b border-gray-100 font-black uppercase text-xs tracking-widest ${panel === 'jobs' ? 'text-gov-blue' : 'text-gray-400'}">Pôle Emploi</button>
-                <button onclick="actions.setHubPanel('assets')" class="w-full text-left py-4 border-b border-gray-100 font-black uppercase text-xs tracking-widest ${panel === 'assets' ? 'text-gov-blue' : 'text-gray-400'}">Patrimoine</button>
+            <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 custom-scrollbar">
+                
+                <button onclick="actions.setHubPanel('main')" class="w-full text-left py-4 border-b border-gray-100 font-black uppercase text-sm tracking-widest ${panel === 'main' ? 'text-gov-blue' : 'text-gray-400'} flex items-center gap-3">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </button>
+
+                <!-- ECONOMIE MOBILE ACCORDION -->
+                <div class="space-y-2">
+                    <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <span class="w-4 h-px bg-gray-200"></span> ÉCONOMIE
+                    </div>
+                    <div class="pl-4 space-y-4 border-l border-gray-100">
+                        <button onclick="actions.setHubPanel('bank'); actions.setBankTab('overview');" class="w-full text-left font-bold uppercase text-xs tracking-wider ${panel === 'bank' ? 'text-gov-blue' : 'text-gray-500'} flex items-center gap-3">
+                            <i data-lucide="landmark" class="w-4 h-4"></i> Banque d'État
+                        </button>
+                        <button onclick="actions.setHubPanel('enterprise'); actions.setEnterpriseTab('market');" class="w-full text-left font-bold uppercase text-xs tracking-wider ${panel === 'enterprise' ? 'text-gov-blue' : 'text-gray-500'} flex items-center gap-3">
+                            <i data-lucide="shopping-bag" class="w-4 h-4"></i> Marché Public
+                        </button>
+                        <button onclick="actions.setHubPanel('enterprise'); actions.setEnterpriseTab('directory');" class="w-full text-left font-bold uppercase text-xs tracking-wider ${panel === 'enterprise' && state.activeEnterpriseTab === 'directory' ? 'text-gov-blue' : 'text-gray-500'} flex items-center gap-3">
+                            <i data-lucide="building" class="w-4 h-4"></i> Annuaire Corp.
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SERVICES MOBILE ACCORDION -->
+                <div class="space-y-2">
+                    <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <span class="w-4 h-px bg-gray-200"></span> SERVICES
+                    </div>
+                    <div class="pl-4 space-y-4 border-l border-gray-100">
+                        ${hasServicesAccess ? `
+                            <button onclick="actions.setHubPanel('services');" class="w-full text-left font-bold uppercase text-xs tracking-wider ${panel === 'services' ? 'text-gov-blue' : 'text-gray-500'} flex items-center gap-3">
+                                <i data-lucide="shield-check" class="w-4 h-4"></i> Terminal CAD
+                            </button>
+                        ` : ''}
+                        <button onclick="actions.setHubPanel('jobs')" class="w-full text-left font-bold uppercase text-xs tracking-wider ${panel === 'jobs' ? 'text-gov-blue' : 'text-gray-500'} flex items-center gap-3">
+                            <i data-lucide="briefcase" class="w-4 h-4"></i> Pôle Emploi
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PATRIMOINE MOBILE -->
+                <div class="space-y-2">
+                    <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <span class="w-4 h-px bg-gray-200"></span> PATRIMOINE
+                    </div>
+                    <div class="pl-4 space-y-4 border-l border-gray-100">
+                        <button onclick="actions.setHubPanel('assets'); actions.setAssetsTab('inventory');" class="w-full text-left font-bold uppercase text-xs tracking-wider ${panel === 'assets' && state.activeAssetsTab === 'inventory' ? 'text-gov-blue' : 'text-gray-500'} flex items-center gap-3">
+                            <i data-lucide="backpack" class="w-4 h-4"></i> Mon Sac
+                        </button>
+                        <button onclick="actions.setHubPanel('assets'); actions.setAssetsTab('invoices');" class="w-full text-left font-bold uppercase text-xs tracking-wider ${panel === 'assets' && state.activeAssetsTab === 'invoices' ? 'text-gov-blue' : 'text-gray-500'} flex items-center gap-3">
+                            <i data-lucide="file-text" class="w-4 h-4"></i> Mes Factures
+                        </button>
+                    </div>
+                </div>
                 
                 ${isIllegal ? `
-                    <button onclick="actions.setHubPanel('illicit')" class="w-full text-left py-4 border-b border-red-100 font-black uppercase text-xs tracking-widest text-red-600">Réseau Clandestin</button>
+                    <button onclick="actions.setHubPanel('illicit')" class="w-full text-left py-4 border-b border-red-100 font-black uppercase text-sm tracking-widest text-red-600 flex items-center gap-3">
+                        <i data-lucide="skull" class="w-5 h-5"></i> Réseau Clandestin
+                    </button>
                 ` : ''}
                 
                 ${hasStaffAccess ? `
-                    <button onclick="actions.setHubPanel('staff')" class="w-full text-left py-4 border-b border-purple-100 font-black uppercase text-xs tracking-widest text-purple-600">Administration</button>
+                    <button onclick="actions.setHubPanel('staff')" class="w-full text-left py-4 border-b border-purple-100 font-black uppercase text-sm tracking-widest text-purple-600 flex items-center gap-3">
+                        <i data-lucide="shield" class="w-5 h-5"></i> Administration
+                    </button>
                 ` : ''}
 
-                <div class="mt-auto pt-10 flex flex-col gap-4">
-                    <button onclick="actions.setHubPanel('profile')" class="w-full py-4 bg-gov-light text-gov-text font-black uppercase text-[10px] tracking-widest text-center">Mon Profil</button>
-                    <button onclick="actions.confirmLogout()" class="w-full py-4 bg-red-50 text-red-600 font-black uppercase text-[10px] tracking-widest text-center">Déconnexion</button>
+                <div class="mt-auto pt-10 flex flex-col gap-3">
+                    <button onclick="actions.setHubPanel('profile')" class="w-full py-4 bg-gov-light text-gov-text font-black uppercase text-[10px] tracking-widest text-center flex items-center justify-center gap-2">
+                        <i data-lucide="user" class="w-4 h-4"></i> Mon Profil
+                    </button>
+                    <button onclick="actions.confirmLogout()" class="w-full py-4 bg-red-50 text-red-600 font-black uppercase text-[10px] tracking-widest text-center flex items-center justify-center gap-2">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> Déconnexion
+                    </button>
                 </div>
             </div>
         </div>
@@ -265,12 +324,12 @@ export const HubView = () => {
                             Services Publics <i data-lucide="chevron-down" class="w-3 h-3"></i>
                         </button>
                         <div class="nav-dropdown rounded-none">
-                            ${navFlyoutItem('Services Civils (CAD)', 'shield-check', "actions.setHubPanel('services');", [
+                            ${hasServicesAccess ? navFlyoutItem('Services Civils (CAD)', 'shield-check', "actions.setHubPanel('services');", [
                                 { label: 'Terminal Dispatch', icon: 'radio', action: "actions.setHubPanel('services'); actions.setServicesTab('dispatch');" },
                                 { label: 'Annuaire Citoyen', icon: 'folder-search', action: "actions.setHubPanel('services'); actions.setServicesTab('directory');" },
                                 { label: 'Rapports & Décrets', icon: 'file-plus', action: "actions.setHubPanel('services'); actions.setServicesTab('reports');" },
                                 { label: 'Radar Véhicules', icon: 'car-front', action: "actions.setHubPanel('services'); actions.setServicesTab('map');" }
-                            ])}
+                            ]) : ''}
                             <button onclick="actions.setHubPanel('jobs')" class="w-full text-left p-4 hover:bg-gov-light text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-colors text-gov-text">
                                 <i data-lucide="briefcase" class="w-4 h-4 text-gov-blue"></i> Pôle Emploi California
                             </button>

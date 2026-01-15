@@ -25,10 +25,14 @@ const refreshBanner = `
 export const ServicesView = () => {
     const char = state.activeCharacter;
     const job = char?.job || 'unemployed';
+    const isIllegal = char?.alignment === 'illegal';
+    
     const isLawyer = job === 'lawyer';
     const isGov = job === 'maire' || job === 'adjoint';
     const isJustice = job === 'juge' || job === 'procureur';
-    const isAllowed = ['leo', 'lafd', 'ladot', 'lawyer', 'maire', 'adjoint', 'juge', 'procureur'].includes(job);
+    
+    // ACCES STRICT : Pas d'illégal et doit avoir un métier accrédité
+    const isAllowed = !isIllegal && ['leo', 'lafd', 'ladot', 'lawyer', 'maire', 'adjoint', 'juge', 'procureur'].includes(job);
 
     if (!isAllowed) {
          return `<div class="h-full flex flex-col items-center justify-center text-gray-500 animate-fade-in bg-[#050505]">
@@ -36,7 +40,8 @@ export const ServicesView = () => {
                 <i data-lucide="shield-off" class="w-10 h-10 opacity-50"></i>
             </div>
             <h2 class="text-xl font-bold text-white mb-2 italic uppercase tracking-tighter">Accès Refusé</h2>
-            <p class="text-sm uppercase font-black tracking-widest text-gray-600">Terminal réservé au personnel accrédité</p>
+            <p class="text-sm uppercase font-black tracking-widest text-gray-600">Terminal réservé au personnel civil accrédité</p>
+            ${isIllegal ? '<p class="text-[10px] text-red-500 font-bold uppercase mt-4 tracking-widest bg-red-500/10 px-4 py-1.5 rounded-full border border-red-500/20 shadow-lg">Interdit aux membres du secteur clandestin</p>' : ''}
          </div>`;
     }
 
