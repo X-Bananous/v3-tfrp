@@ -4,6 +4,14 @@
 html, body { height: 100%; width: 100%; overflow-x: hidden; background: #fff; font-family: 'Inter', sans-serif; }
 #app { min-height: 100vh; display: flex; flex-direction: column; }
 
+/* Hold-to-Purge Animation */
+.hold-to-purge {
+    transition: transform 0.1s ease;
+}
+.hold-to-purge:active {
+    transform: scale(0.98);
+}
+
 /* Marianne Block DSFR Style */
 .marianne-block {
     border-left: 2px solid #000091;

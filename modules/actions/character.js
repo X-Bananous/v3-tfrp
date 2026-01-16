@@ -4,11 +4,97 @@ import { render, router } from '../utils.js';
 import { ui, toggleBtnLoading } from '../ui.js';
 import { loadCharacters, adminCreateCharacter } from '../services.js';
 
+let holdTimer = null;
+let holdStartTime = 0;
+
 export const startEditCharacter = (charId) => {
     const char = state.characters.find(c => c.id === charId);
     if (char) {
         state.editingCharacter = char;
         router('create');
+    }
+};
+
+export const viewCensusDetails = (charId) => {
+    const char = state.characters.find(c => c.id === charId);
+    if (!char || !char.infos) return;
+
+    const info = char.infos;
+    let content = '';
+
+    if (info.type === 'permanent') {
+        content = `
+            <div class="space-y-4">
+                <div class="text-[10px] font-black text-gov-blue uppercase tracking-widest">Note d'intention (Permanent)</div>
+                <div class="p-6 bg-gov-light rounded-2xl border border-gray-200 italic text-sm leading-relaxed text-gray-600">
+                    "${info.reason || 'Aucune justification enregistrée.'}"
+                </div>
+            </div>
+        `;
+    } else {
+        content = `
+            <div class="space-y-6">
+                <div class="text-[10px] font-black text-orange-600 uppercase tracking-widest">Détails Session (Temporaire)</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
+                        <div class="text-[8px] text-orange-400 font-black uppercase mb-1">Objectif</div>
+                        <div class="text-xs font-bold text-gray-700">${info.goal || 'N/A'}</div>
+                    </div>
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
+                        <div class="text-[8px] text-orange-400 font-black uppercase mb-1">Partenaires</div>
+                        <div class="text-xs font-bold text-gray-700">${info.partners || 'N/A'}</div>
+                    </div>
+                </div>
+                <div class="p-6 bg-gov-light rounded-2xl border border-gray-200 italic text-xs leading-relaxed text-gray-600">
+                    <div class="text-[8px] text-gray-400 font-black uppercase mb-2 not-italic">Contexte Scénaristique</div>
+                    "${info.context || 'Aucun contexte fourni.'}"
+                </div>
+            </div>
+        `;
+    }
+
+    ui.showModal({
+        title: "Dossier de Recensement",
+        content: content,
+        confirmText: "Fermer",
+        type: info.type === 'temporaire' ? 'warning' : 'default'
+    });
+};
+
+// --- HOLD TO PURGE LOGIC ---
+export const startHoldPurge = (e, charId) => {
+    e.preventDefault();
+    holdStartTime = Date.now();
+    const progressEl = document.getElementById(`hold-progress-${charId}`);
+    
+    holdTimer = setInterval(() => {
+        const elapsed = Date.now() - holdStartTime;
+        const percent = Math.min((elapsed / 5000) * 100, 100);
+        
+        if (progressEl) progressEl.style.width = `${percent}%`;
+
+        if (elapsed >= 5000) {
+            clearInterval(holdTimer);
+            executeFlashWipe(charId);
+        }
+    }, 50);
+};
+
+export const stopHoldPurge = () => {
+    if (holdTimer) clearInterval(holdTimer);
+    const elements = document.querySelectorAll('[id^="hold-progress-"]');
+    elements.forEach(el => el.style.width = '0%');
+};
+
+const executeFlashWipe = async (charId) => {
+    ui.showToast("Wipe Flash en cours...", "warning");
+    const { error } = await state.supabase.from('characters').delete().eq('id', charId).eq('user_id', state.user.id);
+    if (!error) {
+        ui.showToast("Dossier temporaire effacé de la base.", "success");
+        await loadCharacters();
+        render();
+    } else {
+        ui.showToast("Erreur lors du wipe.", "error");
     }
 };
 
@@ -32,10 +118,8 @@ export const submitCharacter = async (e) => {
         return; 
     }
 
-    // Determine User ID (Self or Admin Target)
     const targetUserId = state.isAdminEditing ? state.adminTargetUserId : state.user.id;
 
-    // Logic for Status and Job preservation
     let status = state.isAdminEditing ? 'accepted' : 'pending';
     let job = 'unemployed';
     let isNotified = false;
@@ -48,20 +132,18 @@ export const submitCharacter = async (e) => {
         isNotified = oldChar.is_notified;
         verifiedBy = oldChar.verifiedby;
 
-        // Reset to pending and clear validator if names changed (Player edit)
         if (!state.isAdminEditing && (data.first_name !== oldChar.first_name || data.last_name !== oldChar.last_name)) {
             status = 'pending';
             isNotified = false;
             verifiedBy = null;
         }
 
-        // Reset job only if alignment changed
         if (data.alignment !== oldChar.alignment) {
             job = 'unemployed';
         }
     }
 
-    // GESTION DES INFOS COMPLÉMENTAIRES (JSON)
+    // GESTION DES INFOS COMPLÉMENTAIRES (Stockées sur le Perso désormais)
     const charInfos = {};
     if (!state.editingCharacter && state.characters.length > 0 && !state.isAdminEditing) {
         charInfos.type = data.char_type;
@@ -72,14 +154,6 @@ export const submitCharacter = async (e) => {
             charInfos.partners = data.info_temp_partners;
             charInfos.context = data.info_temp_context;
         }
-        
-        // Mise à jour de la table profiles comme demandé par l'utilisateur
-        const { error: profileError } = await state.supabase
-            .from('profiles')
-            .update({ infos: charInfos })
-            .eq('id', state.user.id);
-            
-        if (profileError) console.warn("Note: Échec de la mise à jour des infos profil", profileError);
     }
 
     const charData = {
@@ -92,6 +166,7 @@ export const submitCharacter = async (e) => {
         user_id: targetUserId,
         alignment: data.alignment,
         job: job,
+        infos: charInfos, // Ajout du champ infos au personnage
         is_notified: state.isAdminEditing ? true : isNotified,
         verifiedby: state.isAdminEditing ? state.user.id : verifiedBy
     };

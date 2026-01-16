@@ -89,17 +89,21 @@ export const ProfileHubView = () => {
                 ${characters.map(char => {
                     const isAccepted = char.status === 'accepted';
                     const isDeleting = !!char.deletion_requested_at;
+                    const isTemp = char.infos?.type === 'temporaire';
                     const statusColor = isDeleting ? 'orange' : isAccepted ? 'emerald' : 'amber';
                     
                     return `
                         <div class="gov-card flex flex-col bg-white rounded-[32px] border border-gray-100 shadow-xl overflow-hidden transition-all hover:shadow-2xl hover:-translate-y-1">
                             <div class="p-8 pb-4 flex justify-between items-start">
                                 <div class="w-14 h-14 bg-gov-light rounded-2xl flex items-center justify-center border border-gray-100 shadow-inner">
-                                    <i data-lucide="user" class="w-7 h-7 text-gray-400"></i>
+                                    <i data-lucide="${isTemp ? 'timer' : 'user'}" class="w-7 h-7 ${isTemp ? 'text-orange-500' : 'text-gray-400'}"></i>
                                 </div>
-                                <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase border tracking-widest bg-${statusColor}-50 text-${statusColor}-600 border-${statusColor}-200">
-                                    ${isDeleting ? 'PURGE EN COURS' : char.status.toUpperCase()}
-                                </span>
+                                <div class="flex flex-col items-end gap-1">
+                                    <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase border tracking-widest bg-${statusColor}-50 text-${statusColor}-600 border-${statusColor}-200">
+                                        ${isDeleting ? 'PURGE EN COURS' : char.status.toUpperCase()}
+                                    </span>
+                                    ${isTemp ? '<span class="text-[7px] font-black text-orange-600 uppercase tracking-tighter">DOSSIER TEMPORAIRE</span>' : ''}
+                                </div>
                             </div>
 
                             <div class="p-8 pt-2 flex-1">
@@ -130,12 +134,29 @@ export const ProfileHubView = () => {
                                         CHARGER LE DOSSIER
                                     </button>
                                     <div class="flex gap-2">
+                                        ${char.infos ? `
+                                            <button onclick="actions.viewCensusDetails('${char.id}')" class="flex-1 py-2.5 bg-white text-gray-500 hover:text-gov-blue border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
+                                                <i data-lucide="file-text" class="w-3.5 h-3.5"></i> NOTES
+                                            </button>
+                                        ` : ''}
                                         <button onclick="actions.startEditCharacter('${char.id}')" class="flex-1 py-2.5 bg-white text-gray-500 hover:text-gov-blue border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
                                             <i data-lucide="settings" class="w-3.5 h-3.5"></i> ÉDITER
                                         </button>
-                                        <button onclick="actions.requestCharacterDeletion('${char.id}')" class="flex-1 py-2.5 bg-white text-gray-400 hover:text-gov-red border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
-                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> PURGER
-                                        </button>
+                                        
+                                        ${isTemp ? `
+                                            <button 
+                                                onmousedown="actions.startHoldPurge(event, '${char.id}')" 
+                                                onmouseup="actions.stopHoldPurge()" 
+                                                onmouseleave="actions.stopHoldPurge()"
+                                                class="hold-to-purge flex-1 py-2.5 bg-red-50 text-red-600 border border-red-100 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 relative overflow-hidden">
+                                                <div id="hold-progress-${char.id}" class="absolute left-0 top-0 h-full bg-red-600/20 w-0 pointer-events-none"></div>
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5 relative z-10"></i> <span class="relative z-10">WIPE FLASH</span>
+                                            </button>
+                                        ` : `
+                                            <button onclick="actions.requestCharacterDeletion('${char.id}')" class="flex-1 py-2.5 bg-white text-gray-400 hover:text-gov-red border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> PURGER
+                                            </button>
+                                        `}
                                     </div>
                                 ` : isDeleting ? `
                                     <div class="text-center mb-2">

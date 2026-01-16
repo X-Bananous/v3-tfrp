@@ -12,6 +12,7 @@ import { StaffPermissionsView } from './staff/permissions.js';
 import { StaffSessionsView } from './staff/sessions.js';
 import { StaffLogsView } from './staff/logs.js';
 import { StaffSanctionsView } from './staff/sanctions.js';
+import { StaffSecurityView } from './staff/security.js';
 
 const refreshBanner = `
     <div class="flex flex-col md:flex-row items-center justify-between px-6 py-3 bg-purple-900/10 border-b border-purple-500/10 gap-3 shrink-0 z-20 relative">
@@ -20,7 +21,7 @@ const refreshBanner = `
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
             </div>
-            <span><span class="font-bold">Protocol Terminal</span> • Accès Fondation v6.0</span>
+            <span><span class="font-bold">Protocol Terminal</span> • Accès Fondation v6.5</span>
         </div>
         <button onclick="actions.refreshCurrentView()" id="refresh-data-btn" class="text-[10px] font-black uppercase tracking-widest text-purple-400 hover:text-white flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap">
             <i data-lucide="refresh-cw" class="w-3 h-3"></i> Sync Monde
@@ -45,22 +46,44 @@ export const StaffView = () => {
         permissions: StaffPermissionsView,
         sessions: StaffSessionsView,
         logs: StaffLogsView,
-        sanctions: StaffSanctionsView
+        sanctions: StaffSanctionsView,
+        security: StaffSecurityView
     };
 
     const content = (tabMap[activeTabId] || StaffCitizensView)();
     const isOnDuty = state.onDutyStaff?.some(s => s.id === state.user.id);
 
+    const tabs = [
+        { id: 'citizens', label: 'Population', icon: 'users' },
+        { id: 'economy', label: 'Finances', icon: 'coins' },
+        { id: 'illegal', label: 'Criminel', icon: 'skull' },
+        { id: 'sanctions', label: 'Sanctions', icon: 'shield-alert' },
+        { id: 'sessions', label: 'Sessions', icon: 'server' },
+        { id: 'security', label: 'Sécurité', icon: 'lock' }
+    ];
+
     return `
         <div class="h-full flex flex-col bg-[#050505] overflow-hidden animate-fade-in relative">
             ${refreshBanner}
+            
             <div class="px-8 pb-4 pt-6 flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 bg-[#050505] shrink-0 relative z-30">
-                <div>
-                    <h2 class="text-4xl font-black text-white flex items-center gap-4 uppercase italic tracking-tighter">
-                        <i data-lucide="shield" class="w-10 h-10 text-purple-500"></i> Fondation
-                    </h2>
-                    <p class="text-[10px] text-purple-500/60 font-black uppercase tracking-widest mt-1">Régistration : ${activeTabId.toUpperCase()} • ${isOnDuty ? 'En Service' : 'Consultation'}</p>
+                <div class="flex items-center gap-6">
+                    <div>
+                        <h2 class="text-4xl font-black text-white flex items-center gap-4 uppercase italic tracking-tighter">
+                            <i data-lucide="shield" class="w-10 h-10 text-purple-500"></i> Fondation
+                        </h2>
+                        <p class="text-[10px] text-purple-500/60 font-black uppercase tracking-widest mt-1">Noyau de Gestion v6.5 • ${activeTabId.toUpperCase()}</p>
+                    </div>
+                    
+                    <div class="hidden xl:flex gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
+                        ${tabs.map(t => `
+                            <button onclick="actions.setStaffTab('${t.id}')" class="px-4 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${activeTabId === t.id ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-500 hover:text-white hover:bg-white/5'} flex items-center gap-2">
+                                <i data-lucide="${t.icon}" class="w-3.5 h-3.5"></i> ${t.label}
+                            </button>
+                        `).join('')}
+                    </div>
                 </div>
+
                 <div class="flex gap-4">
                     ${isOnDuty ? 
                         `<button onclick="actions.confirmToggleDuty(true)" class="px-6 py-2.5 rounded-xl text-[10px] font-black bg-emerald-600 text-white transition-all flex items-center gap-3 uppercase tracking-widest shadow-xl"><i data-lucide="user-check" class="w-4 h-4"></i> LIVE</button>` : 
@@ -68,6 +91,7 @@ export const StaffView = () => {
                     }
                 </div>
             </div>
+
             <div class="flex-1 p-8 overflow-y-auto custom-scrollbar relative min-h-0">
                 ${content}
             </div>
