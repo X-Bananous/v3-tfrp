@@ -1,4 +1,3 @@
-
 import { CONFIG } from '../config.js';
 import { state } from '../state.js';
 
@@ -34,18 +33,20 @@ export const CharacterCreateView = () => {
                 <form onsubmit="actions.submitCharacter(event)" class="space-y-12 relative z-10">
                     
                     <!-- 1. TYPE DE DOSSIER -->
-                    <div class="space-y-8">
-                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest border-b-4 border-[#000091] w-fit pb-1">1. Type de dossier administratif</h3>
+                    <div class="space-y-8 ${isEdit ? 'opacity-60 pointer-events-none' : ''}">
+                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest border-b-4 border-[#000091] w-fit pb-1">
+                            1. Type de dossier administratif ${isEdit ? '<span class="text-[10px] text-gray-400 ml-2">(Verrouillé)</span>' : ''}
+                        </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <label class="cursor-pointer group">
-                                <input type="radio" name="char_type" value="permanent" class="peer sr-only" ${charType === 'permanent' ? 'checked' : ''} onchange="window.updateFormType('permanent')">
+                                <input type="radio" name="char_type" value="permanent" class="peer sr-only" ${charType === 'permanent' ? 'checked' : ''} ${isEdit ? 'disabled' : ''} onchange="window.updateFormType('permanent')">
                                 <div class="p-6 border-2 border-gray-100 peer-checked:border-gov-blue peer-checked:bg-blue-50/50 rounded-2xl transition-all">
                                     <div class="font-black uppercase text-sm mb-1">Citoyen Permanent</div>
                                     <p class="text-[10px] text-gray-500 italic uppercase font-bold">Dossier long-terme avec archivage total.</p>
                                 </div>
                             </label>
                             <label class="cursor-pointer group">
-                                <input type="radio" name="char_type" value="temporary" class="peer sr-only" ${charType === 'temporary' ? 'checked' : ''} onchange="window.updateFormType('temporary')">
+                                <input type="radio" name="char_type" value="temporary" class="peer sr-only" ${charType === 'temporary' ? 'checked' : ''} ${isEdit ? 'disabled' : ''} onchange="window.updateFormType('temporary')">
                                 <div class="p-6 border-2 border-gray-100 peer-checked:border-orange-500 peer-checked:bg-orange-50/50 rounded-2xl transition-all">
                                     <div class="font-black uppercase text-sm mb-1">Visa Temporaire</div>
                                     <p class="text-[10px] text-gray-500 italic uppercase font-bold">Valide pour une seule session de jeu.</p>
@@ -83,14 +84,15 @@ export const CharacterCreateView = () => {
                         </div>
                     </div>
 
-                    <!-- 3. DETAILS JSON (Dynamique) -->
+                    <!-- 3. DETAILS JSON (Dynamique) - Masqué en mode édition -->
+                    ${!isEdit ? `
                     <div id="dynamic-details" class="space-y-8 animate-in">
                         ${charType === 'permanent' ? `
                             <div class="space-y-6">
                                 <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest border-b-4 border-[#000091] w-fit pb-1">3. Justification du dossier</h3>
                                 <div class="space-y-3">
                                     <label class="text-[11px] font-black text-gray-600 uppercase tracking-widest block">Pourquoi ce personnage ? (Objectif & Lore - 500 car. min)</label>
-                                    <textarea name="info_reason" required minlength="500" class="w-full p-4 border-2 border-gray-100 rounded-2xl h-48 text-sm italic outline-none focus:border-gov-blue transition-all" placeholder="Détaillez ici votre vision long terme pour ce citoyen...">${char.infos?.reason || ''}</textarea>
+                                    <textarea name="info_reason" required minlength="500" class="w-full p-4 border-2 border-gray-100 rounded-2xl h-48 text-sm italic outline-none focus:border-gov-blue transition-all" placeholder="Détaillez ici votre vision long terme pour ce citoyen..."></textarea>
                                 </div>
                             </div>
                         ` : `
@@ -99,24 +101,25 @@ export const CharacterCreateView = () => {
                                 <div class="grid grid-cols-1 gap-6">
                                     <div class="space-y-2">
                                         <label class="text-[11px] font-black text-gray-600 uppercase tracking-widest block">L'objectif (Scène précise)</label>
-                                        <input type="text" name="info_goal" value="${char.infos?.goal || ''}" required placeholder="Ex: Remplacement temporaire pour un braquage..." class="w-full p-4 border-b-2 border-gray-200 focus:border-orange-500 outline-none text-sm font-bold">
+                                        <input type="text" name="info_goal" required placeholder="Ex: Remplacement temporaire pour un braquage..." class="w-full p-4 border-b-2 border-gray-200 focus:border-orange-500 outline-none text-sm font-bold">
                                     </div>
                                     <div class="space-y-2">
                                         <label class="text-[11px] font-black text-gray-600 uppercase tracking-widest block">Contexte Global</label>
-                                        <textarea name="info_context" required class="w-full p-4 border-2 border-gray-100 rounded-xl h-24 text-sm outline-none focus:border-orange-500 transition-all">${char.infos?.context || ''}</textarea>
+                                        <textarea name="info_context" required class="w-full p-4 border-2 border-gray-100 rounded-xl h-24 text-sm outline-none focus:border-orange-500 transition-all"></textarea>
                                     </div>
                                     <div class="space-y-2">
                                         <label class="text-[11px] font-black text-gray-600 uppercase tracking-widest block">Intervenants impliqués</label>
-                                        <input type="text" name="info_who" value="${char.infos?.with_who || ''}" required placeholder="Ex: Gang des Vagos, Unité LSPD Alpha..." class="w-full p-4 border-b-2 border-gray-200 focus:border-orange-500 outline-none text-sm font-bold">
+                                        <input type="text" name="info_who" required placeholder="Ex: Gang des Vagos, Unité LSPD Alpha..." class="w-full p-4 border-b-2 border-gray-200 focus:border-orange-500 outline-none text-sm font-bold">
                                     </div>
                                 </div>
                             </div>
                         `}
                     </div>
+                    ` : ''}
 
                     <!-- 4. ORIENTATION -->
                     <div class="space-y-8">
-                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest border-b-4 border-[#000091] w-fit pb-1">4. Orientation Socio-Professionnelle</h3>
+                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest border-b-4 border-[#000091] w-fit pb-1">${isEdit ? '3' : '4'}. Orientation Socio-Professionnelle</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <label class="cursor-pointer group">
                                 <input type="radio" name="alignment" value="legal" class="peer sr-only" required ${char.alignment !== 'illegal' ? 'checked' : ''}>
@@ -140,7 +143,7 @@ export const CharacterCreateView = () => {
                     <div class="pt-10 border-t border-gray-100 flex flex-col md:flex-row justify-end gap-6 items-center">
                         <button type="button" onclick="actions.cancelCreate()" class="text-xs font-black text-gray-400 uppercase tracking-widest hover:text-red-600 transition-colors">Annuler la procédure</button>
                         <button type="submit" class="w-full md:w-auto px-12 py-5 bg-[#000091] text-white font-black text-sm uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all">
-                            DÉPOSER LE DOSSIER
+                            ${isEdit ? 'METTRE À JOUR LE DOSSIER' : 'DÉPOSER LE DOSSIER'}
                         </button>
                     </div>
                 </form>

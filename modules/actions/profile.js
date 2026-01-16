@@ -168,3 +168,71 @@ export const cancelCharacterDeletion = async (charId) => {
         ui.showToast("Erreur lors de l'annulation.", "error");
     }
 };
+
+export const showGlobalAudit = async (charId) => {
+    const char = state.characters.find(c => c.id === charId);
+    if (!char) return;
+    
+    ui.showToast("Extraction du dossier CAD...", "info");
+    
+    try {
+        const [bankRes, invRes, entRes] = await Promise.all([
+            state.supabase.from('bank_accounts').select('*').eq('character_id', charId).maybeSingle(),
+            state.supabase.from('inventory').select('*').eq('character_id', charId),
+            state.supabase.from('enterprise_members').select('*, enterprises(*)').eq('character_id', charId)
+        ]);
+
+        const bank = bankRes.data || { bank_balance: 0, cash_balance: 0, savings_balance: 0 };
+        const inventory = invRes.data || [];
+        const enterprises = entRes.data || [];
+
+        ui.showModal({
+            title: `Audit Global : ${char.first_name} ${char.last_name}`,
+            content: `
+                <div class="text-left space-y-6">
+                    <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
+                        <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i data-lucide="landmark" class="w-3.5 h-3.5 text-gov-blue"></i> Finances Consolidées
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div><div class="text-[8px] font-bold text-gray-500 uppercase">Banque</div><div class="font-mono text-sm font-black text-gov-text">$${bank.bank_balance.toLocaleString()}</div></div>
+                            <div><div class="text-[8px] font-bold text-gray-500 uppercase">Liquide</div><div class="font-mono text-sm font-black text-gov-text">$${bank.cash_balance.toLocaleString()}</div></div>
+                            <div><div class="text-[8px] font-bold text-gray-500 uppercase">Épargne</div><div class="font-mono text-sm font-black text-emerald-600">$${bank.savings_balance.toLocaleString()}</div></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
+                        <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i data-lucide="package" class="w-3.5 h-3.5 text-orange-500"></i> Inventaire (${inventory.length})
+                        </div>
+                        <div class="max-h-32 overflow-y-auto custom-scrollbar pr-2 space-y-2">
+                            ${inventory.length > 0 ? inventory.map(i => `
+                                <div class="flex justify-between items-center text-[10px] p-2 bg-white/50 rounded-lg">
+                                    <span class="font-bold uppercase italic">${i.name}</span>
+                                    <span class="font-mono font-black">x${i.quantity}</span>
+                                </div>
+                            `).join('') : '<div class="text-center italic text-gray-400 text-[10px]">Sac vide</div>'}
+                        </div>
+                    </div>
+
+                    <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
+                        <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i data-lucide="briefcase" class="w-3.5 h-3.5 text-blue-500"></i> Affiliations
+                        </div>
+                        <div class="space-y-2">
+                            ${enterprises.length > 0 ? enterprises.map(e => `
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="font-bold uppercase text-gov-blue">${e.enterprises?.name}</span>
+                                    <span class="text-[8px] font-black bg-white px-2 py-0.5 rounded border border-gray-200 uppercase">${e.rank}</span>
+                                </div>
+                            `).join('') : '<div class="text-center italic text-gray-400 text-[10px]">Aucune affiliation</div>'}
+                        </div>
+                    </div>
+                </div>
+            `,
+            confirmText: "Fermer l'Audit"
+        });
+    } catch (err) {
+        ui.showToast("Erreur d'audit.", "error");
+    }
+};
