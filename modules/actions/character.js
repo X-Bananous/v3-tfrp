@@ -17,24 +17,27 @@ export const startEditCharacter = (charId) => {
 
 export const viewCensusDetails = (charId) => {
     const char = state.characters.find(c => c.id === charId);
-    if (!char || !char.infos) return;
+    if (!char || !char.infos) {
+        ui.showToast("Aucune information additionnelle sur ce dossier.", "info");
+        return;
+    }
 
     const info = char.infos;
-    let content = '';
+    let detailsHtml = '';
 
     if (info.type === 'permanent') {
-        content = `
+        detailsHtml = `
             <div class="space-y-4">
-                <div class="text-[10px] font-black text-gov-blue uppercase tracking-widest">Note d'intention (Permanent)</div>
+                <div class="text-[10px] font-black text-gov-blue uppercase tracking-widest border-b border-gray-100 pb-2">Note d'intention (Permanent)</div>
                 <div class="p-6 bg-gov-light rounded-2xl border border-gray-200 italic text-sm leading-relaxed text-gray-600">
-                    "${info.reason || 'Aucune justification enregistrée.'}"
+                    "${info.reason || 'Non renseignée.'}"
                 </div>
             </div>
         `;
     } else {
-        content = `
+        detailsHtml = `
             <div class="space-y-6">
-                <div class="text-[10px] font-black text-orange-600 uppercase tracking-widest">Détails Session (Temporaire)</div>
+                <div class="text-[10px] font-black text-orange-600 uppercase tracking-widest border-b border-gray-100 pb-2">Détails de Session (Temporaire)</div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
                         <div class="text-[8px] text-orange-400 font-black uppercase mb-1">Objectif</div>
@@ -54,23 +57,28 @@ export const viewCensusDetails = (charId) => {
     }
 
     ui.showModal({
-        title: "Dossier de Recensement",
-        content: content,
+        title: "Détails du Recensement",
+        content: detailsHtml,
         confirmText: "Fermer",
         type: info.type === 'temporaire' ? 'warning' : 'default'
     });
 };
 
+// --- HOLD TO PURGE LOGIC ---
 export const startHoldPurge = (e, charId) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     holdStartTime = Date.now();
+    
+    // We update both possible visual locations (Dossier card and Security tab)
     const progressEl = document.getElementById(`hold-progress-${charId}`);
+    const progressElSec = document.getElementById(`hold-progress-sec-${charId}`);
     
     holdTimer = setInterval(() => {
         const elapsed = Date.now() - holdStartTime;
         const percent = Math.min((elapsed / 5000) * 100, 100);
         
         if (progressEl) progressEl.style.width = `${percent}%`;
+        if (progressElSec) progressElSec.style.width = `${percent}%`;
 
         if (elapsed >= 5000) {
             clearInterval(holdTimer);
@@ -89,7 +97,7 @@ const executeFlashWipe = async (charId) => {
     ui.showToast("Wipe Flash en cours...", "warning");
     const { error } = await state.supabase.from('characters').delete().eq('id', charId).eq('user_id', state.user.id);
     if (!error) {
-        ui.showToast("Dossier temporaire effacé de la base.", "success");
+        ui.showToast("Dossier temporaire effacé avec succès.", "success");
         await loadCharacters();
         render();
     } else {

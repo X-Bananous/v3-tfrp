@@ -5,6 +5,7 @@ import { router, render } from '../utils.js';
 import { loadUserSanctions } from '../actions/profile.js';
 import { ui } from '../ui.js';
 import { fetchStaffProfiles, fetchGlobalTransactions } from '../services.js';
+import { WHEEL_REWARDS } from '../actions/wheel.js';
 
 const ALL_PERMISSIONS = [
     { k: 'can_approve_characters', l: 'File Whitelist', d: "Autorise l'examen et la validation des nouveaux citoyens entrant sur le territoire (Whitelist)." },
@@ -136,11 +137,9 @@ export const ProfileHubView = () => {
                                         CHARGER LE DOSSIER
                                     </button>
                                     <div class="flex gap-2">
-                                        ${char.infos ? `
-                                            <button onclick="actions.viewCensusDetails('${char.id}')" class="flex-1 py-2.5 bg-white text-gray-500 hover:text-gov-blue border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
-                                                <i data-lucide="file-text" class="w-3.5 h-3.5"></i> NOTES
-                                            </button>
-                                        ` : ''}
+                                        <button onclick="actions.viewCensusDetails('${char.id}')" class="flex-1 py-2.5 bg-white text-gray-500 hover:text-gov-blue border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
+                                            <i data-lucide="info" class="w-3.5 h-3.5"></i> NOTES
+                                        </button>
                                         <button onclick="actions.startEditCharacter('${char.id}')" class="flex-1 py-2.5 bg-white text-gray-500 hover:text-gov-blue border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
                                             <i data-lucide="settings" class="w-3.5 h-3.5"></i> ÉDITER
                                         </button>
@@ -150,8 +149,10 @@ export const ProfileHubView = () => {
                                                 onmousedown="actions.startHoldPurge(event, '${char.id}')" 
                                                 onmouseup="actions.stopHoldPurge()" 
                                                 onmouseleave="actions.stopHoldPurge()"
+                                                ontouchstart="actions.startHoldPurge(event, '${char.id}')"
+                                                ontouchend="actions.stopHoldPurge()"
                                                 class="hold-to-purge flex-1 py-2.5 bg-red-50 text-red-600 border border-red-100 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 relative overflow-hidden">
-                                                <div id="hold-progress-${char.id}" class="absolute left-0 top-0 h-full bg-red-600/20 w-0 pointer-events-none"></div>
+                                                <div id="hold-progress-${char.id}" class="absolute left-0 top-0 h-full bg-red-600/20 w-0 pointer-events-none transition-all duration-100"></div>
                                                 <i data-lucide="trash-2" class="w-3.5 h-3.5 relative z-10"></i> <span class="relative z-10">WIPE FLASH</span>
                                             </button>
                                         ` : `
@@ -244,91 +245,141 @@ export const ProfileHubView = () => {
     }
 
     else if (currentTab === 'lootbox') {
-        setTimeout(() => actions.openWheel(), 10);
-        return '';
+        const turns = u.whell_turn || 0;
+        const isOpening = state.isOpening;
+        
+        tabContent = `
+            <div class="animate-in max-w-6xl mx-auto pb-20 space-y-12">
+                <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(0,0,145,0.02),transparent_70%)]"></div>
+                    
+                    <div class="relative z-10 w-full">
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gov-blue/10 text-gov-blue text-[10px] font-black uppercase tracking-[0.3em] border border-gov-blue/20 mb-8">
+                            <i data-lucide="package" class="w-4 h-4"></i> Loterie Nationale Certifiée
+                        </div>
+                        
+                        <div class="flex flex-col items-center mb-12">
+                            <div class="relative mb-8">
+                                <div id="lootbox-visual" class="w-40 h-40 bg-gov-light rounded-[48px] border-4 border-gov-blue/20 flex items-center justify-center text-gov-blue shadow-2xl relative transition-all duration-500 ${isOpening ? 'lootbox-opening-anim' : 'hover:scale-105 hover:rotate-2'}">
+                                    <i data-lucide="package" class="w-20 h-20"></i>
+                                    <div class="absolute -bottom-4 -right-4 w-14 h-14 bg-white rounded-2xl flex items-center justify-center border border-gray-100 shadow-xl">
+                                        <i data-lucide="key" class="w-7 h-7 text-yellow-500"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h2 class="text-4xl font-black text-gov-text tracking-tighter italic uppercase mb-2">Caisse de Récompenses</h2>
+                            <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-10">Vous disposez de <span class="text-gov-blue">${turns}</span> Clé(s) d'accès</p>
+                            
+                            <button onclick="actions.openCrate(0)" ${turns <= 0 || isOpening ? 'disabled' : ''} 
+                                class="px-16 py-6 bg-gov-blue text-white rounded-[32px] font-black text-sm uppercase tracking-[0.3em] shadow-xl hover:bg-black transition-all transform active:scale-95 disabled:opacity-30 disabled:grayscale">
+                                ${isOpening ? 'DÉCRYPTAGE...' : 'TIRER LE LEVIER'}
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                            <div class="p-6 bg-gov-light rounded-3xl border border-gray-100">
+                                <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Fonctionnement</h4>
+                                <p class="text-[11px] text-gray-500 leading-relaxed font-medium">Chaque clé débloque une caisse contenant un lot aléatoire (Argent, VIP, Rôles). Les gains sont certifiés par certificat numérique.</p>
+                            </div>
+                            <div class="p-6 bg-gov-light rounded-3xl border border-gray-100">
+                                <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Gains Argent</h4>
+                                <p class="text-[11px] text-gray-500 leading-relaxed font-medium">Les récompenses monétaires sont injectées directement sur le compte bancaire du citoyen de votre choix parmi vos dossiers actifs.</p>
+                            </div>
+                            <div class="p-6 bg-gov-light rounded-3xl border border-gray-100">
+                                <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Probabilités</h4>
+                                <button onclick="actions.showProbabilities()" class="text-[11px] text-gov-blue font-black uppercase tracking-widest hover:underline flex items-center gap-2">
+                                    <i data-lucide="bar-chart" class="w-3 h-3"></i> Voir l'algorithme
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     else if (currentTab === 'security') {
         const deletionDate = u.deletion_requested_at ? new Date(u.deletion_requested_at) : null;
-        const auditLogs = state.globalTransactions?.filter(t => t.type === 'admin_adjustment').slice(0, 10) || [];
-        const activePurges = state.staffMembers?.filter(p => !!p.deletion_requested_at) || [];
+        const recentAudit = state.globalTransactions?.filter(t => 
+            t.receiver_id && characters.some(c => c.id === t.receiver_id) ||
+            t.sender_id && characters.some(c => c.id === t.sender_id)
+        ).slice(0, 5) || [];
 
         tabContent = `
-            <div class="animate-in max-w-6xl mx-auto pb-20 space-y-12">
-                
-                <!-- RGPD & PERSONNAL INFO -->
-                <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl">
-                    <h4 class="text-[10px] font-black text-gov-blue uppercase tracking-[0.4em] mb-8">Transparence des Données (RGPD)</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                        <div class="p-6 bg-gov-light rounded-3xl border border-gray-100">
-                            <div class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Identité Profil</div>
-                            <div class="text-sm font-bold text-gov-text truncate">@${u.username}</div>
-                            <div class="text-[9px] text-gray-400 font-mono mt-0.5">UID: ${u.id}</div>
-                        </div>
-                        <div class="p-6 bg-gov-light rounded-3xl border border-gray-100">
-                            <div class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Dossiers Actifs</div>
-                            <div class="text-sm font-bold text-gov-text">${characters.length} Fiches Citoyennes</div>
-                            <div class="text-[9px] text-gray-400 mt-0.5">Incluant comptes & inventaires</div>
-                        </div>
-                        <div class="p-6 bg-gov-light rounded-3xl border border-gray-100">
-                            <div class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Réseau</div>
-                            <div class="text-sm font-bold text-gov-text">${Object.keys(perms).length} Accréditations</div>
-                            <div class="text-[9px] text-gray-400 mt-0.5">Archives Discord synchronisées</div>
-                        </div>
-                    </div>
-
+            <div class="animate-in max-w-6xl mx-auto pb-20 space-y-8">
+                <!-- DROIT A L'OUBLI -->
+                <div class="bg-white p-10 rounded-[40px] border-t-8 border-gov-red shadow-xl">
+                    <h4 class="text-[10px] font-black text-gov-red uppercase tracking-[0.4em] mb-6 flex items-center gap-3"><i data-lucide="shield-alert" class="w-4 h-4"></i> Droit à l'oubli numérique</h4>
+                    <p class="text-sm text-gray-500 leading-relaxed mb-10 max-w-2xl font-medium">L'exercice de ce droit entraîne la suppression irrévocable de votre existence numérique dans nos bases sous 72h.</p>
+                    
                     ${deletionDate ? `
                         <div class="bg-orange-50 border-2 border-orange-200 p-8 rounded-[32px] mb-8 text-center">
-                            <div class="text-[9px] text-orange-600 font-black uppercase tracking-[0.4em] mb-4">Phase de Purge Active</div>
-                            <div class="text-4xl font-mono font-black text-gov-text mb-8 italic">EFFACEMENT SOUS 72H</div>
-                            <button onclick="actions.cancelDataDeletion()" class="bg-gov-text text-white px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl">ANNULER LA PROCÉDURE</button>
+                            <div class="text-[9px] text-orange-600 font-black uppercase tracking-[0.4em] mb-4 italic">Procédure de purge en cours</div>
+                            <div class="text-4xl font-mono font-black text-gov-text mb-8">EFFACEMENT DANS 72H</div>
+                            <button onclick="actions.cancelDataDeletion()" class="bg-gov-text text-white px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl">ANNULER LA RÉVOCATION</button>
                         </div>
                     ` : `
-                        <div class="flex justify-center">
-                            <button onclick="actions.requestDataDeletion()" class="bg-gov-red text-white px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl">RÉVOQUER TOUTES MES DONNÉES</button>
-                        </div>
+                        <button onclick="actions.requestDataDeletion()" class="bg-gov-red text-white px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl transform active:scale-95">RÉVOQUER TOUTES MES DONNÉES</button>
                     `}
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- REGISTRE DES PURGES PUBLIQUES -->
-                    <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl flex flex-col h-fit">
-                        <h4 class="text-[10px] font-black text-orange-600 uppercase tracking-[0.4em] mb-6 flex items-center gap-3">
-                            <i data-lucide="user-x" class="w-5 h-5"></i> Registre des Purges (Public)
-                        </h4>
-                        <div class="space-y-4">
-                            ${activePurges.length === 0 ? `
-                                <div class="text-center py-10 opacity-30 italic text-xs font-bold uppercase tracking-widest text-gray-400">Aucune identité menacée</div>
-                            ` : activePurges.map(p => {
-                                const hoursLeft = Math.max(0, Math.floor((new Date(p.deletion_requested_at).getTime() + (72 * 60 * 60 * 1000) - Date.now()) / (1000 * 60 * 60)));
+                    <!-- GESTION DES DOSSIERS -->
+                    <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl flex flex-col h-full">
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-8 flex items-center gap-3"><i data-lucide="users" class="w-4 h-4"></i> Gestion des Dossiers Citoyens</h4>
+                        <div class="space-y-4 flex-1">
+                            ${characters.map(char => {
+                                const isDeleting = !!char.deletion_requested_at;
+                                const isTemp = char.infos?.type === 'temporaire';
                                 return `
-                                    <div class="p-4 bg-gov-light rounded-2xl border border-gray-100 flex items-center justify-between group">
-                                        <div class="flex items-center gap-3">
-                                            <img src="${p.avatar_url || 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-8 h-8 rounded-lg grayscale opacity-50">
-                                            <div class="text-xs font-black text-gov-text uppercase">${p.username}</div>
+                                    <div class="p-4 bg-gov-light rounded-2xl border ${isDeleting ? 'border-orange-200' : 'border-gray-100'} flex items-center justify-between group">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-gray-400 border border-gray-100 shadow-sm"><i data-lucide="${isTemp ? 'timer' : 'user'}" class="w-5 h-5"></i></div>
+                                            <div>
+                                                <div class="text-sm font-black text-gov-text uppercase">${char.first_name} ${char.last_name}</div>
+                                                <div class="text-[8px] text-gray-400 uppercase font-black">${isTemp ? 'Temporaire' : 'Permanent'} • UID: #${char.id.substring(0,4)}</div>
+                                            </div>
                                         </div>
-                                        <span class="text-[9px] font-mono font-black text-orange-600">${hoursLeft}H RESTANTES</span>
+                                        <div>
+                                            ${isDeleting ? `
+                                                <button onclick="actions.cancelCharacterDeletion('${char.id}')" class="text-[8px] font-black text-gov-blue uppercase hover:underline">Annuler Purge</button>
+                                            ` : isTemp ? `
+                                                <button 
+                                                    onmousedown="actions.startHoldPurge(event, '${char.id}')" 
+                                                    onmouseup="actions.stopHoldPurge()" 
+                                                    class="text-[8px] font-black text-red-600 uppercase flex items-center gap-1.5 group relative px-2 py-1 overflow-hidden">
+                                                    <div id="hold-progress-sec-${char.id}" class="absolute left-0 top-0 h-full bg-red-600/10 w-0 pointer-events-none transition-all duration-100"></div>
+                                                    <i data-lucide="trash-2" class="w-3 h-3"></i> <span class="relative z-10">Wipe Flash</span>
+                                                </button>
+                                            ` : `
+                                                <button onclick="actions.requestCharacterDeletion('${char.id}')" class="text-[8px] font-black text-gray-400 hover:text-red-500 uppercase flex items-center gap-1.5"><i data-lucide="trash-2" class="w-3 h-3"></i> Purger</button>
+                                            `}
+                                        </div>
                                     </div>
                                 `;
                             }).join('')}
                         </div>
                     </div>
 
-                    <!-- AUDIT GLOBAL DES MOUVEMENTS ADMIN -->
-                    <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl flex flex-col h-fit">
-                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-6 flex items-center gap-3">
-                            <i data-lucide="scroll-text" class="w-5 h-5"></i> Audit Global (Ajustements)
-                        </h4>
-                        <div class="space-y-4">
-                            ${auditLogs.length === 0 ? `
-                                <div class="text-center py-10 opacity-30 italic text-xs font-bold uppercase tracking-widest text-gray-400">Aucune action administrative</div>
-                            ` : auditLogs.map(l => `
-                                <div class="p-4 bg-gov-light rounded-2xl border border-gray-100 flex flex-col gap-2">
-                                    <div class="flex justify-between items-center">
-                                        <div class="text-[9px] font-black text-gov-blue uppercase tracking-tight italic">${l.receiver?.first_name || 'Citoyen'}</div>
-                                        <div class="text-[9px] font-black text-emerald-600">+$${l.amount.toLocaleString()}</div>
+                    <!-- AUDIT PATRIMONIAL -->
+                    <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl flex flex-col h-full">
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-8 flex items-center gap-3"><i data-lucide="history" class="w-4 h-4"></i> Journal d'Audit Patrimonial</h4>
+                        <div class="space-y-4 flex-1">
+                            ${recentAudit.length === 0 ? `
+                                <div class="h-full flex flex-col items-center justify-center opacity-30 text-center py-10">
+                                    <i data-lucide="scroll-text" class="w-10 h-10 mb-2"></i>
+                                    <p class="text-[10px] font-black uppercase">Aucun flux récent</p>
+                                </div>
+                            ` : recentAudit.map(t => `
+                                <div class="p-4 bg-gov-light rounded-2xl border border-gray-100 flex justify-between items-center">
+                                    <div>
+                                        <div class="text-[10px] font-black text-gov-text uppercase truncate max-w-[150px]">${t.description || 'Virement'}</div>
+                                        <div class="text-[8px] text-gray-400 font-mono mt-0.5">${new Date(t.created_at).toLocaleTimeString()}</div>
                                     </div>
-                                    <div class="text-[10px] text-gray-500 italic leading-tight">"${l.description}"</div>
+                                    <div class="font-mono font-black text-xs ${t.sender_id && characters.some(c => c.id === t.sender_id) ? 'text-red-600' : 'text-emerald-600'}">
+                                        ${t.sender_id && characters.some(c => c.id === t.sender_id) ? '-' : '+'} $${t.amount.toLocaleString()}
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
