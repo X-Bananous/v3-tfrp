@@ -131,9 +131,6 @@ export const ProfileHubView = () => {
                                         <button onclick="actions.startEditCharacter('${char.id}')" class="flex-1 py-2.5 bg-white text-gray-500 hover:text-gov-blue border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
                                             <i data-lucide="settings" class="w-3.5 h-3.5"></i> ÉDITER
                                         </button>
-                                        <button onclick="actions.requestCharacterDeletion('${char.id}')" class="flex-1 py-2.5 bg-white text-gray-400 hover:text-gov-red border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
-                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> PURGER
-                                        </button>
                                     </div>
                                 ` : isDeleting ? `
                                     <div class="text-center mb-2">
@@ -235,11 +232,12 @@ export const ProfileHubView = () => {
                 
                 crates.push(`
                     <div class="relative">
+                        <div class="loot-burst ${isTarget ? 'animate-burst' : ''}"></div>
                         <button onclick="${canOpen ? `actions.openCrate(${i})` : ''}" 
                             ${!canOpen && !isTarget ? 'disabled' : ''}
                             class="w-full aspect-square bg-[#0c0c0e] rounded-[32px] border border-white/5 flex flex-col items-center justify-center gap-4 transition-all duration-500 
                             ${canOpen ? 'hover:border-blue-500/50 hover:bg-blue-600/5 hover:scale-[1.02] cursor-pointer' : 'opacity-40 cursor-not-allowed'}
-                            ${isTarget ? 'border-blue-500 bg-blue-600/20 scale-[1.05] animate-pulse shadow-[0_0_50px_rgba(59,130,246,0.3)]' : ''}">
+                            ${isTarget ? 'animate-crate-opening border-blue-500 bg-blue-600/20 z-50 shadow-[0_0_80px_rgba(59,130,246,0.5)]' : ''}">
                             
                             <div class="relative">
                                 <div class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 border border-blue-500/20 shadow-inner group-hover:scale-110 transition-transform">
@@ -249,8 +247,8 @@ export const ProfileHubView = () => {
                             </div>
                             
                             <div class="text-center">
-                                <div class="text-[10px] font-black text-white uppercase tracking-widest">${isTarget ? 'DÉCRYPTAGE...' : 'UNITÉ SÉCURISÉE'}</div>
-                                <div class="text-[8px] text-gray-500 uppercase font-bold tracking-widest mt-1">LOTERIE NATIONALE</div>
+                                <div class="text-[10px] font-black text-white uppercase tracking-widest">${isTarget ? 'CRYPTAGE...' : 'UNITÉ SÉCURISÉE'}</div>
+                                <div class="text-[8px] text-gray-500 uppercase font-bold tracking-widest mt-1">SÉQUENCE ALPHA</div>
                             </div>
                         </button>
                     </div>
@@ -262,7 +260,7 @@ export const ProfileHubView = () => {
         tabContent = `
             <div class="animate-in max-w-6xl mx-auto pb-20">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    <!-- LEFT: CRATES GRID -->
+                    <!-- LEFT: GRID -->
                     <div class="lg:col-span-8">
                         ${turns === 0 && !isOpening ? `
                             <div class="h-full flex flex-col items-center justify-center text-center py-20 bg-white p-12 rounded-[48px] border border-gray-100 shadow-xl">
@@ -295,15 +293,6 @@ export const ProfileHubView = () => {
                                 <i data-lucide="info" class="w-4 h-4"></i> Consulter l'Algorithme
                             </button>
                         </div>
-
-                        <div class="bg-white p-8 rounded-[40px] border border-gray-100 shadow-xl">
-                            <h4 class="text-[10px] font-black text-gov-blue uppercase tracking-widest mb-6 flex items-center gap-2">
-                                <i data-lucide="shield-check" class="w-4 h-4"></i> Certification v4.6
-                            </h4>
-                            <p class="text-[11px] text-gray-500 leading-relaxed font-medium italic">
-                                "Le système de lootbox de l'État de Californie utilise un générateur de nombres pseudo-aléatoires chiffré. Les gains sont instantanés ou nécessitent une validation Discord pour les rôles exclusifs."
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -313,48 +302,53 @@ export const ProfileHubView = () => {
     else if (currentTab === 'security') {
         const deletionDate = u.deletion_requested_at ? new Date(u.deletion_requested_at) : null;
         tabContent = `
-            <div class="bg-white p-12 rounded-[48px] border-t-8 border-gov-red shadow-2xl animate-in max-w-4xl mx-auto">
-                <div class="flex flex-col md:flex-row items-center gap-10 mb-12 border-b border-gray-100 pb-12">
-                    <div class="relative shrink-0">
-                        <div class="w-32 h-32 avatar-container">
-                            <img src="${u.avatar}" class="avatar-img shadow-xl border-4 border-gov-light bg-white">
-                            ${u.decoration ? `<img src="${u.decoration}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] h-[130%] max-w-none z-20 pointer-events-none">` : ''}
-                        </div>
-                        <div class="absolute -bottom-1 -right-1 w-8 h-8 bg-gov-blue text-white rounded-full flex items-center justify-center border-2 border-white shadow-lg z-30">
-                            <i data-lucide="shield" class="w-4 h-4"></i>
-                        </div>
-                    </div>
-                    <div class="text-center md:text-left">
-                        <h4 class="text-3xl font-black text-gov-text uppercase italic mb-2 tracking-tighter">Identité de Sécurité</h4>
-                        <div class="flex flex-wrap justify-center md:justify-start gap-3">
-                            <span class="text-[9px] font-mono font-bold text-gray-400 uppercase bg-gov-light px-3 py-1 rounded-lg border border-gray-200">UID: ${u.id}</span>
-                            <span class="text-[9px] font-black text-gov-blue uppercase bg-blue-50 px-3 py-1 rounded-lg border border-blue-100 tracking-widest">${u.username}</span>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-4 leading-relaxed font-medium italic">Centre de gestion RGPD • Droit à l'oubli numérique</p>
-                    </div>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-red-50 text-gov-red rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg border border-red-100">
-                        <i data-lucide="shield-alert" class="w-8 h-8"></i>
-                    </div>
-                    <h5 class="text-2xl font-black text-gov-text uppercase italic mb-4 tracking-tighter">Procédure de Purge Identitaire</h5>
-                    <p class="text-sm text-gray-500 leading-relaxed mb-10 max-w-2xl mx-auto font-medium italic">
-                        L'exercice du droit à l'oubli entraîne la suppression irrévocable de votre existence numérique dans nos bases. 
-                        <b>Cette action effacera vos dossiers, vos comptes bancaires et vos archives sous 72h.</b>
+            <div class="space-y-8 animate-in max-w-4xl mx-auto pb-20">
+                <!-- COMPTE GLOBAL -->
+                <div class="bg-white p-12 rounded-[48px] border-t-8 border-gov-red shadow-2xl">
+                    <h4 class="text-3xl font-black text-gov-text uppercase italic mb-6">Compte National & Global</h4>
+                    <p class="text-sm text-gray-500 leading-relaxed mb-10 font-medium italic">
+                        L'exercice du droit à l'oubli global entraîne la suppression irrévocable de votre existence numérique complète dans nos bases (Tous personnages inclus).
                     </p>
                     
                     ${deletionDate ? `
-                        <div class="bg-orange-50 border-2 border-orange-200 p-8 rounded-[32px] mb-8 inline-block w-full">
+                        <div class="bg-orange-50 border-2 border-orange-200 p-8 rounded-[32px] mb-8 text-center">
                             <div class="text-[9px] text-orange-600 font-black uppercase tracking-[0.4em] mb-4">Phase de purge active</div>
                             <div class="text-4xl font-mono font-black text-gov-text mb-8">72:00:00</div>
-                            <button onclick="actions.cancelDataDeletion()" class="bg-gov-text text-white px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl transform active:scale-95">ANNULER LA PROCÉDURE</button>
+                            <button onclick="actions.cancelDataDeletion()" class="bg-gov-text text-white px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl">ANNULER LA PROCÉDURE</button>
                         </div>
                     ` : `
                         <button onclick="actions.requestDataDeletion()" class="bg-gov-red text-white px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl transform hover:scale-105 active:scale-95">
-                            DÉTRUIRE MON IDENTITÉ NATIONALE
+                            INITIER LA PURGE GLOBALE
                         </button>
                     `}
+                </div>
+
+                <!-- PURGE INDIVIDUELLE -->
+                <div class="bg-white p-10 rounded-[48px] border border-gray-100 shadow-xl">
+                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-8">Gestion Individuelle des Dossiers</h4>
+                    <div class="space-y-4">
+                        ${characters.map(char => {
+                            const isDeleting = !!char.deletion_requested_at;
+                            return `
+                                <div class="p-5 bg-gov-light rounded-3xl border border-gray-100 flex items-center justify-between group">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400">
+                                            <i data-lucide="user" class="w-5 h-5"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-black text-gov-text text-sm uppercase italic">${char.first_name} ${char.last_name}</div>
+                                            <div class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">${char.alignment} • UID: ${char.id.substring(0,8)}</div>
+                                        </div>
+                                    </div>
+                                    ${isDeleting ? `
+                                        <button onclick="actions.cancelCharacterDeletion('${char.id}')" class="text-[9px] font-black text-gov-blue uppercase tracking-widest bg-white px-4 py-2 rounded-xl border border-gray-200 hover:shadow-md transition-all">Annuler Purge</button>
+                                    ` : `
+                                        <button onclick="actions.requestCharacterDeletion('${char.id}')" class="text-[9px] font-black text-gov-red uppercase tracking-widest bg-white px-4 py-2 rounded-xl border border-gray-200 hover:bg-gov-red hover:text-white transition-all">Purger ce dossier</button>
+                                    `}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
                 </div>
             </div>
         `;
@@ -365,7 +359,6 @@ export const ProfileHubView = () => {
         
         ${isMobileMenuOpen ? MobileMenuOverlay() : ''}
 
-        <!-- UNIFIED TERMINAL NAVBAR (STRICT DESIGN UNIFICATION) -->
         <nav class="terminal-nav shrink-0">
             <div class="flex items-center gap-6 md:gap-12 h-full">
                 <div onclick="actions.backToLanding()" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer transition-transform hover:scale-[0.8]">
@@ -373,7 +366,6 @@ export const ProfileHubView = () => {
                     <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
                 </div>
 
-                <!-- Desktop Menu Unifié -->
                 <div class="hidden lg:flex items-center gap-1 h-full ml-4">
                     ${tabs.map(t => `
                         <button onclick="actions.setProfileTab('${t.id}')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${currentTab === t.id ? 'text-gov-blue border-b-2 border-gov-blue' : 'text-gray-400 hover:text-gov-text'}">
@@ -388,7 +380,6 @@ export const ProfileHubView = () => {
                     <i data-lucide="home" class="w-5 h-5"></i>
                 </button>
                 
-                <!-- Profile Block (Avec support décoration Discord) -->
                 <div class="nav-item h-full flex items-center">
                     <div class="flex items-center gap-4 cursor-pointer p-2.5 hover:bg-gov-light rounded-sm transition-all h-full">
                         <div class="text-right hidden sm:block">
@@ -402,11 +393,6 @@ export const ProfileHubView = () => {
                         </div>
                     </div>
                     <div class="nav-dropdown right-0 left-auto rounded-none shadow-2xl">
-                        <div class="px-4 py-3 border-b border-gray-50 bg-gov-light/30">
-                            <div class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Identité Discord</div>
-                            <div class="text-[11px] font-black text-gov-text uppercase">${u.id}</div>
-                        </div>
-                        <div class="h-px bg-gray-50 my-1"></div>
                         <button onclick="actions.confirmLogout()" class="w-full text-left p-4 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest flex items-center gap-4 text-red-600 transition-colors">
                             <i data-lucide="log-out" class="w-4 h-4"></i> Déconnexion
                         </button>
@@ -420,14 +406,11 @@ export const ProfileHubView = () => {
         </nav>
 
         <div class="flex-1 overflow-y-auto custom-scrollbar">
-            <!-- HEADER BANNER -->
             <div class="relative h-48 md:h-64 shrink-0 overflow-hidden bg-gov-blue">
                 ${u.banner ? `<img src="${u.banner}" class="w-full h-full object-cover">` : '<div class="w-full h-full bg-gradient-to-r from-gov-blue via-blue-900 to-indigo-900 opacity-90"></div>'}
                 <div class="absolute inset-0 bg-gradient-to-t from-[#F6F6F6] via-transparent to-transparent"></div>
-                <div class="absolute inset-0 bg-black/10"></div>
             </div>
 
-            <!-- PROFILE HEADER -->
             <div class="max-w-6xl mx-auto w-full px-6 md:px-8 -mt-16 md:-mt-24 relative z-10 mb-12">
                 <div class="flex flex-col md:flex-row items-end gap-6 md:gap-10">
                     <div class="mx-auto md:mx-0 shrink-0">
@@ -441,7 +424,7 @@ export const ProfileHubView = () => {
                     </div>
                     <div class="flex-1 pb-4 text-center md:text-left w-full">
                         <div class="text-[9px] md:text-[10px] font-black text-gov-blue uppercase tracking-[0.4em] mb-3">Répertoire des Identités</div>
-                        <h2 class="text-4xl md:text-5xl font-black text-gov-text tracking-tighter uppercase italic leading-none drop-shadow-xl">${u.username}</h2>
+                        <h2 class="text-4xl md:text-5xl font-black text-gov-text tracking-tighter uppercase italic leading-none drop-shadow-sm">${u.username}</h2>
                         <div class="flex flex-wrap justify-center md:justify-start gap-3 mt-6">
                             <span class="text-gray-400 font-mono text-[9px] md:text-[10px] uppercase tracking-widest bg-white px-4 py-1.5 rounded-lg border border-gray-100 shadow-sm">UID: ${u.id}</span>
                             ${u.isFounder ? '<span class="text-[9px] md:text-[10px] font-black text-purple-600 uppercase tracking-widest bg-purple-50 px-4 py-1.5 border border-purple-100 rounded-lg italic">Fondation</span>' : ''}
@@ -450,7 +433,6 @@ export const ProfileHubView = () => {
                 </div>
             </div>
 
-            <!-- MAIN CONTENT -->
             <main class="max-w-6xl mx-auto w-full px-6 md:px-8 flex-1">
                 ${tabContent}
             </main>
