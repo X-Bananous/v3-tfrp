@@ -3,6 +3,33 @@ import { state } from '../state.js';
 import { render, router } from '../utils.js';
 import { ui } from '../ui.js';
 
+const SoundEngine = {
+    ctx: null,
+    init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    tick(freq = 150) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.5, this.ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.1);
+    },
+    success() {
+        if (!this.ctx) return;
+        const playNote = (freq, start, duration) => {
+            const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime + start);
+            gain.gain.setValueAtTime(0.1, this.ctx.currentTime + start);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(this.ctx.currentTime + start); osc.stop(this.ctx.currentTime + start + duration);
+        };
+        playNote(440, 0, 0.2); playNote(554, 0.1, 0.2); playNote(659, 0.2, 0.4);
+    }
+};
+
 export const WHEEL_REWARDS = [
     { label: '1 000 $', weight: 12, type: 'money', value: 1000, color: '#10b981', rarity: 'Commun' },
     { label: '5 000 $', weight: 10, type: 'money', value: 5000, color: '#10b981', rarity: 'Commun' },
@@ -23,11 +50,15 @@ export const WHEEL_REWARDS = [
     { label: '300 000 $', weight: 0.65, type: 'money', value: 300000, color: '#ef4444', rarity: 'Relique' },
     { label: '500 000 $', weight: 0.325, type: 'money', value: 500000, color: '#ef4444', rarity: 'Ancestral' },
     { label: 'VIP Bronze', weight: 3.25, type: 'role', color: '#cd7f32', rarity: 'Premium' },
+    { label: 'VIP Argent', weight: 2.6, type: 'role', color: '#c0c0c0', rarity: 'Premium' },
     { label: 'VIP Or', weight: 1.95, type: 'role', color: '#ffd700', rarity: 'Premium' },
-    { label: 'Rôle Légende', weight: 0.65, type: 'role', color: '#a855f7', rarity: 'Divin' }
+    { label: 'VIP Platine', weight: 1.3, type: 'role', color: '#e5e4e2', rarity: 'Elite' },
+    { label: 'Rôle Légende', weight: 0.65, type: 'role', color: '#a855f7', rarity: 'Divin' },
+    { label: '???', weight: 0.975, type: 'special', color: '#f472b6', rarity: 'Unique' }
 ];
 
 export const openCrate = async (crateIdx) => {
+    SoundEngine.init();
     const turns = state.user.whell_turn || 0;
     if (state.isOpening || turns <= 0) return;
     if (state.characters.length === 0) return ui.showToast("Dossier citoyen requis.", "error");
@@ -36,33 +67,51 @@ export const openCrate = async (crateIdx) => {
     state.openingCrateIdx = crateIdx;
     render();
 
-    // Animation simplifiée : 1.5s de pulse léger
+    // Séquence audio Sonar
+    let currentFreq = 200;
+    const audioInterval = setInterval(() => {
+        SoundEngine.tick(currentFreq);
+        currentFreq += 100;
+    }, 150);
+
+    // Durée de l'animation de tremblement
     setTimeout(async () => {
+        clearInterval(audioInterval);
         const totalWeight = WHEEL_REWARDS.reduce((acc, r) => acc + r.weight, 0);
         let randomVal = Math.random() * totalWeight;
         let winner = WHEEL_REWARDS[0];
         for (const reward of WHEEL_REWARDS) {
             randomVal -= reward.weight;
-            if (randomVal <= 0) { winner = reward; break; }
+            if (randomVal <= 0) { 
+                winner = reward; 
+                break; 
+            }
         }
 
         const currentWinner = { ...winner };
         state.lastWheelWinner = currentWinner;
         
+        SoundEngine.success();
+        
         const newTurns = turns - 1;
         await state.supabase.from('profiles').update({ whell_turn: newTurns }).eq('id', state.user.id);
         state.user.whell_turn = newTurns;
 
-        state.isOpening = false;
-        state.openingCrateIdx = null;
+        // Attente courte pour l'animation de burst avant l'affichage du modal
+        setTimeout(() => {
+            state.isOpening = false;
+            state.openingCrateIdx = null;
 
-        if (currentWinner.type === 'money') {
-            showCharacterChoiceModal(currentWinner);
-        } else {
-            showSecureScreenshotModal(currentWinner);
-        }
+            if (currentWinner.type === 'money') {
+                showCharacterChoiceModal(currentWinner);
+            } else {
+                showSecureScreenshotModal(currentWinner);
+            }
+            render();
+        }, 600);
+        
         render();
-    }, 1500);
+    }, 2500);
 };
 
 const showCharacterChoiceModal = (reward) => {
@@ -82,13 +131,67 @@ const showCharacterChoiceModal = (reward) => {
         content: `
             <div class="text-center mb-10">
                 <div class="text-7xl mb-6">💰</div>
-                <div class="text-4xl font-black text-emerald-600 tracking-tighter">+$ ${reward.value.toLocaleString()}</div>
-                <p class="text-gray-500 text-xs mt-3 italic">Sélectionnez le bénéficiaire :</p>
+                <div class="text-4xl font-black text-emerald-600 tracking-tighter drop-shadow-sm">+$ ${reward.value.toLocaleString()}</div>
+                <p class="text-gray-500 text-xs mt-3 italic font-medium">Sélectionnez le bénéficiaire de ce gain immédiat :</p>
             </div>
             <div class="space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-2">${charsHtml}</div>
         `,
         confirmText: null
     });
+};
+
+const generateClaimCertificate = (reward) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 500;
+    const ctx = canvas.getContext('2d');
+    const verificationCode = Math.random().toString(36).substring(2, 12).toUpperCase();
+
+    ctx.fillStyle = '#000091';
+    ctx.fillRect(0, 0, 800, 500);
+
+    ctx.save();
+    ctx.rotate(-Math.PI / 6);
+    ctx.font = 'black 14px Inter';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+    for (let x = -500; x < 1500; x += 150) {
+        for (let y = -500; y < 1500; y += 80) {
+            ctx.fillText('TFRP OFFICIAL CLAIM • ', x, y);
+        }
+    }
+    ctx.restore();
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 15;
+    ctx.strokeRect(0, 0, 800, 500);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 24px Inter';
+    ctx.fillText('CERTIFICAT DE GAIN OFFICIEL', 50, 60);
+    ctx.fillStyle = reward.color || '#ffffff';
+    ctx.font = 'black 12px Inter';
+    ctx.fillText('TEAM FRENCH ROLEPLAY • PROTOCOLE v6.4', 50, 85);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = 'bold 14px Inter';
+    ctx.fillText('IDENTITÉ DISCORD VÉRIFIÉE', 50, 150);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 28px Inter';
+    ctx.fillText(state.user.username.toUpperCase(), 50, 185);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = 'bold 14px Inter';
+    ctx.fillText('LOT ATTRIBUÉ', 50, 280);
+    ctx.fillStyle = reward.color || '#ffffff';
+    ctx.font = 'italic black 48px Inter';
+    ctx.fillText(reward.label.toUpperCase(), 50, 340);
+
+    const link = document.createElement('a');
+    link.download = `TFRP_CERTIFICATE_${verificationCode}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    
+    return verificationCode;
 };
 
 const showSecureScreenshotModal = (reward) => {
@@ -102,11 +205,34 @@ const showSecureScreenshotModal = (reward) => {
                     <div class="text-[10px] text-white/60 font-black uppercase tracking-[0.4em] mb-2">Preuve de Gain Certifiée</div>
                     <div class="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">${reward.label}</div>
                 </div>
-                <div class="bg-red-600 text-white p-4 rounded-2xl text-[10px] font-black uppercase">Faites une capture d'écran pour réclamer sur Discord.</div>
+                <div class="bg-red-600 text-white p-4 rounded-2xl text-[10px] font-black uppercase">Téléchargez votre certificat pour débloquer la session.</div>
+            </div>
+            <div class="mt-8">
+                <button id="download-btn-secure" onclick="actions.handleSecureDownload('${reward.label}')" class="w-full py-5 bg-gov-blue hover:bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-3">
+                    <i data-lucide="download" class="w-5 h-5"></i> TÉLÉCHARGER LE CERTIFICAT
+                </button>
             </div>
         `,
-        confirmText: "Compris"
+        confirmText: "Fermer (Verrouillé)"
     });
+
+    const confirmBtn = document.getElementById('modal-confirm');
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.classList.add('opacity-30', 'cursor-not-allowed');
+    }
+
+    window.actions.handleSecureDownload = () => {
+        generateClaimCertificate(reward);
+        ui.showToast("Certificat authentifié.", "success");
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.classList.remove('opacity-30', 'cursor-not-allowed', 'bg-gov-blue');
+            confirmBtn.classList.add('bg-emerald-600');
+            confirmBtn.textContent = "SESSION TERMINÉE";
+            confirmBtn.onclick = () => ui.forceCloseModal();
+        }
+    };
 };
 
 export const claimMoneyReward = async (value, charId) => {
@@ -115,7 +241,10 @@ export const claimMoneyReward = async (value, charId) => {
         if (bank) {
             await state.supabase.from('bank_accounts').update({ bank_balance: (bank.bank_balance || 0) + value }).eq('character_id', charId);
             await state.supabase.from('transactions').insert({ 
-                receiver_id: charId, amount: value, type: 'admin_adjustment', description: 'Gain Loterie TFRP' 
+                receiver_id: charId, 
+                amount: value, 
+                type: 'admin_adjustment', 
+                description: 'Gain Loterie TFRP (Lootbox)' 
             });
             ui.showToast(`$${value.toLocaleString()} versés.`, "success");
         }
@@ -124,11 +253,8 @@ export const claimMoneyReward = async (value, charId) => {
     render();
 };
 
-export const setProfileTab = (tab) => {
-    state.activeProfileTab = tab;
-    render();
-};
-
+export const openWheel = () => { actions.setProfileTab('lootbox'); router('wheel'); };
+export const closeWheel = () => { router('profile_hub'); };
 export const showProbabilities = () => {
     const totalWeight = WHEEL_REWARDS.reduce((acc, r) => acc + r.weight, 0);
     const sorted = [...WHEEL_REWARDS].sort((a,b) => b.weight - a.weight);

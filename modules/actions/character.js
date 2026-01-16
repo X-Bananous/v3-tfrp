@@ -32,21 +32,6 @@ export const submitCharacter = async (e) => {
         return; 
     }
 
-    // Préparation de l'objet infos JSON
-    const type = data.char_type;
-    const infos = {
-        type: type,
-        submitted_at: new Date().toISOString()
-    };
-
-    if (type === 'permanent') {
-        infos.reason = data.info_reason;
-    } else {
-        infos.goal = data.info_goal;
-        infos.context = data.info_context;
-        infos.with_who = data.info_who;
-    }
-
     // Determine User ID (Self or Admin Target)
     const targetUserId = state.isAdminEditing ? state.adminTargetUserId : state.user.id;
 
@@ -76,6 +61,27 @@ export const submitCharacter = async (e) => {
         }
     }
 
+    // GESTION DES INFOS COMPLÉMENTAIRES (JSON)
+    const charInfos = {};
+    if (!state.editingCharacter && state.characters.length > 0 && !state.isAdminEditing) {
+        charInfos.type = data.char_type;
+        if (data.char_type === 'permanent') {
+            charInfos.reason = data.info_permanent_reason;
+        } else {
+            charInfos.goal = data.info_temp_goal;
+            charInfos.partners = data.info_temp_partners;
+            charInfos.context = data.info_temp_context;
+        }
+        
+        // Mise à jour de la table profiles comme demandé par l'utilisateur
+        const { error: profileError } = await state.supabase
+            .from('profiles')
+            .update({ infos: charInfos })
+            .eq('id', state.user.id);
+            
+        if (profileError) console.warn("Note: Échec de la mise à jour des infos profil", profileError);
+    }
+
     const charData = {
         first_name: data.first_name,
         last_name: data.last_name,
@@ -87,21 +93,18 @@ export const submitCharacter = async (e) => {
         alignment: data.alignment,
         job: job,
         is_notified: state.isAdminEditing ? true : isNotified,
-        verifiedby: state.isAdminEditing ? state.user.id : verifiedBy,
-        infos: infos // Sauvegarde de l'objet JSON
+        verifiedby: state.isAdminEditing ? state.user.id : verifiedBy
     };
 
     let error = null;
 
     if (state.editingCharacter) {
-        // Update existing
         const { error: updateError } = await state.supabase
             .from('characters')
             .update(charData)
             .eq('id', state.editingCharacter.id);
         error = updateError;
     } else {
-        // Create new
         const { error: insertError } = await state.supabase
             .from('characters')
             .insert([charData]);
@@ -113,7 +116,6 @@ export const submitCharacter = async (e) => {
     if (!error) {
         if(state.isAdminEditing) {
             ui.showToast("Personnage créé/modifié avec succès (Admin).", 'success');
-            // Reset Admin State
             state.isAdminEditing = false;
             state.adminTargetUserId = null;
             state.editingCharacter = null;
