@@ -4,6 +4,7 @@ import { state } from '../state.js';
 import { router, render } from '../utils.js';
 import { loadUserSanctions } from '../actions/profile.js';
 import { ui } from '../ui.js';
+import { fetchStaffProfiles, fetchGlobalTransactions } from '../services.js';
 
 const ALL_PERMISSIONS = [
     { k: 'can_approve_characters', l: 'File Whitelist', d: "Autorise l'examen et la validation des nouveaux citoyens entrant sur le territoire (Whitelist)." },
@@ -40,6 +41,8 @@ export const ProfileHubView = () => {
     if (!state.hasFetchedSanctions) {
         state.hasFetchedSanctions = true;
         loadUserSanctions();
+        fetchStaffProfiles();
+        fetchGlobalTransactions();
     }
 
     const tabs = [
@@ -50,7 +53,6 @@ export const ProfileHubView = () => {
         { id: 'security', label: 'Sécurité', icon: 'lock' }
     ];
 
-    // --- MOBILE MENU OVERLAY ---
     const MobileMenuOverlay = () => `
         <div class="fixed inset-0 z-[2000] bg-white flex flex-col animate-in overflow-hidden">
             <div class="h-20 px-6 border-b border-gray-100 flex items-center justify-between shrink-0">
@@ -102,7 +104,7 @@ export const ProfileHubView = () => {
                                     <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase border tracking-widest bg-${statusColor}-50 text-${statusColor}-600 border-${statusColor}-200">
                                         ${isDeleting ? 'PURGE EN COURS' : char.status.toUpperCase()}
                                     </span>
-                                    ${isTemp ? '<span class="text-[7px] font-black text-orange-600 uppercase tracking-tighter">DOSSIER TEMPORAIRE</span>' : ''}
+                                    ${isTemp ? '<span class="text-[7px] font-black text-orange-600 uppercase tracking-tighter">TEMPORAIRE</span>' : ''}
                                 </div>
                             </div>
 
@@ -248,11 +250,16 @@ export const ProfileHubView = () => {
 
     else if (currentTab === 'security') {
         const deletionDate = u.deletion_requested_at ? new Date(u.deletion_requested_at) : null;
+        const auditLogs = state.globalTransactions?.filter(t => t.type === 'admin_adjustment').slice(0, 10) || [];
+        const activePurges = state.staffMembers?.filter(p => !!p.deletion_requested_at) || [];
+
         tabContent = `
-            <div class="animate-in max-w-5xl mx-auto pb-20 space-y-8">
+            <div class="animate-in max-w-6xl mx-auto pb-20 space-y-12">
+                
+                <!-- RGPD & PERSONNAL INFO -->
                 <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl">
                     <h4 class="text-[10px] font-black text-gov-blue uppercase tracking-[0.4em] mb-8">Transparence des Données (RGPD)</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                         <div class="p-6 bg-gov-light rounded-3xl border border-gray-100">
                             <div class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Identité Profil</div>
                             <div class="text-sm font-bold text-gov-text truncate">@${u.username}</div>
@@ -269,25 +276,62 @@ export const ProfileHubView = () => {
                             <div class="text-[9px] text-gray-400 mt-0.5">Archives Discord synchronisées</div>
                         </div>
                     </div>
+
+                    ${deletionDate ? `
+                        <div class="bg-orange-50 border-2 border-orange-200 p-8 rounded-[32px] mb-8 text-center">
+                            <div class="text-[9px] text-orange-600 font-black uppercase tracking-[0.4em] mb-4">Phase de Purge Active</div>
+                            <div class="text-4xl font-mono font-black text-gov-text mb-8 italic">EFFACEMENT SOUS 72H</div>
+                            <button onclick="actions.cancelDataDeletion()" class="bg-gov-text text-white px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl">ANNULER LA PROCÉDURE</button>
+                        </div>
+                    ` : `
+                        <div class="flex justify-center">
+                            <button onclick="actions.requestDataDeletion()" class="bg-gov-red text-white px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl">RÉVOQUER TOUTES MES DONNÉES</button>
+                        </div>
+                    `}
                 </div>
 
-                <div class="bg-white p-10 rounded-[40px] border-t-8 border-gov-red shadow-2xl">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-red-50 text-gov-red rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg border border-red-100">
-                            <i data-lucide="shield-alert" class="w-8 h-8"></i>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- REGISTRE DES PURGES PUBLIQUES -->
+                    <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl flex flex-col h-fit">
+                        <h4 class="text-[10px] font-black text-orange-600 uppercase tracking-[0.4em] mb-6 flex items-center gap-3">
+                            <i data-lucide="user-x" class="w-5 h-5"></i> Registre des Purges (Public)
+                        </h4>
+                        <div class="space-y-4">
+                            ${activePurges.length === 0 ? `
+                                <div class="text-center py-10 opacity-30 italic text-xs font-bold uppercase tracking-widest text-gray-400">Aucune identité menacée</div>
+                            ` : activePurges.map(p => {
+                                const hoursLeft = Math.max(0, Math.floor((new Date(p.deletion_requested_at).getTime() + (72 * 60 * 60 * 1000) - Date.now()) / (1000 * 60 * 60)));
+                                return `
+                                    <div class="p-4 bg-gov-light rounded-2xl border border-gray-100 flex items-center justify-between group">
+                                        <div class="flex items-center gap-3">
+                                            <img src="${p.avatar_url || 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-8 h-8 rounded-lg grayscale opacity-50">
+                                            <div class="text-xs font-black text-gov-text uppercase">${p.username}</div>
+                                        </div>
+                                        <span class="text-[9px] font-mono font-black text-orange-600">${hoursLeft}H RESTANTES</span>
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
-                        <h4 class="text-2xl font-black text-gov-text uppercase italic mb-4 tracking-tighter">Suppression Définitive</h4>
-                        <p class="text-sm text-gray-500 leading-relaxed mb-10 max-w-2xl mx-auto font-medium italic">L'exercice du droit à l'oubli entraîne la suppression irrévocable de votre existence numérique dans nos bases.</p>
-                        
-                        ${deletionDate ? `
-                            <div class="bg-orange-50 border-2 border-orange-200 p-8 rounded-[32px] mb-8 inline-block w-full">
-                                <div class="text-[9px] text-orange-600 font-black uppercase tracking-[0.4em] mb-4">Cooldown de Latence Actif</div>
-                                <div class="text-4xl font-mono font-black text-gov-text mb-8">EFFACEMENT SOUS 72H</div>
-                                <button onclick="actions.cancelDataDeletion()" class="bg-gov-text text-white px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl transform active:scale-95">ANNULER LA PROCÉDURE</button>
-                            </div>
-                        ` : `
-                            <button onclick="actions.requestDataDeletion()" class="bg-gov-red text-white px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl transform hover:scale-105 active:scale-95">RÉVOQUER TOUTES MES DONNÉES</button>
-                        `}
+                    </div>
+
+                    <!-- AUDIT GLOBAL DES MOUVEMENTS ADMIN -->
+                    <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl flex flex-col h-fit">
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-6 flex items-center gap-3">
+                            <i data-lucide="scroll-text" class="w-5 h-5"></i> Audit Global (Ajustements)
+                        </h4>
+                        <div class="space-y-4">
+                            ${auditLogs.length === 0 ? `
+                                <div class="text-center py-10 opacity-30 italic text-xs font-bold uppercase tracking-widest text-gray-400">Aucune action administrative</div>
+                            ` : auditLogs.map(l => `
+                                <div class="p-4 bg-gov-light rounded-2xl border border-gray-100 flex flex-col gap-2">
+                                    <div class="flex justify-between items-center">
+                                        <div class="text-[9px] font-black text-gov-blue uppercase tracking-tight italic">${l.receiver?.first_name || 'Citoyen'}</div>
+                                        <div class="text-[9px] font-black text-emerald-600">+$${l.amount.toLocaleString()}</div>
+                                    </div>
+                                    <div class="text-[10px] text-gray-500 italic leading-tight">"${l.description}"</div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -298,7 +342,6 @@ export const ProfileHubView = () => {
     <div class="flex-1 flex flex-col bg-[#F6F6F6] min-h-screen overflow-hidden">
         ${isMobileMenuOpen ? MobileMenuOverlay() : ''}
         
-        <!-- UNIFIED TERMINAL NAVBAR -->
         <nav class="terminal-nav shrink-0">
             <div class="flex items-center gap-6 md:gap-12 h-full">
                 <div onclick="actions.backToLanding()" class="marianne-block uppercase font-black text-gov-text scale-75 origin-left cursor-pointer transition-transform hover:scale-[0.8]">

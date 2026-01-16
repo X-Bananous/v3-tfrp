@@ -61,7 +61,6 @@ export const viewCensusDetails = (charId) => {
     });
 };
 
-// --- HOLD TO PURGE LOGIC ---
 export const startHoldPurge = (e, charId) => {
     e.preventDefault();
     holdStartTime = Date.now();
@@ -143,7 +142,6 @@ export const submitCharacter = async (e) => {
         }
     }
 
-    // GESTION DES INFOS COMPLÉMENTAIRES (Stockées sur le Perso désormais)
     const charInfos = {};
     if (!state.editingCharacter && state.characters.length > 0 && !state.isAdminEditing) {
         charInfos.type = data.char_type;
@@ -166,7 +164,7 @@ export const submitCharacter = async (e) => {
         user_id: targetUserId,
         alignment: data.alignment,
         job: job,
-        infos: charInfos, // Ajout du champ infos au personnage
+        infos: charInfos,
         is_notified: state.isAdminEditing ? true : isNotified,
         verifiedby: state.isAdminEditing ? state.user.id : verifiedBy
     };

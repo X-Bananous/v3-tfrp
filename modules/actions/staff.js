@@ -1,4 +1,3 @@
-
 import { state } from '../state.js';
 import { render, router } from '../utils.js';
 import { ui, toggleBtnLoading } from '../ui.js';
@@ -16,7 +15,7 @@ export const setStaffTab = async (tab) => {
     render();
 
     try {
-        if (tab === 'economy' || tab === 'illegal' || tab === 'security') {
+        if (tab === 'economy' || tab === 'illegal') {
              await services.fetchServerStats();
         }
         if (tab === 'citizens') {
@@ -56,36 +55,11 @@ export const setStaffTab = async (tab) => {
             await services.fetchActiveSession();
             await services.fetchSessionHistory();
         }
-        if (tab === 'security') {
-            await services.fetchStaffProfiles();
-            await services.fetchGlobalTransactions();
-        }
     } finally {
         state.isPanelLoading = false;
         render();
     }
 };
-
-export const cancelUserPurgeAdmin = async (userId) => {
-    if (!state.user.isFounder) return;
-    
-    ui.showModal({
-        title: "Annulation de Purge",
-        content: `Interrompre la suppression définitive des données de l'utilisateur <@${userId}> ?`,
-        confirmText: "Annuler la Purge",
-        type: "danger",
-        onConfirm: async () => {
-            const { error } = await state.supabase.from('profiles').update({ deletion_requested_at: null }).eq('id', userId);
-            if (!error) {
-                ui.showToast("Purge annulée avec succès.", "success");
-                await services.fetchStaffProfiles();
-                render();
-            }
-        }
-    });
-};
-
-// ... (reste des fonctions existantes inchangées) ...
 
 // SANCTION ACTIONS
 export const searchUserForSanction = async (query) => {
