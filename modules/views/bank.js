@@ -4,13 +4,79 @@ import { state } from '../state.js';
 export const BankView = () => {
     if (!state.bankAccount) return '<div class="p-8 text-center text-gray-500"><div class="w-10 h-10 border-4 border-gov-blue border-t-transparent rounded-full animate-spin mb-4 mx-auto"></div>Synchronisation bancaire...</div>';
     
-    const activeTab = state.activeBankTab || 'overview';
+    const activeTab = state.activeBankTab || 'hub';
     const bankBalance = state.bankAccount.bank_balance || 0;
     const cashBalance = state.bankAccount.cash_balance || 0;
     const savingsBalance = state.bankAccount.savings_balance || 0;
 
-    let subContent = '';
+    // BANQUE HUB (VUE PRINCIPALE)
+    if (activeTab === 'hub') {
+        return `
+            <div class="h-full flex flex-col bg-[#F6F6F6] overflow-hidden animate-fade-in">
+                <div class="px-8 py-12 bg-white border-b border-gray-200 shrink-0">
+                    <div class="max-w-6xl mx-auto">
+                        <div class="text-[10px] font-black text-gov-blue uppercase tracking-[0.5em] mb-4 flex items-center gap-3">
+                            <span class="w-12 h-0.5 bg-gov-blue"></span> Portail Financier Officiel
+                        </div>
+                        <h2 class="text-5xl font-black text-gov-text uppercase italic tracking-tighter leading-none">Banque de <span class="text-gov-blue">Los Angeles.</span></h2>
+                    </div>
+                </div>
 
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-8">
+                    <div class="max-w-6xl mx-auto py-10">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            <button onclick="actions.setBankTab('overview')" class="gov-card p-10 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
+                                <div class="w-20 h-20 bg-gov-light rounded-none flex items-center justify-center mb-8 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner">
+                                    <i data-lucide="layout-grid" class="w-10 h-10"></i>
+                                </div>
+                                <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Résumé de Compte</h4>
+                                <p class="text-[9px] text-gray-400 mt-4 uppercase font-black tracking-widest">Situation & Liquidités</p>
+                            </button>
+
+                            <button onclick="actions.setBankTab('transfer')" class="gov-card p-10 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
+                                <div class="w-20 h-20 bg-gov-light rounded-none flex items-center justify-center mb-8 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner">
+                                    <i data-lucide="send" class="w-10 h-10"></i>
+                                </div>
+                                <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Virement Bancaire</h4>
+                                <p class="text-[9px] text-gray-400 mt-4 uppercase font-black tracking-widest">Emission de fonds certifiée</p>
+                            </button>
+
+                            <button onclick="actions.setBankTab('savings')" class="gov-card p-10 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
+                                <div class="w-20 h-20 bg-gov-light rounded-none flex items-center justify-center mb-8 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner">
+                                    <i data-lucide="piggy-bank" class="w-10 h-10"></i>
+                                </div>
+                                <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Livret Épargne</h4>
+                                <p class="text-[9px] text-gray-400 mt-4 uppercase font-black tracking-widest">Placement à intérêts fixes</p>
+                            </button>
+
+                            <button onclick="actions.setBankTab('history')" class="gov-card p-10 flex flex-col items-center text-center group bg-white rounded-none shadow-xl border border-gray-100 hover:border-gov-blue/30 transition-all duration-500">
+                                <div class="w-20 h-20 bg-gov-light rounded-none flex items-center justify-center mb-8 group-hover:bg-gov-blue group-hover:text-white transition-all duration-500 shadow-inner">
+                                    <i data-lucide="scroll-text" class="w-10 h-10"></i>
+                                </div>
+                                <h4 class="text-xl font-black uppercase italic tracking-tight text-gov-text">Archives</h4>
+                                <p class="text-[9px] text-gray-400 mt-4 uppercase font-black tracking-widest">Historique des transactions</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // VUES INTERNES AVEC BOUTON RETOUR
+    const backHeader = `
+        <div class="px-8 py-8 bg-white border-b border-gray-200 shrink-0 flex items-center justify-between">
+            <button onclick="actions.setBankTab('hub')" class="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-gov-blue hover:text-black transition-all">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i> Retour au Hub Financier
+            </button>
+            <div class="text-right hidden sm:block">
+                <div class="text-[8px] text-gray-400 uppercase font-black mb-1">Terminal de Contrôle</div>
+                <div class="text-xs font-mono font-black uppercase text-gov-text">${activeTab === 'overview' ? 'Situation de Compte' : activeTab === 'transfer' ? 'Transfert de Fonds' : activeTab === 'savings' ? 'Livret d\'Épargne' : 'Archives de Transaction'}</div>
+            </div>
+        </div>
+    `;
+
+    let subContent = '';
     if (activeTab === 'overview') {
         subContent = `
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in">
@@ -165,21 +231,7 @@ export const BankView = () => {
 
     return `
         <div class="h-full flex flex-col bg-[#F6F6F6] overflow-hidden animate-fade-in">
-            <!-- BANNER HEADER -->
-            <div class="px-8 py-10 bg-white border-b border-gray-200 shrink-0 flex flex-col md:flex-row justify-between items-center gap-6">
-                <div>
-                    <div class="text-[10px] font-black text-gov-blue uppercase tracking-[0.4em] mb-2">Banque d'État de Los Angeles</div>
-                    <h2 class="text-4xl font-black text-gov-text uppercase italic tracking-tighter">Terminal <span class="text-gov-blue">Financier.</span></h2>
-                </div>
-                
-                <div class="flex gap-2 p-1.5 bg-gov-light rounded-2xl border border-gray-100 overflow-x-auto no-scrollbar max-w-full">
-                    <button onclick="actions.setBankTab('overview')" class="px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'overview' ? 'bg-white text-gov-blue shadow-md' : 'text-gray-400 hover:text-gov-text'}">Résumé</button>
-                    <button onclick="actions.setBankTab('transfer')" class="px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'transfer' ? 'bg-white text-gov-blue shadow-md' : 'text-gray-400 hover:text-gov-text'}">Virement</button>
-                    <button onclick="actions.setBankTab('savings')" class="px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'savings' ? 'bg-white text-gov-blue shadow-md' : 'text-gray-400 hover:text-gov-text'}">Épargne</button>
-                    <button onclick="actions.setBankTab('history')" class="px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'history' ? 'bg-white text-gov-blue shadow-md' : 'text-gray-400 hover:text-gov-text'}">Archives</button>
-                </div>
-            </div>
-
+            ${backHeader}
             <div class="flex-1 overflow-y-auto custom-scrollbar p-8">
                 <div class="max-w-6xl mx-auto pb-20">
                     ${subContent}

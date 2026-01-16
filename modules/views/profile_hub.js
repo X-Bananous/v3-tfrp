@@ -1,8 +1,9 @@
 
 import { CONFIG } from '../config.js';
 import { state } from '../state.js';
-import { router } from '../utils.js';
+import { router, render } from '../utils.js';
 import { loadUserSanctions } from '../actions/profile.js';
+import { ui } from '../ui.js';
 
 const ALL_PERMISSIONS = [
     { k: 'can_approve_characters', l: 'File Whitelist', d: "Autorise l'examen et la validation des nouveaux citoyens entrant sur le territoire (Whitelist)." },
@@ -199,6 +200,72 @@ export const ProfileHubView = () => {
 
     else if (currentTab === 'security') {
         const deletionDate = u.deletion_requested_at ? new Date(u.deletion_requested_at) : null;
+        
+        // Fonction helper pour afficher les détails techniques réels
+        window.actions.showTechnicalDetails = async (charId) => {
+            const char = state.characters.find(c => c.id === charId);
+            if (!char) return;
+            
+            ui.showToast("Extraction des métadonnées...", "info");
+            
+            try {
+                const [bankRes, invRes, entRes] = await Promise.all([
+                    state.supabase.from('bank_accounts').select('*').eq('character_id', charId).maybeSingle(),
+                    state.supabase.from('inventory').select('*').eq('character_id', charId),
+                    state.supabase.from('enterprise_members').select('*, enterprises(*)').eq('character_id', charId)
+                ]);
+
+                const bank = bankRes.data || { bank_balance: 0, cash_balance: 0, savings_balance: 0 };
+                const inventory = invRes.data || [];
+                const enterprises = entRes.data || [];
+
+                ui.showModal({
+                    title: `Audit Technique : ${char.first_name}`,
+                    content: `
+                        <div class="text-left space-y-6">
+                            <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
+                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4">Masse Monétaire Réelle</div>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div><div class="text-[8px] font-bold text-gray-500 uppercase">Banque</div><div class="font-mono text-sm font-black">$${bank.bank_balance.toLocaleString()}</div></div>
+                                    <div><div class="text-[8px] font-bold text-gray-500 uppercase">Liquide</div><div class="font-mono text-sm font-black">$${bank.cash_balance.toLocaleString()}</div></div>
+                                    <div><div class="text-[8px] font-bold text-gray-500 uppercase">Epargne</div><div class="font-mono text-sm font-black">$${bank.savings_balance.toLocaleString()}</div></div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
+                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4">Registre des Biens (${inventory.length})</div>
+                                <div class="max-h-32 overflow-y-auto custom-scrollbar pr-2 space-y-2">
+                                    ${inventory.length > 0 ? inventory.map(i => `
+                                        <div class="flex justify-between items-center text-[10px] p-2 bg-white/50 rounded-lg">
+                                            <span class="font-bold uppercase italic">${i.name}</span>
+                                            <span class="font-mono bg-white px-2 rounded">x${i.quantity}</span>
+                                        </div>
+                                    `).join('') : '<div class="text-center italic text-gray-400 text-[10px]">Aucun objet physique</div>'}
+                                </div>
+                            </div>
+
+                            <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
+                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4">Liaisons Corporatistes</div>
+                                <div class="space-y-2">
+                                    ${enterprises.length > 0 ? enterprises.map(e => `
+                                        <div class="flex justify-between items-center text-[10px]">
+                                            <span class="font-bold uppercase text-gov-blue">${e.enterprises?.name}</span>
+                                            <span class="text-[8px] font-black bg-white px-2 py-0.5 rounded border border-gray-200 uppercase">${e.rank}</span>
+                                        </div>
+                                    `).join('') : '<div class="text-center italic text-gray-400 text-[10px]">Aucune affiliation enregistrée</div>'}
+                                </div>
+                            </div>
+
+                            <div class="text-[8px] text-gray-400 text-center uppercase tracking-widest font-bold">ID Système : ${char.id}</div>
+                        </div>
+                    `,
+                    confirmText: "Fermer l'Audit"
+                });
+            } catch (err) {
+                ui.showToast("Erreur d'extraction.", "error");
+            }
+        };
+
         tabContent = `
             <div class="animate-in max-w-5xl mx-auto pb-20 space-y-8">
                 <!-- INFOS RGPD DÉTAILLÉES -->
@@ -229,13 +296,18 @@ export const ProfileHubView = () => {
                     <div class="space-y-4">
                         ${characters.map(char => `
                             <div class="flex items-center justify-between p-5 bg-gov-light rounded-2xl border border-gray-100 group">
-                                <div>
-                                    <div class="font-black text-gov-text text-sm uppercase italic">${char.first_name} ${char.last_name}</div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-black text-gov-text text-sm uppercase italic truncate">${char.first_name} ${char.last_name}</div>
                                     <div class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">REF: #${char.id.substring(0,8).toUpperCase()}</div>
                                 </div>
-                                <button onclick="actions.requestCharacterDeletion('${char.id}')" class="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all">
-                                    Purger ce dossier
-                                </button>
+                                <div class="flex gap-2">
+                                    <button onclick="actions.showTechnicalDetails('${char.id}')" class="px-4 py-2 bg-white border border-gray-200 text-gov-blue rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-gov-blue hover:text-white transition-all flex items-center gap-2">
+                                        <i data-lucide="eye" class="w-3 h-3"></i> Détails Techniques
+                                    </button>
+                                    <button onclick="actions.requestCharacterDeletion('${char.id}')" class="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all">
+                                        Purger ce dossier
+                                    </button>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
