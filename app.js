@@ -32,11 +32,12 @@ import { HubView } from './modules/views/hub.js';
 import { TermsView, PrivacyView } from './modules/views/legal.js';
 import { WheelView } from './modules/views/wheel.js';
 
-window.actions = {
+// Merge into existing window.actions to avoid overwriting early definitions in modules
+window.actions = Object.assign(window.actions || {}, {
     ...AuthActions, ...NavActions, ...CharacterActions, ...EconomyActions,
     ...IllicitActions, ...ServicesActions, ...StaffActions,
     ...EnterpriseActions, ...ProfileActions, ...WheelActions
-};
+});
 
 window.router = router;
 

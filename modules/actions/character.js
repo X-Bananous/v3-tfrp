@@ -1,3 +1,4 @@
+
 import { state } from '../state.js';
 import { render, router } from '../utils.js';
 import { ui, toggleBtnLoading } from '../ui.js';
@@ -31,24 +32,19 @@ export const submitCharacter = async (e) => {
         return; 
     }
 
-    const isEdit = !!state.editingCharacter;
-    let infos = isEdit ? state.editingCharacter.infos : null;
+    // Préparation de l'objet infos JSON
+    const type = data.char_type;
+    const infos = {
+        type: type,
+        submitted_at: new Date().toISOString()
+    };
 
-    if (!isEdit) {
-        // Préparation de l'objet infos JSON uniquement à la création
-        const type = data.char_type;
-        infos = {
-            type: type,
-            submitted_at: new Date().toISOString()
-        };
-
-        if (type === 'permanent') {
-            infos.reason = data.info_reason;
-        } else {
-            infos.goal = data.info_goal;
-            infos.context = data.info_context;
-            infos.with_who = data.info_who;
-        }
+    if (type === 'permanent') {
+        infos.reason = data.info_reason;
+    } else {
+        infos.goal = data.info_goal;
+        infos.context = data.info_context;
+        infos.with_who = data.info_who;
     }
 
     // Determine User ID (Self or Admin Target)
@@ -60,7 +56,7 @@ export const submitCharacter = async (e) => {
     let isNotified = false;
     let verifiedBy = null;
 
-    if (isEdit) {
+    if (state.editingCharacter) {
         const oldChar = state.editingCharacter;
         status = oldChar.status;
         job = oldChar.job;
@@ -92,12 +88,12 @@ export const submitCharacter = async (e) => {
         job: job,
         is_notified: state.isAdminEditing ? true : isNotified,
         verifiedby: state.isAdminEditing ? state.user.id : verifiedBy,
-        infos: infos // Sauvegarde de l'objet JSON (existant si edit, nouveau sinon)
+        infos: infos // Sauvegarde de l'objet JSON
     };
 
     let error = null;
 
-    if (isEdit) {
+    if (state.editingCharacter) {
         // Update existing
         const { error: updateError } = await state.supabase
             .from('characters')
@@ -124,7 +120,7 @@ export const submitCharacter = async (e) => {
             if(window.actions && window.actions.setHubPanel) window.actions.setHubPanel('staff');
             router('hub');
         } else {
-            const msg = isEdit && status !== 'pending' 
+            const msg = state.editingCharacter && status !== 'pending' 
                 ? "Dossier mis à jour." 
                 : "Dossier transmis pour validation.";
             ui.showToast(msg, 'success');
