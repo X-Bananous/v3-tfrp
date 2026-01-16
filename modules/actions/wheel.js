@@ -67,24 +67,25 @@ export const openCrate = async (crateIdx) => {
     state.openingCrateIdx = crateIdx;
     render();
 
-    // Séquence audio Sonar
-    let currentFreq = 200;
-    const audioInterval = setInterval(() => {
-        SoundEngine.tick(currentFreq);
-        currentFreq += 100;
-    }, 150);
+    // Séquence audio Sonar (Plus rapide vers la fin)
+    let sonarFreq = 200;
+    let sonarInt = 200;
+    const playSonar = () => {
+        if (!state.isOpening) return;
+        SoundEngine.tick(sonarFreq);
+        sonarFreq += 50;
+        sonarInt = Math.max(80, sonarInt - 15);
+        setTimeout(playSonar, sonarInt);
+    };
+    playSonar();
 
     setTimeout(async () => {
-        clearInterval(audioInterval);
         const totalWeight = WHEEL_REWARDS.reduce((acc, r) => acc + r.weight, 0);
         let randomVal = Math.random() * totalWeight;
         let winner = WHEEL_REWARDS[0];
         for (const reward of WHEEL_REWARDS) {
             randomVal -= reward.weight;
-            if (randomVal <= 0) { 
-                winner = reward; 
-                break; 
-            }
+            if (randomVal <= 0) { winner = reward; break; }
         }
 
         const currentWinner = { ...winner };
@@ -105,7 +106,7 @@ export const openCrate = async (crateIdx) => {
             showSecureScreenshotModal(currentWinner);
         }
         render();
-    }, 2000);
+    }, 2500); // 2.5s d'animation visuelle avant le résultat
 };
 
 const showCharacterChoiceModal = (reward) => {
@@ -136,116 +137,87 @@ const showCharacterChoiceModal = (reward) => {
 
 const generateClaimCertificate = (reward) => {
     const canvas = document.createElement('canvas');
-    canvas.width = 800;
-    canvas.height = 500;
+    canvas.width = 800; canvas.height = 500;
     const ctx = canvas.getContext('2d');
     const verificationCode = Math.random().toString(36).substring(2, 12).toUpperCase();
 
-    // Background
+    // Background Luxe
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, 800, 500);
 
-    // Diagonal Watermark Pattern (Anti-falsification)
+    // Diagonal Watermark (Anti-falsification)
     ctx.save();
     ctx.rotate(-Math.PI / 6);
-    ctx.font = 'black 14px Inter';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
-    for (let x = -500; x < 1500; x += 150) {
-        for (let y = -500; y < 1500; y += 80) {
+    ctx.font = 'black 16px Inter';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+    for (let x = -500; x < 1500; x += 180) {
+        for (let y = -500; y < 1500; y += 100) {
             ctx.fillText('TFRP OFFICIAL CLAIM • ', x, y);
         }
     }
     ctx.restore();
 
-    // Border
+    // Border Thématique
     ctx.strokeStyle = reward.color || '#3b82f6';
     ctx.lineWidth = 15;
     ctx.strokeRect(0, 0, 800, 500);
 
-    // Header
+    // Titrage
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 24px Inter';
     ctx.fillText('CERTIFICAT DE GAIN OFFICIEL', 50, 60);
     ctx.fillStyle = reward.color || '#3b82f6';
     ctx.font = 'black 12px Inter';
-    ctx.fillText('TEAM FRENCH ROLEPLAY • PROTOCOLE v6.4', 50, 85);
+    ctx.fillText('TEAM FRENCH ROLEPLAY • CAD-OS v6.6', 50, 85);
 
-    // Identity
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 14px Inter';
-    ctx.fillText('IDENTITÉ DISCORD VÉRIFIÉE', 50, 150);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 28px Inter';
-    ctx.fillText(state.user.username.toUpperCase(), 50, 185);
-    ctx.fillStyle = '#3b82f6';
-    ctx.font = 'mono 12px Courier';
-    ctx.fillText('UID: ' + state.user.id, 50, 210);
+    // Bénéficiaire
+    ctx.fillStyle = '#64748b'; ctx.font = 'bold 14px Inter'; ctx.fillText('DÉTENTEUR DISCORD', 50, 150);
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 28px Inter'; ctx.fillText(state.user.username.toUpperCase(), 50, 185);
+    ctx.fillStyle = '#3b82f6'; ctx.font = 'mono 12px Courier'; ctx.fillText('UID: ' + state.user.id, 50, 210);
 
-    // Reward
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 14px Inter';
-    ctx.fillText('LOT ATTRIBUÉ', 50, 280);
-    ctx.fillStyle = reward.color || '#ffffff';
-    ctx.font = 'italic black 48px Inter';
-    ctx.fillText(reward.label.toUpperCase(), 50, 340);
+    // Récompense
+    ctx.fillStyle = '#64748b'; ctx.font = 'bold 14px Inter'; ctx.fillText('LOT ATTRIBUÉ', 50, 280);
+    ctx.fillStyle = reward.color || '#ffffff'; ctx.font = 'italic black 48px Inter'; ctx.fillText(reward.label.toUpperCase(), 50, 340);
 
-    // Footer Info
+    // Footer
     const dateStr = new Date().toLocaleString();
-    ctx.fillStyle = '#475569';
-    ctx.font = 'bold 10px Inter';
+    ctx.fillStyle = '#475569'; ctx.font = 'bold 10px Inter';
     ctx.fillText('GÉNÉRÉ LE : ' + dateStr, 50, 450);
     ctx.fillText('VALIDE UNIQUEMENT VIA TICKET SUPPORT DISCORD', 50, 465);
 
-    // Verification Code (Unique)
-    ctx.fillStyle = reward.color || '#ffffff';
-    ctx.font = 'mono 10px Courier';
+    // Code Auth Unique
+    ctx.fillStyle = reward.color || '#ffffff'; ctx.font = 'mono 12px Courier';
     ctx.fillText('AUTH_CODE: ' + verificationCode, 550, 465);
 
-    // Download
     const link = document.createElement('a');
-    link.download = `TFRP_CERTIFICATE_${verificationCode}.png`;
+    link.download = `TFRP_CLAIM_${verificationCode}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-    
     return verificationCode;
 };
 
 const showSecureScreenshotModal = (reward) => {
-    let downloaded = false;
-    
     ui.showModal({
         title: "LOT D'EXCEPTION DÉVÉROUILLÉ",
         isClosable: false,
         type: 'warning',
         content: `
-            <div id="reward-certificate-box" class="text-center p-8 bg-[#0f172a] rounded-[40px] border border-white/5 relative overflow-hidden shadow-2xl">
+            <div class="text-center p-8 bg-[#0f172a] rounded-[40px] border border-white/5 relative overflow-hidden shadow-2xl">
                 <div class="absolute -right-20 -top-20 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl"></div>
-                
                 <div class="mb-8">
                     <div class="text-[10px] text-blue-400 font-black uppercase tracking-[0.4em] mb-2">Preuve de Gain Certifiée</div>
                     <div class="text-4xl font-black text-white italic tracking-tighter uppercase leading-none" style="color: ${reward.color}">${reward.label}</div>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left border-t border-b border-white/5 py-8 mb-8">
-                    <div>
-                        <div class="text-[8px] text-gray-500 font-black uppercase tracking-widest mb-1">Bénéficiaire</div>
-                        <div class="text-sm font-bold text-white truncate">${state.user.username}</div>
-                    </div>
-                    <div>
-                        <div class="text-[8px] text-gray-500 font-black uppercase tracking-widest mb-1">UID Discord</div>
-                        <div class="text-sm font-mono font-bold text-blue-400">${state.user.id}</div>
-                    </div>
+                    <div><div class="text-[8px] text-gray-500 font-black uppercase tracking-widest mb-1">Bénéficiaire</div><div class="text-sm font-bold text-white truncate">${state.user.username}</div></div>
+                    <div><div class="text-[8px] text-gray-500 font-black uppercase tracking-widest mb-1">UID Discord</div><div class="text-sm font-mono font-bold text-blue-400">${state.user.id}</div></div>
                 </div>
-
-                <div class="bg-red-500/10 border border-red-500/20 p-5 rounded-3xl">
-                    <p class="text-[10px] text-red-400 font-black uppercase leading-relaxed">
-                        VERROUILLAGE SYSTÈME : <br>Téléchargez votre certificat pour débloquer la session.
-                    </p>
+                <div class="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl">
+                    <p class="text-[10px] text-red-400 font-black uppercase leading-relaxed">SÉCURITÉ : Téléchargez votre preuve pour clôturer la session.</p>
                 </div>
             </div>
-            
             <div class="mt-8">
-                <button id="download-btn-secure" onclick="actions.handleSecureDownload('${reward.label}')" class="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-blue-900/40 transition-all flex items-center justify-center gap-3">
+                <button id="download-btn-secure" onclick="actions.handleSecureDownload('${reward.label}')" class="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-3">
                     <i data-lucide="download" class="w-5 h-5"></i> TÉLÉCHARGER LE CERTIFICAT
                 </button>
             </div>
@@ -254,25 +226,17 @@ const showSecureScreenshotModal = (reward) => {
     });
 
     const confirmBtn = document.getElementById('modal-confirm');
-    if (confirmBtn) {
-        confirmBtn.disabled = true;
-        confirmBtn.classList.add('opacity-30', 'cursor-not-allowed');
-    }
+    if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.classList.add('opacity-30', 'cursor-not-allowed'); }
 
     window.actions.handleSecureDownload = () => {
         generateClaimCertificate(reward);
-        downloaded = true;
         ui.showToast("Certificat authentifié et téléchargé.", "success");
-        
         if (confirmBtn) {
             confirmBtn.disabled = false;
             confirmBtn.classList.remove('opacity-30', 'cursor-not-allowed');
             confirmBtn.classList.add('bg-emerald-600', 'text-white');
             confirmBtn.textContent = "SESSION TERMINÉE";
-            confirmBtn.onclick = () => {
-                ui.forceCloseModal();
-                render();
-            };
+            confirmBtn.onclick = () => ui.forceCloseModal();
         }
     };
 };
@@ -282,16 +246,10 @@ export const claimMoneyReward = async (value, charId) => {
         const { data: bank } = await state.supabase.from('bank_accounts').select('bank_balance').eq('character_id', charId).single();
         if (bank) {
             await state.supabase.from('bank_accounts').update({ bank_balance: (bank.bank_balance || 0) + value }).eq('character_id', charId);
-            await state.supabase.from('transactions').insert({ 
-                receiver_id: charId, 
-                amount: value, 
-                type: 'admin_adjustment', 
-                description: 'Gain Loterie TFRP (Lootbox)' 
-            });
+            await state.supabase.from('transactions').insert({ receiver_id: charId, amount: value, type: 'admin_adjustment', description: 'Gain Lootbox TFRP' });
             ui.showToast(`$${value.toLocaleString()} versés avec succès.`, "success");
         }
     } catch(e) { ui.showToast("Erreur versement.", "error"); }
-    
     ui.forceCloseModal();
     render();
 };
@@ -301,5 +259,5 @@ export const closeWheel = () => { actions.setProfileTab('identity'); };
 export const showProbabilities = () => {
     const totalWeight = WHEEL_REWARDS.reduce((acc, r) => acc + r.weight, 0);
     const sorted = [...WHEEL_REWARDS].sort((a,b) => b.weight - a.weight);
-    ui.showModal({ title: "Algorithme de Probabilités", content: `<div class="bg-gov-light rounded-[24px] border border-gray-200 overflow-hidden max-h-96 overflow-y-auto custom-scrollbar">${sorted.map(r => `<div class="flex justify-between items-center p-4 border-b border-gray-100 hover:bg-white transition-colors"><div class="flex items-center gap-3"><div class="w-2 h-2 rounded-full" style="background: ${r.color}"></div><span class="text-[10px] font-black text-gov-text uppercase tracking-tight">${r.label}</span></div><span class="text-[10px] font-mono text-gov-blue font-bold">${((r.weight/totalWeight)*100).toFixed(1)}%</span></div>`).join('')}</div>` });
+    ui.showModal({ title: "Registre des Probabilités", content: `<div class="bg-gov-light rounded-[24px] border border-gray-200 overflow-hidden max-h-96 overflow-y-auto custom-scrollbar">${sorted.map(r => `<div class="flex justify-between items-center p-4 border-b border-gray-100 hover:bg-white transition-colors"><div class="flex items-center gap-3"><div class="w-2 h-2 rounded-full" style="background: ${r.color}"></div><span class="text-[10px] font-black text-gov-text uppercase tracking-tight">${r.label}</span></div><span class="text-[10px] font-mono text-gov-blue font-bold">${((r.weight/totalWeight)*100).toFixed(1)}%</span></div>`).join('')}</div>` });
 };

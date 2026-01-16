@@ -14,25 +14,45 @@ export const WheelView = () => {
             const canOpen = turns > 0 && !isOpening;
             
             crates.push(`
-                <div class="relative group h-64">
-                    <div class="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 rounded-[40px] transition-all duration-700 blur-2xl"></div>
+                <div class="relative group">
+                    <style>
+                        @keyframes lid-pop {
+                            0% { transform: translateY(0) rotate(0); }
+                            20% { transform: translateY(-30px) rotate(-15deg); opacity: 0.8; }
+                            100% { transform: translateY(-120px) rotate(-45deg); opacity: 0; }
+                        }
+                        @keyframes box-shake {
+                            0%, 100% { transform: rotate(0); }
+                            25% { transform: rotate(5deg); }
+                            50% { transform: rotate(-5deg); }
+                            75% { transform: rotate(5deg); }
+                        }
+                        @keyframes glow-explosion {
+                            0% { transform: scale(1); opacity: 0.5; filter: blur(5px); }
+                            100% { transform: scale(3); opacity: 0; filter: blur(30px); }
+                        }
+                        .animate-lid { animation: lid-pop 1s forwards cubic-bezier(0.34, 1.56, 0.64, 1); }
+                        .animate-shake { animation: box-shake 0.2s infinite ease-in-out; }
+                        .animate-glow { animation: glow-explosion 1.5s infinite ease-out; }
+                    </style>
+                    
                     <button onclick="${canOpen ? `actions.openCrate(${i})` : ''}" 
                         ${!canOpen && !isTarget ? 'disabled' : ''}
-                        class="w-full h-full glass-panel rounded-[40px] border border-white/5 bg-[#0a0a0a] flex flex-col items-center justify-center gap-6 transition-all duration-700 
-                        ${canOpen ? 'hover:border-blue-500/50 hover:-translate-y-2 cursor-pointer shadow-xl' : 'opacity-40 cursor-not-allowed'}
-                        ${isTarget ? 'border-blue-400 bg-blue-600/10 scale-[1.05] shadow-[0_0_80px_rgba(59,130,246,0.4)]' : ''}">
+                        class="w-full aspect-square bg-[#0c0c0e] rounded-[40px] border border-white/5 flex flex-col items-center justify-center gap-5 transition-all duration-700 
+                        ${canOpen ? 'hover:border-blue-500/50 hover:bg-blue-600/5 hover:scale-[1.02] cursor-pointer' : 'opacity-40 cursor-not-allowed'}
+                        ${isTarget ? 'border-blue-500 bg-blue-600/20 scale-[1.1] z-50' : ''}">
                         
-                        <div class="relative w-24 h-24 flex items-center justify-center">
-                            <!-- ANIAMTION BOX VISUELLE -->
-                            <div class="box-container relative ${isTarget ? 'animate-opening-sequence' : ''}">
-                                <div class="box-lid absolute -top-2 left-0 w-full h-4 bg-blue-500 rounded-t-lg origin-bottom transition-all duration-500 ${isTarget ? 'lid-pop' : ''}"></div>
-                                <div class="box-body w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-900 rounded-xl flex items-center justify-center border border-blue-400/30 shadow-2xl">
+                        <div class="relative flex items-center justify-center w-24 h-24">
+                            <!-- ANIAMTION BOX -->
+                            <div class="relative w-16 h-16 ${isTarget ? 'animate-shake' : ''}">
+                                ${isTarget ? '<div class="absolute inset-0 bg-blue-400 rounded-full animate-glow"></div>' : ''}
+                                <div class="box-lid absolute -top-1 left-0 w-full h-4 bg-blue-500 rounded-t-lg origin-bottom z-20 ${isTarget ? 'animate-lid' : ''}"></div>
+                                <div class="box-body w-full h-full bg-gradient-to-br from-blue-600 to-blue-900 rounded-xl flex items-center justify-center border border-blue-400/30 shadow-2xl relative z-10">
                                     <i data-lucide="package" class="w-8 h-8 text-white ${isTarget ? 'animate-pulse' : ''}"></i>
                                 </div>
-                                ${isTarget ? '<div class="absolute inset-0 bg-blue-400 rounded-full blur-2xl animate-ping opacity-50"></div>' : ''}
                             </div>
                             
-                            ${canOpen ? '<div class="absolute -top-3 -right-3 w-7 h-7 rounded-full bg-emerald-500 border-4 border-[#0a0a0a] flex items-center justify-center shadow-xl"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>' : ''}
+                            ${canOpen ? '<div class="absolute -top-4 -right-4 w-7 h-7 rounded-full bg-emerald-500 border-4 border-[#0c0c0e] flex items-center justify-center shadow-xl"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>' : ''}
                         </div>
                         
                         <div class="text-center">
@@ -47,25 +67,6 @@ export const WheelView = () => {
     };
 
     return `
-    <style>
-        @keyframes lid-pop {
-            0% { transform: translateY(0) rotate(0); }
-            50% { transform: translateY(-30px) rotate(-15deg); opacity: 0.8; }
-            100% { transform: translateY(-100px) rotate(-45deg); opacity: 0; }
-        }
-        .lid-pop { animation: lid-pop 0.8s forwards cubic-bezier(0.34, 1.56, 0.64, 1); }
-        
-        @keyframes opening-sequence {
-            0% { transform: scale(1) rotate(0); }
-            10% { transform: scale(1.1) rotate(2deg); }
-            20% { transform: scale(1.1) rotate(-2deg); }
-            30% { transform: scale(1.1) rotate(2deg); }
-            40% { transform: scale(1.2); }
-            100% { transform: scale(1.3); }
-        }
-        .animate-opening-sequence { animation: opening-sequence 2s forwards ease-in-out; }
-    </style>
-    
     <div class="fixed inset-0 z-[500] bg-[#050505] flex flex-col items-center justify-start p-8 animate-fade-in overflow-hidden">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(10,132,246,0.1),transparent_70%)]"></div>
 
@@ -94,7 +95,7 @@ export const WheelView = () => {
 
         <!-- Crate Grid -->
         <div class="w-full max-w-7xl flex-1 overflow-y-auto custom-scrollbar pr-6 relative z-10">
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 pb-32">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8 pb-32">
                 ${renderCrates()}
             </div>
         </div>
