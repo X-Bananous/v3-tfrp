@@ -201,68 +201,109 @@ export const ProfileHubView = () => {
     else if (currentTab === 'security') {
         const deletionDate = u.deletion_requested_at ? new Date(u.deletion_requested_at) : null;
         
-        // Fonction helper pour afficher les détails techniques réels
-        window.actions.showTechnicalDetails = async (charId) => {
+        // Fonction helper pour afficher les détails techniques complets et exhaustifs
+        window.actions.showGlobalAudit = async (charId) => {
             const char = state.characters.find(c => c.id === charId);
             if (!char) return;
             
-            ui.showToast("Extraction des métadonnées...", "info");
+            ui.showToast("Déchiffrement du dossier CAD...", "info");
             
             try {
-                const [bankRes, invRes, entRes] = await Promise.all([
+                const [bankRes, invRes, entRes, txRes] = await Promise.all([
                     state.supabase.from('bank_accounts').select('*').eq('character_id', charId).maybeSingle(),
                     state.supabase.from('inventory').select('*').eq('character_id', charId),
-                    state.supabase.from('enterprise_members').select('*, enterprises(*)').eq('character_id', charId)
+                    state.supabase.from('enterprise_members').select('*, enterprises(*)').eq('character_id', charId),
+                    state.supabase.from('transactions').select('*').or(`sender_id.eq.${charId},receiver_id.eq.${charId}`).order('created_at', { ascending: false }).limit(5)
                 ]);
 
                 const bank = bankRes.data || { bank_balance: 0, cash_balance: 0, savings_balance: 0 };
                 const inventory = invRes.data || [];
                 const enterprises = entRes.data || [];
+                const transactions = txRes.data || [];
 
                 ui.showModal({
-                    title: `Audit Technique : ${char.first_name}`,
+                    title: `Audit Intégral : ${char.first_name} ${char.last_name}`,
                     content: `
-                        <div class="text-left space-y-6">
+                        <div class="text-left space-y-8 custom-scrollbar max-h-[60vh] pr-4">
+                            <!-- IDENTITÉ & STATUT -->
                             <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
-                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4">Masse Monétaire Réelle</div>
-                                <div class="grid grid-cols-3 gap-4">
-                                    <div><div class="text-[8px] font-bold text-gray-500 uppercase">Banque</div><div class="font-mono text-sm font-black">$${bank.bank_balance.toLocaleString()}</div></div>
-                                    <div><div class="text-[8px] font-bold text-gray-500 uppercase">Liquide</div><div class="font-mono text-sm font-black">$${bank.cash_balance.toLocaleString()}</div></div>
-                                    <div><div class="text-[8px] font-bold text-gray-500 uppercase">Epargne</div><div class="font-mono text-sm font-black">$${bank.savings_balance.toLocaleString()}</div></div>
+                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <i data-lucide="fingerprint" class="w-3.5 h-3.5 text-gov-blue"></i> État Civil Certifié
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 text-xs">
+                                    <div><span class="text-gray-400 block mb-0.5 uppercase font-bold">Naissance</span><span class="font-bold text-gov-text">${new Date(char.birth_date).toLocaleDateString()} (${char.age} ans)</span></div>
+                                    <div><span class="text-gray-400 block mb-0.5 uppercase font-bold">Lieu</span><span class="font-bold text-gov-text uppercase">${char.birth_place || 'Los Angeles'}</span></div>
+                                    <div><span class="text-gray-400 block mb-0.5 uppercase font-bold">Secteur</span><span class="font-black ${char.alignment === 'illegal' ? 'text-gov-red' : 'text-gov-blue'} uppercase italic">${char.alignment}</span></div>
+                                    <div><span class="text-gray-400 block mb-0.5 uppercase font-bold">Profession</span><span class="font-bold text-gov-text uppercase">${char.job || 'Civil / Sans emploi'}</span></div>
                                 </div>
                             </div>
 
+                            <!-- FINANCES EXHAUSTIVES -->
                             <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
-                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4">Registre des Biens (${inventory.length})</div>
-                                <div class="max-h-32 overflow-y-auto custom-scrollbar pr-2 space-y-2">
-                                    ${inventory.length > 0 ? inventory.map(i => `
-                                        <div class="flex justify-between items-center text-[10px] p-2 bg-white/50 rounded-lg">
-                                            <span class="font-bold uppercase italic">${i.name}</span>
-                                            <span class="font-mono bg-white px-2 rounded">x${i.quantity}</span>
+                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <i data-lucide="landmark" class="w-3.5 h-3.5 text-emerald-500"></i> Masse Monétaire en Temps Réel
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 mb-6">
+                                    <div class="text-center p-3 bg-white rounded-xl border border-gray-100 shadow-sm"><div class="text-[8px] font-bold text-gray-400 uppercase">Banque</div><div class="font-mono text-sm font-black text-gov-text">$${bank.bank_balance.toLocaleString()}</div></div>
+                                    <div class="text-center p-3 bg-white rounded-xl border border-gray-100 shadow-sm"><div class="text-[8px] font-bold text-gray-400 uppercase">Liquide</div><div class="font-mono text-sm font-black text-gov-text">$${bank.cash_balance.toLocaleString()}</div></div>
+                                    <div class="text-center p-3 bg-white rounded-xl border border-gray-100 shadow-sm"><div class="text-[8px] font-bold text-gray-400 uppercase">Épargne</div><div class="font-mono text-sm font-black text-emerald-600">$${bank.savings_balance.toLocaleString()}</div></div>
+                                </div>
+                                
+                                <div class="text-[8px] text-gray-400 font-black uppercase mb-2">Flux de capitaux récents</div>
+                                <div class="space-y-2">
+                                    ${transactions.length > 0 ? transactions.map(t => `
+                                        <div class="flex justify-between items-center text-[10px] p-2 bg-white/40 rounded-lg">
+                                            <span class="font-medium italic truncate max-w-[150px]">${t.description || t.type}</span>
+                                            <span class="font-mono font-black ${t.receiver_id === charId ? 'text-emerald-500' : 'text-red-500'}">${t.receiver_id === charId ? '+' : '-'} $${Math.abs(t.amount).toLocaleString()}</span>
                                         </div>
-                                    `).join('') : '<div class="text-center italic text-gray-400 text-[10px]">Aucun objet physique</div>'}
+                                    `).join('') : '<div class="text-center text-[9px] text-gray-400 py-2">Aucun mouvement certifié</div>'}
                                 </div>
                             </div>
 
+                            <!-- REGISTRE DES BIENS MATÉRIELS -->
                             <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
-                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4">Liaisons Corporatistes</div>
+                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <i data-lucide="package" class="w-3.5 h-3.5 text-orange-500"></i> Inventaire Civil (${inventory.length} types)
+                                </div>
+                                <div class="max-h-32 overflow-y-auto custom-scrollbar pr-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    ${inventory.length > 0 ? inventory.map(i => `
+                                        <div class="flex justify-between items-center text-[10px] p-2 bg-white rounded-lg border border-gray-100">
+                                            <span class="font-bold uppercase italic truncate pr-2">${i.name}</span>
+                                            <span class="font-mono bg-gov-light px-2 rounded font-black">x${i.quantity}</span>
+                                        </div>
+                                    `).join('') : '<div class="col-span-2 text-center italic text-gray-400 text-[10px] py-4">Dossier de possession vierge</div>'}
+                                </div>
+                            </div>
+
+                            <!-- CORPORATIONS & AFFILIATIONS -->
+                            <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
+                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <i data-lucide="briefcase" class="w-3.5 h-3.5 text-blue-500"></i> Liaisons Corporatistes
+                                </div>
                                 <div class="space-y-2">
                                     ${enterprises.length > 0 ? enterprises.map(e => `
-                                        <div class="flex justify-between items-center text-[10px]">
-                                            <span class="font-bold uppercase text-gov-blue">${e.enterprises?.name}</span>
-                                            <span class="text-[8px] font-black bg-white px-2 py-0.5 rounded border border-gray-200 uppercase">${e.rank}</span>
+                                        <div class="flex justify-between items-center p-3 bg-white rounded-xl border border-gray-100 shadow-sm">
+                                            <div>
+                                                <div class="text-[10px] font-black text-gov-text uppercase">${e.enterprises?.name}</div>
+                                                <div class="text-[8px] text-gray-400 font-bold uppercase tracking-widest">${e.rank}</div>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="text-[8px] text-gray-400 uppercase">Statut Contrat</div>
+                                                <div class="text-[9px] font-black ${e.status === 'accepted' ? 'text-emerald-500' : 'text-orange-500'} uppercase">${e.status}</div>
+                                            </div>
                                         </div>
-                                    `).join('') : '<div class="text-center italic text-gray-400 text-[10px]">Aucune affiliation enregistrée</div>'}
+                                    `).join('') : '<div class="text-center italic text-gray-400 text-[10px] py-4">Aucune affiliation enregistrée au registre du commerce</div>'}
                                 </div>
                             </div>
 
-                            <div class="text-[8px] text-gray-400 text-center uppercase tracking-widest font-bold">ID Système : ${char.id}</div>
+                            <div class="text-[9px] text-gray-400 text-center uppercase tracking-widest font-black border-t border-gray-100 pt-6">ID Système : ${char.id}</div>
                         </div>
                     `,
                     confirmText: "Fermer l'Audit"
                 });
             } catch (err) {
                 ui.showToast("Erreur d'extraction.", "error");
+                console.error(err);
             }
         };
 
@@ -290,22 +331,22 @@ export const ProfileHubView = () => {
                     </div>
                 </div>
 
-                <!-- PURGE INDIVIDUELLE -->
+                <!-- PURGE INDIVIDUELLE AVEC AUDIT COMPLET -->
                 <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl">
-                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-8">Purger un dossier spécifique</h4>
+                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-8">Fiches Citoyennes & Audit</h4>
                     <div class="space-y-4">
                         ${characters.map(char => `
-                            <div class="flex items-center justify-between p-5 bg-gov-light rounded-2xl border border-gray-100 group">
+                            <div class="flex items-center justify-between p-5 bg-gov-light rounded-2xl border border-gray-100 group transition-all hover:border-gov-blue/30">
                                 <div class="flex-1 min-w-0">
                                     <div class="font-black text-gov-text text-sm uppercase italic truncate">${char.first_name} ${char.last_name}</div>
                                     <div class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">REF: #${char.id.substring(0,8).toUpperCase()}</div>
                                 </div>
                                 <div class="flex gap-2">
-                                    <button onclick="actions.showTechnicalDetails('${char.id}')" class="px-4 py-2 bg-white border border-gray-200 text-gov-blue rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-gov-blue hover:text-white transition-all flex items-center gap-2">
-                                        <i data-lucide="eye" class="w-3 h-3"></i> Détails Techniques
+                                    <button onclick="actions.showGlobalAudit('${char.id}')" class="px-5 py-2.5 bg-white border border-gray-200 text-gov-blue rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gov-blue hover:text-white transition-all flex items-center gap-2 shadow-sm">
+                                        <i data-lucide="search" class="w-4 h-4"></i> Audit Global
                                     </button>
-                                    <button onclick="actions.requestCharacterDeletion('${char.id}')" class="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all">
-                                        Purger ce dossier
+                                    <button onclick="actions.requestCharacterDeletion('${char.id}')" class="px-5 py-2.5 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-sm">
+                                        Purger
                                     </button>
                                 </div>
                             </div>
