@@ -1,7 +1,7 @@
 
 import { CONFIG } from '../config.js';
 import { state } from '../state.js';
-import { router, render } from '../utils.js';
+import { router, render, hasPermission } from '../utils.js';
 import { loadUserSanctions } from '../actions/profile.js';
 import { ui } from '../ui.js';
 
@@ -35,8 +35,6 @@ export const ProfileHubView = () => {
     const characters = state.characters || [];
     const perms = u.permissions || {};
     const sanctions = state.userSanctions || [];
-    const isMobileMenuOpen = state.ui.mobileMenuOpen;
-    const turns = u.whell_turn || 0;
 
     if (!state.hasFetchedSanctions) {
         state.hasFetchedSanctions = true;
@@ -56,6 +54,33 @@ export const ProfileHubView = () => {
     if (currentTab === 'identity') {
         tabContent = `
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 animate-in pb-20">
+                
+                <!-- BYPASS BUBBLE -->
+                ${hasPermission('can_bypass_login') ? `
+                    <div class="gov-card flex flex-col bg-[#0f172a] rounded-[32px] border border-blue-500/30 shadow-2xl overflow-hidden group">
+                        <div class="p-8 pb-4 flex justify-between items-start">
+                            <div class="w-14 h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-inner">
+                                <i data-lucide="shield-alert" class="w-7 h-7 text-blue-400"></i>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase border tracking-widest bg-blue-500/10 text-blue-400 border-blue-500/20">
+                                ROOT ACCESS
+                            </span>
+                        </div>
+                        <div class="p-8 pt-2 flex-1">
+                            <div class="text-[9px] text-blue-400/60 font-black uppercase tracking-[0.2em] mb-1">Terminal de Contrôle</div>
+                            <h3 class="text-3xl font-black text-white uppercase italic tracking-tighter leading-none mb-6">
+                                ACCÈS<br><span class="text-blue-400">FONDATION</span>
+                            </h3>
+                            <p class="text-[10px] text-gray-500 italic font-medium leading-relaxed">Permet l'administration globale sans chargement de dossier citoyen.</p>
+                        </div>
+                        <div class="p-6 bg-white/5 border-t border-white/10">
+                            <button onclick="actions.openFoundationModal()" class="w-full py-4 bg-blue-600 text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all rounded-xl shadow-lg">
+                                INJECTER SESSION ROOT
+                            </button>
+                        </div>
+                    </div>
+                ` : ''}
+
                 ${characters.map(char => {
                     const isAccepted = char.status === 'accepted';
                     const isDeleting = !!char.deletion_requested_at;
@@ -124,14 +149,14 @@ export const ProfileHubView = () => {
                     `;
                 }).join('')}
                 
-                ${characters.length < CONFIG.MAX_CHARS ? `
-                    <button onclick="actions.goToCreate()" class="group bg-white/40 border-4 border-dashed border-gray-200 rounded-[32px] flex flex-col items-center justify-center p-12 hover:border-gov-blue hover:bg-blue-50/50 transition-all min-h-[400px]">
-                        <div class="w-16 h-16 bg-white text-gray-300 rounded-full flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all shadow-xl group-hover:scale-110 duration-500">
-                            <i data-lucide="plus" class="w-8 h-8"></i>
-                        </div>
-                        <span class="text-gov-text text-xl font-black uppercase italic tracking-tighter text-center">NOUVEAU<br>RECENSEMENT</span>
-                    </button>
-                ` : ''}
+                <!-- NEW CHARACTER BUTTON ALWAYS VISIBLE -->
+                <button onclick="actions.goToCreate()" class="group bg-white/40 border-4 border-dashed border-gray-200 rounded-[32px] flex flex-col items-center justify-center p-12 hover:border-gov-blue hover:bg-blue-50/50 transition-all min-h-[400px]">
+                    <div class="w-16 h-16 bg-white text-gray-300 rounded-full flex items-center justify-center mb-6 group-hover:bg-gov-blue group-hover:text-white transition-all shadow-xl group-hover:scale-110 duration-500">
+                        <i data-lucide="plus" class="w-8 h-8"></i>
+                    </div>
+                    <span class="text-gov-text text-xl font-black uppercase italic tracking-tighter text-center">NOUVEAU<br>RECENSEMENT</span>
+                    <span class="text-[9px] text-gray-400 font-black uppercase tracking-widest mt-4">Emplacement ${characters.length + 1} / ${CONFIG.MAX_CHARS}</span>
+                </button>
             </div>
         `;
     } 
@@ -192,121 +217,9 @@ export const ProfileHubView = () => {
         `;
     }
 
-    else if (currentTab === 'lootbox') {
-        // Rediriger vers la vue WheelView dédiée
-        setTimeout(() => actions.openWheel(), 10);
-        return '';
-    }
-
     else if (currentTab === 'security') {
         const deletionDate = u.deletion_requested_at ? new Date(u.deletion_requested_at) : null;
         
-        // Fonction helper pour afficher les détails techniques complets et exhaustifs
-        window.actions.showGlobalAudit = async (charId) => {
-            const char = state.characters.find(c => c.id === charId);
-            if (!char) return;
-            
-            ui.showToast("Déchiffrement du dossier CAD...", "info");
-            
-            try {
-                const [bankRes, invRes, entRes, txRes] = await Promise.all([
-                    state.supabase.from('bank_accounts').select('*').eq('character_id', charId).maybeSingle(),
-                    state.supabase.from('inventory').select('*').eq('character_id', charId),
-                    state.supabase.from('enterprise_members').select('*, enterprises(*)').eq('character_id', charId),
-                    state.supabase.from('transactions').select('*').or(`sender_id.eq.${charId},receiver_id.eq.${charId}`).order('created_at', { ascending: false }).limit(5)
-                ]);
-
-                const bank = bankRes.data || { bank_balance: 0, cash_balance: 0, savings_balance: 0 };
-                const inventory = invRes.data || [];
-                const enterprises = entRes.data || [];
-                const transactions = txRes.data || [];
-
-                ui.showModal({
-                    title: `Audit Intégral : ${char.first_name} ${char.last_name}`,
-                    content: `
-                        <div class="text-left space-y-8 custom-scrollbar max-h-[60vh] pr-4">
-                            <!-- IDENTITÉ & STATUT -->
-                            <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
-                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
-                                    <i data-lucide="fingerprint" class="w-3.5 h-3.5 text-gov-blue"></i> État Civil Certifié
-                                </div>
-                                <div class="grid grid-cols-2 gap-4 text-xs">
-                                    <div><span class="text-gray-400 block mb-0.5 uppercase font-bold">Naissance</span><span class="font-bold text-gov-text">${new Date(char.birth_date).toLocaleDateString()} (${char.age} ans)</span></div>
-                                    <div><span class="text-gray-400 block mb-0.5 uppercase font-bold">Lieu</span><span class="font-bold text-gov-text uppercase">${char.birth_place || 'Los Angeles'}</span></div>
-                                    <div><span class="text-gray-400 block mb-0.5 uppercase font-bold">Secteur</span><span class="font-black ${char.alignment === 'illegal' ? 'text-gov-red' : 'text-gov-blue'} uppercase italic">${char.alignment}</span></div>
-                                    <div><span class="text-gray-400 block mb-0.5 uppercase font-bold">Profession</span><span class="font-bold text-gov-text uppercase">${char.job || 'Civil / Sans emploi'}</span></div>
-                                </div>
-                            </div>
-
-                            <!-- FINANCES EXHAUSTIVES -->
-                            <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
-                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
-                                    <i data-lucide="landmark" class="w-3.5 h-3.5 text-emerald-500"></i> Masse Monétaire en Temps Réel
-                                </div>
-                                <div class="grid grid-cols-3 gap-4 mb-6">
-                                    <div class="text-center p-3 bg-white rounded-xl border border-gray-100 shadow-sm"><div class="text-[8px] font-bold text-gray-400 uppercase">Banque</div><div class="font-mono text-sm font-black text-gov-text">$${bank.bank_balance.toLocaleString()}</div></div>
-                                    <div class="text-center p-3 bg-white rounded-xl border border-gray-100 shadow-sm"><div class="text-[8px] font-bold text-gray-400 uppercase">Liquide</div><div class="font-mono text-sm font-black text-gov-text">$${bank.cash_balance.toLocaleString()}</div></div>
-                                    <div class="text-center p-3 bg-white rounded-xl border border-gray-100 shadow-sm"><div class="text-[8px] font-bold text-gray-400 uppercase">Épargne</div><div class="font-mono text-sm font-black text-emerald-600">$${bank.savings_balance.toLocaleString()}</div></div>
-                                </div>
-                                
-                                <div class="text-[8px] text-gray-400 font-black uppercase mb-2">Flux de capitaux récents</div>
-                                <div class="space-y-2">
-                                    ${transactions.length > 0 ? transactions.map(t => `
-                                        <div class="flex justify-between items-center text-[10px] p-2 bg-white/40 rounded-lg">
-                                            <span class="font-medium italic truncate max-w-[150px]">${t.description || t.type}</span>
-                                            <span class="font-mono font-black ${t.receiver_id === charId ? 'text-emerald-500' : 'text-red-500'}">${t.receiver_id === charId ? '+' : '-'} $${Math.abs(t.amount).toLocaleString()}</span>
-                                        </div>
-                                    `).join('') : '<div class="text-center text-[9px] text-gray-400 py-2">Aucun mouvement certifié</div>'}
-                                </div>
-                            </div>
-
-                            <!-- REGISTRE DES BIENS MATÉRIELS -->
-                            <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
-                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
-                                    <i data-lucide="package" class="w-3.5 h-3.5 text-orange-500"></i> Inventaire Civil (${inventory.length} types)
-                                </div>
-                                <div class="max-h-32 overflow-y-auto custom-scrollbar pr-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    ${inventory.length > 0 ? inventory.map(i => `
-                                        <div class="flex justify-between items-center text-[10px] p-2 bg-white rounded-lg border border-gray-100">
-                                            <span class="font-bold uppercase italic truncate pr-2">${i.name}</span>
-                                            <span class="font-mono bg-gov-light px-2 rounded font-black">x${i.quantity}</span>
-                                        </div>
-                                    `).join('') : '<div class="col-span-2 text-center italic text-gray-400 text-[10px] py-4">Dossier de possession vierge</div>'}
-                                </div>
-                            </div>
-
-                            <!-- CORPORATIONS & AFFILIATIONS -->
-                            <div class="bg-gov-light p-6 rounded-3xl border border-gray-200">
-                                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
-                                    <i data-lucide="briefcase" class="w-3.5 h-3.5 text-blue-500"></i> Liaisons Corporatistes
-                                </div>
-                                <div class="space-y-2">
-                                    ${enterprises.length > 0 ? enterprises.map(e => `
-                                        <div class="flex justify-between items-center p-3 bg-white rounded-xl border border-gray-100 shadow-sm">
-                                            <div>
-                                                <div class="text-[10px] font-black text-gov-text uppercase">${e.enterprises?.name}</div>
-                                                <div class="text-[8px] text-gray-400 font-bold uppercase tracking-widest">${e.rank}</div>
-                                            </div>
-                                            <div class="text-right">
-                                                <div class="text-[8px] text-gray-400 uppercase">Statut Contrat</div>
-                                                <div class="text-[9px] font-black ${e.status === 'accepted' ? 'text-emerald-500' : 'text-orange-500'} uppercase">${e.status}</div>
-                                            </div>
-                                        </div>
-                                    `).join('') : '<div class="text-center italic text-gray-400 text-[10px] py-4">Aucune affiliation enregistrée au registre du commerce</div>'}
-                                </div>
-                            </div>
-
-                            <div class="text-[9px] text-gray-400 text-center uppercase tracking-widest font-black border-t border-gray-100 pt-6">ID Système : ${char.id}</div>
-                        </div>
-                    `,
-                    confirmText: "Fermer l'Audit"
-                });
-            } catch (err) {
-                ui.showToast("Erreur d'extraction.", "error");
-                console.error(err);
-            }
-        };
-
         tabContent = `
             <div class="animate-in max-w-5xl mx-auto pb-20 space-y-8">
                 <!-- INFOS RGPD DÉTAILLÉES -->
@@ -394,9 +307,10 @@ export const ProfileHubView = () => {
                     <div class="text-md leading-none uppercase tracking-tighter italic">LOS ANGELES</div>
                 </div>
 
-                <div class="hidden lg:flex items-center gap-1 h-full ml-4">
+                <!-- RESPONSIVE TABS NAVBAR (Sames as Hub Main) -->
+                <div class="flex items-center gap-1 h-full ml-4 overflow-x-auto no-scrollbar scroll-smooth">
                     ${tabs.map(t => `
-                        <button onclick="actions.setProfileTab('${t.id}')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${currentTab === t.id ? 'text-gov-blue border-b-2 border-gov-blue' : 'text-gray-400 hover:text-gov-text'}">
+                        <button onclick="actions.setProfileTab('${t.id}')" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${currentTab === t.id ? 'text-gov-blue border-b-2 border-gov-blue' : 'text-gray-400 hover:text-gov-text'}">
                             ${t.label}
                         </button>
                     `).join('')}

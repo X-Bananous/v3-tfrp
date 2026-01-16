@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   username: string;
@@ -26,6 +27,9 @@ export interface StaffPermissions {
   can_launch_session?: boolean;
   can_use_dm?: boolean;
   can_use_say?: boolean;
+  can_warn?: boolean;
+  can_mute?: boolean;
+  can_ban?: boolean;
 }
 
 export enum CharacterStatus {
@@ -52,6 +56,14 @@ export interface Character {
   bar_passed?: boolean;
   last_bar_attempt?: string;
   deletion_requested_at?: string | null;
+  infos?: {
+    type: 'permanent' | 'temporary';
+    reason?: string;
+    goal?: string;
+    context?: string;
+    with_who?: string;
+    submitted_at: string;
+  };
 }
 
 export interface Gang {

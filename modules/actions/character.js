@@ -17,7 +17,9 @@ export const submitCharacter = async (e) => {
     const btn = e.submitter;
     toggleBtnLoading(btn, true);
 
-    const data = Object.fromEntries(new FormData(e.target));
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    
     const today = new Date();
     const birthDate = new Date(data.birth_date);
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -28,6 +30,21 @@ export const submitCharacter = async (e) => {
         ui.showToast('Personnage trop jeune (13 ans minimum).', 'error');
         toggleBtnLoading(btn, false);
         return; 
+    }
+
+    // Préparation de l'objet infos JSON
+    const type = data.char_type;
+    const infos = {
+        type: type,
+        submitted_at: new Date().toISOString()
+    };
+
+    if (type === 'permanent') {
+        infos.reason = data.info_reason;
+    } else {
+        infos.goal = data.info_goal;
+        infos.context = data.info_context;
+        infos.with_who = data.info_who;
     }
 
     // Determine User ID (Self or Admin Target)
@@ -70,7 +87,8 @@ export const submitCharacter = async (e) => {
         alignment: data.alignment,
         job: job,
         is_notified: state.isAdminEditing ? true : isNotified,
-        verifiedby: state.isAdminEditing ? state.user.id : verifiedBy
+        verifiedby: state.isAdminEditing ? state.user.id : verifiedBy,
+        infos: infos // Sauvegarde de l'objet JSON
     };
 
     let error = null;
@@ -99,7 +117,7 @@ export const submitCharacter = async (e) => {
             state.isAdminEditing = false;
             state.adminTargetUserId = null;
             state.editingCharacter = null;
-            if(window.actions && window.actions.setHubPanel) window.actions.setHubPanel('staff'); // Return to staff panel
+            if(window.actions && window.actions.setHubPanel) window.actions.setHubPanel('staff');
             router('hub');
         } else {
             const msg = state.editingCharacter && status !== 'pending' 
@@ -108,7 +126,7 @@ export const submitCharacter = async (e) => {
             ui.showToast(msg, 'success');
             state.editingCharacter = null;
             await loadCharacters();
-            router('select');
+            router('profile_hub');
         }
     } else {
         ui.showToast("Erreur lors de l'enregistrement.", 'error');
@@ -140,7 +158,7 @@ export const deleteCharacter = async (charId) => {
             if (!error) { 
                 ui.showToast("Personnage supprimé.", 'info');
                 await loadCharacters(); 
-                router('select'); 
+                router('profile_hub'); 
             } else {
                 ui.showToast("Erreur suppression.", 'error');
             }
