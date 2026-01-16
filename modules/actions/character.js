@@ -33,18 +33,25 @@ export const submitCharacter = async (e) => {
     }
 
     // Préparation de l'objet infos JSON
-    const type = data.char_type;
-    const infos = {
-        type: type,
-        submitted_at: new Date().toISOString()
-    };
-
-    if (type === 'permanent') {
-        infos.reason = data.info_reason;
+    let infos = {};
+    if (state.editingCharacter) {
+        // En édition, on garde le type et les justifications d'origine
+        infos = { ...state.editingCharacter.infos };
     } else {
-        infos.goal = data.info_goal;
-        infos.context = data.info_context;
-        infos.with_who = data.info_who;
+        // En création, on construit l'objet complet
+        const type = data.char_type;
+        infos = {
+            type: type,
+            submitted_at: new Date().toISOString()
+        };
+
+        if (type === 'permanent') {
+            infos.reason = data.info_reason;
+        } else {
+            infos.goal = data.info_goal;
+            infos.context = data.info_context;
+            infos.with_who = data.info_who;
+        }
     }
 
     // Determine User ID (Self or Admin Target)

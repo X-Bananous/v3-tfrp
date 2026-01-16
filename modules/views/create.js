@@ -36,22 +36,34 @@ export const CharacterCreateView = () => {
                     <!-- 1. TYPE DE DOSSIER -->
                     <div class="space-y-8">
                         <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest border-b-4 border-[#000091] w-fit pb-1">1. Type de dossier administratif</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <label class="cursor-pointer group">
-                                <input type="radio" name="char_type" value="permanent" class="peer sr-only" ${charType === 'permanent' ? 'checked' : ''} onchange="window.updateFormType('permanent')">
-                                <div class="p-6 border-2 border-gray-100 peer-checked:border-gov-blue peer-checked:bg-blue-50/50 rounded-2xl transition-all">
-                                    <div class="font-black uppercase text-sm mb-1">Citoyen Permanent</div>
-                                    <p class="text-[10px] text-gray-500 italic uppercase font-bold">Dossier long-terme avec archivage total.</p>
+                        
+                        ${isEdit ? `
+                            <div class="p-6 border-2 border-gov-blue bg-blue-50/20 rounded-2xl flex items-center justify-between">
+                                <div>
+                                    <div class="font-black uppercase text-sm text-gov-blue">${charType === 'permanent' ? 'Citoyen Permanent' : 'Visa Temporaire'}</div>
+                                    <p class="text-[10px] text-gray-400 italic uppercase font-bold">Le type de dossier ne peut plus être modifié après validation.</p>
                                 </div>
-                            </label>
-                            <label class="cursor-pointer group">
-                                <input type="radio" name="char_type" value="temporary" class="peer sr-only" ${charType === 'temporary' ? 'checked' : ''} onchange="window.updateFormType('temporary')">
-                                <div class="p-6 border-2 border-gray-100 peer-checked:border-orange-500 peer-checked:bg-orange-50/50 rounded-2xl transition-all">
-                                    <div class="font-black uppercase text-sm mb-1">Visa Temporaire</div>
-                                    <p class="text-[10px] text-gray-500 italic uppercase font-bold">Valide pour une seule session de jeu.</p>
-                                </div>
-                            </label>
-                        </div>
+                                <i data-lucide="lock" class="w-5 h-5 text-gov-blue opacity-30"></i>
+                                <input type="hidden" name="char_type" value="${charType}">
+                            </div>
+                        ` : `
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <label class="cursor-pointer group">
+                                    <input type="radio" name="char_type" value="permanent" class="peer sr-only" ${charType === 'permanent' ? 'checked' : ''} onchange="window.updateFormType('permanent')">
+                                    <div class="p-6 border-2 border-gray-100 peer-checked:border-gov-blue peer-checked:bg-blue-50/50 rounded-2xl transition-all">
+                                        <div class="font-black uppercase text-sm mb-1">Citoyen Permanent</div>
+                                        <p class="text-[10px] text-gray-500 italic uppercase font-bold">Dossier long-terme avec archivage total.</p>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer group">
+                                    <input type="radio" name="char_type" value="temporary" class="peer sr-only" ${charType === 'temporary' ? 'checked' : ''} onchange="window.updateFormType('temporary')">
+                                    <div class="p-6 border-2 border-gray-100 peer-checked:border-orange-500 peer-checked:bg-orange-50/50 rounded-2xl transition-all">
+                                        <div class="font-black uppercase text-sm mb-1">Visa Temporaire</div>
+                                        <p class="text-[10px] text-gray-500 italic uppercase font-bold">Valide pour une seule session de jeu.</p>
+                                    </div>
+                                </label>
+                            </div>
+                        `}
                     </div>
 
                     <!-- 2. IDENTITE -->
@@ -83,14 +95,15 @@ export const CharacterCreateView = () => {
                         </div>
                     </div>
 
-                    <!-- 3. DETAILS JSON (Dynamique) -->
+                    <!-- 3. DETAILS JSON (Masqués si EDIT) -->
+                    ${!isEdit ? `
                     <div id="dynamic-details" class="space-y-8 animate-in">
                         ${charType === 'permanent' ? `
                             <div class="space-y-6">
                                 <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest border-b-4 border-[#000091] w-fit pb-1">3. Justification du dossier</h3>
                                 <div class="space-y-3">
                                     <label class="text-[11px] font-black text-gray-600 uppercase tracking-widest block">Pourquoi ce personnage ? (Objectif & Lore - 500 car. min)</label>
-                                    <textarea name="info_reason" required minlength="500" class="w-full p-4 border-2 border-gray-100 rounded-2xl h-48 text-sm italic outline-none focus:border-gov-blue transition-all" placeholder="Détaillez ici votre vision long terme pour ce citoyen...">${char.infos?.reason || ''}</textarea>
+                                    <textarea name="info_reason" required minlength="500" class="w-full p-4 border-2 border-gray-100 rounded-2xl h-48 text-sm italic outline-none focus:border-gov-blue transition-all" placeholder="Détaillez ici votre vision long terme pour ce citoyen..."></textarea>
                                 </div>
                             </div>
                         ` : `
@@ -99,20 +112,21 @@ export const CharacterCreateView = () => {
                                 <div class="grid grid-cols-1 gap-6">
                                     <div class="space-y-2">
                                         <label class="text-[11px] font-black text-gray-600 uppercase tracking-widest block">L'objectif (Scène précise)</label>
-                                        <input type="text" name="info_goal" value="${char.infos?.goal || ''}" required placeholder="Ex: Remplacement temporaire pour un braquage..." class="w-full p-4 border-b-2 border-gray-200 focus:border-orange-500 outline-none text-sm font-bold">
+                                        <input type="text" name="info_goal" required placeholder="Ex: Remplacement temporaire pour un braquage..." class="w-full p-4 border-b-2 border-gray-200 focus:border-orange-500 outline-none text-sm font-bold">
                                     </div>
                                     <div class="space-y-2">
                                         <label class="text-[11px] font-black text-gray-600 uppercase tracking-widest block">Contexte Global</label>
-                                        <textarea name="info_context" required class="w-full p-4 border-2 border-gray-100 rounded-xl h-24 text-sm outline-none focus:border-orange-500 transition-all">${char.infos?.context || ''}</textarea>
+                                        <textarea name="info_context" required class="w-full p-4 border-2 border-gray-100 rounded-xl h-24 text-sm outline-none focus:border-orange-500 transition-all"></textarea>
                                     </div>
                                     <div class="space-y-2">
                                         <label class="text-[11px] font-black text-gray-600 uppercase tracking-widest block">Intervenants impliqués</label>
-                                        <input type="text" name="info_who" value="${char.infos?.with_who || ''}" required placeholder="Ex: Gang des Vagos, Unité LSPD Alpha..." class="w-full p-4 border-b-2 border-gray-200 focus:border-orange-500 outline-none text-sm font-bold">
+                                        <input type="text" name="info_who" required placeholder="Ex: Gang des Vagos, Unité LSPD Alpha..." class="w-full p-4 border-b-2 border-gray-200 focus:border-orange-500 outline-none text-sm font-bold">
                                     </div>
                                 </div>
                             </div>
                         `}
                     </div>
+                    ` : ''}
 
                     <!-- 4. ORIENTATION -->
                     <div class="space-y-8">
