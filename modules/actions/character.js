@@ -4,6 +4,9 @@ import { render, router } from '../utils.js';
 import { ui, toggleBtnLoading } from '../ui.js';
 import { loadCharacters, adminCreateCharacter } from '../services.js';
 
+let holdTimer = null;
+let holdStartTime = 0;
+
 export const startEditCharacter = (charId) => {
     const char = state.characters.find(c => c.id === charId);
     if (char) {
@@ -12,20 +15,22 @@ export const startEditCharacter = (charId) => {
     }
 };
 
-export const viewCensusDetails = () => {
-    const infos = state.user?.infos;
-    if (!infos) {
-        ui.showToast("Aucune note de recensement enregistrée.", "info");
+export const viewCensusDetails = (charId) => {
+    const char = state.characters.find(c => c.id === charId);
+    if (!char || !char.infos) {
+        ui.showToast("Détails de recensement non disponibles.", "info");
         return;
     }
 
+    const info = char.infos;
     let detailsHtml = '';
-    if (infos.type === 'permanent') {
+
+    if (info.type === 'permanent') {
         detailsHtml = `
             <div class="space-y-4">
                 <div class="text-[10px] font-black text-gov-blue uppercase tracking-widest border-b border-gray-100 pb-2">Note d'intention (Permanent)</div>
                 <div class="p-6 bg-gov-light rounded-2xl border border-gray-200 italic text-sm leading-relaxed text-gray-600">
-                    "${infos.reason || 'Non renseignée.'}"
+                    "${info.reason || 'Non renseignée.'}"
                 </div>
             </div>
         `;
@@ -36,16 +41,16 @@ export const viewCensusDetails = () => {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
                         <div class="text-[8px] text-orange-400 font-black uppercase mb-1">Objectif</div>
-                        <div class="text-xs font-bold text-gray-700">${infos.goal || 'N/A'}</div>
+                        <div class="text-xs font-bold text-gray-700">${info.goal || 'N/A'}</div>
                     </div>
                     <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
                         <div class="text-[8px] text-orange-400 font-black uppercase mb-1">Partenaires</div>
-                        <div class="text-xs font-bold text-gray-700">${infos.partners || 'N/A'}</div>
+                        <div class="text-xs font-bold text-gray-700">${info.partners || 'N/A'}</div>
                     </div>
                 </div>
                 <div class="p-6 bg-gov-light rounded-2xl border border-gray-200 italic text-xs leading-relaxed text-gray-600">
                     <div class="text-[8px] text-gray-400 font-black uppercase mb-2 not-italic">Contexte Scénaristique</div>
-                    "${infos.context || 'Aucun contexte fourni.'}"
+                    "${info.context || 'Aucun contexte fourni.'}"
                 </div>
             </div>
         `;
@@ -55,6 +60,65 @@ export const viewCensusDetails = () => {
         title: "Dossier de Recensement",
         content: detailsHtml,
         confirmText: "Fermer"
+    });
+};
+
+// --- LOGIQUE HOLD-TO-PURGE ---
+export const startHoldPurge = (e, charId) => {
+    if (e.cancelable) e.preventDefault();
+    holdStartTime = Date.now();
+    
+    const progressEl = document.getElementById(`hold-progress-${charId}`);
+    const progressElSec = document.getElementById(`hold-progress-sec-${charId}`);
+    
+    holdTimer = setInterval(() => {
+        const elapsed = Date.now() - holdStartTime;
+        const percent = Math.min((elapsed / 5000) * 100, 100);
+        
+        if (progressEl) progressEl.style.width = `${percent}%`;
+        if (progressElSec) progressElSec.style.width = `${percent}%`;
+
+        if (elapsed >= 5000) {
+            clearInterval(holdTimer);
+            executeFlashWipe(charId);
+        }
+    }, 50);
+};
+
+export const stopHoldPurge = () => {
+    if (holdTimer) clearInterval(holdTimer);
+    const elements = document.querySelectorAll('[id^="hold-progress-"]');
+    elements.forEach(el => el.style.width = '0%');
+};
+
+const executeFlashWipe = async (charId) => {
+    ui.showToast("Wipe Flash en cours...", "warning");
+    const { error } = await state.supabase.from('characters').delete().eq('id', charId).eq('user_id', state.user.id);
+    if (!error) {
+        ui.showToast("Dossier temporaire effacé avec succès.", "success");
+        await loadCharacters();
+        render();
+    } else {
+        ui.showToast("Erreur lors de la suppression.", "error");
+    }
+};
+
+export const deleteCharacterImmediate = async (charId) => {
+    ui.showModal({
+        title: "SUPPRESSION DÉFINITIVE",
+        content: "Souhaitez-vous supprimer ce dossier définitivement ? Cette action est immédiate et irréversible.",
+        confirmText: "Supprimer",
+        type: "danger",
+        onConfirm: async () => {
+            const { error } = await state.supabase.from('characters').delete().eq('id', charId).eq('user_id', state.user.id);
+            if (!error) { 
+                ui.showToast("Dossier effacé.", 'info');
+                await loadCharacters(); 
+                render(); 
+            } else {
+                ui.showToast("Erreur système.", 'error');
+            }
+        }
     });
 };
 
@@ -103,22 +167,17 @@ export const submitCharacter = async (e) => {
         }
     }
 
-    // SAUVEGARDE DES INFOS DANS PROFILES (pour éviter erreur table characters)
+    // Gestion du champ 'infos'
+    const charInfos = {};
     if (!state.editingCharacter && state.characters.length > 0 && !state.isAdminEditing) {
-        const charInfos = {
-            type: data.char_type,
-            reason: data.info_permanent_reason,
-            goal: data.info_temp_goal,
-            partners: data.info_temp_partners,
-            context: data.info_temp_context
-        };
-        
-        await state.supabase
-            .from('profiles')
-            .update({ infos: charInfos })
-            .eq('id', state.user.id);
-        
-        state.user.infos = charInfos;
+        charInfos.type = data.char_type;
+        if (data.char_type === 'permanent') {
+            charInfos.reason = data.info_permanent_reason;
+        } else {
+            charInfos.goal = data.info_temp_goal;
+            charInfos.partners = data.info_temp_partners;
+            charInfos.context = data.info_temp_context;
+        }
     }
 
     const charData = {
@@ -131,6 +190,7 @@ export const submitCharacter = async (e) => {
         user_id: targetUserId,
         alignment: data.alignment,
         job: job,
+        infos: charInfos,
         is_notified: state.isAdminEditing ? true : isNotified,
         verifiedby: state.isAdminEditing ? state.user.id : verifiedBy
     };
@@ -154,7 +214,7 @@ export const submitCharacter = async (e) => {
 
     if (!error) {
         if(state.isAdminEditing) {
-            ui.showToast("Personnage créé/modifié avec succès.", 'success');
+            ui.showToast("Dossier administratif traité.", 'success');
             state.isAdminEditing = false;
             state.editingCharacter = null;
             router('hub');
@@ -170,26 +230,26 @@ export const submitCharacter = async (e) => {
     }
 };
 
-export const deleteCharacterImmediate = async (charId) => {
+export const requestCharacterDeletion = async (charId) => {
+    const char = state.characters.find(c => c.id === charId);
+    if (!char) return;
+
     ui.showModal({
-        title: "Suppression Immédiate",
-        content: "Souhaitez-vous supprimer ce dossier définitivement ? Cette action est instantanée.",
-        confirmText: "Supprimer",
+        title: "PURGER L'IDENTITÉ",
+        content: `Voulez-vous marquer <b>${char.first_name} ${char.last_name}</b> pour suppression ? Les données seront effacées dans 72h.`,
+        confirmText: "Confirmer la purge",
         type: "danger",
         onConfirm: async () => {
-            const { error } = await state.supabase.from('characters').delete().eq('id', charId).eq('user_id', state.user.id);
-            if (!error) { 
-                ui.showToast("Dossier supprimé.", 'info');
-                await loadCharacters(); 
-                render(); 
-            } else {
-                ui.showToast("Erreur lors de la suppression.", 'error');
-            }
+            const now = new Date().toISOString();
+            await state.supabase.from('characters').update({ deletion_requested_at: now }).eq('id', charId);
+            await loadCharacters();
+            render();
         }
     });
 };
 
-export const deleteCharacter = async (charId) => {
-    // Purge classique avec cooldown
-    requestCharacterDeletion(charId);
+export const cancelCharacterDeletion = async (charId) => {
+    await state.supabase.from('characters').update({ deletion_requested_at: null }).eq('id', charId);
+    await loadCharacters();
+    render();
 };

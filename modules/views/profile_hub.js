@@ -41,7 +41,6 @@ export const ProfileHubView = () => {
     if (!state.hasFetchedSanctions) {
         state.hasFetchedSanctions = true;
         loadUserSanctions();
-        fetchStaffProfiles();
         fetchGlobalTransactions();
     }
 
@@ -70,15 +69,6 @@ export const ProfileHubView = () => {
                         <i data-lucide="${t.icon}" class="w-5 h-5"></i> ${t.label}
                     </button>
                 `).join('')}
-
-                <div class="mt-auto pt-10 flex flex-col gap-3">
-                    <button onclick="actions.backToLanding()" class="w-full py-4 bg-gov-light text-gov-text font-black uppercase text-[10px] tracking-widest text-center flex items-center justify-center gap-2">
-                        <i data-lucide="home" class="w-4 h-4"></i> Accueil
-                    </button>
-                    <button onclick="actions.confirmLogout()" class="w-full py-4 bg-red-50 text-red-600 font-black uppercase text-[10px] tracking-widest text-center flex items-center justify-center gap-2">
-                        <i data-lucide="log-out" class="w-4 h-4"></i> Déconnexion
-                    </button>
-                </div>
             </div>
         </div>
     `;
@@ -92,19 +82,20 @@ export const ProfileHubView = () => {
                     const isAccepted = char.status === 'accepted';
                     const isRejected = char.status === 'rejected';
                     const isDeleting = !!char.deletion_requested_at;
-                    const isTemp = char.alignment === 'illegal' && char.job === 'temporaire'; // Logique simplifiée pour démo
+                    const isTemp = char.infos?.type === 'temporaire';
                     const statusColor = isDeleting ? 'orange' : isAccepted ? 'emerald' : isRejected ? 'red' : 'amber';
                     
                     return `
                         <div class="gov-card flex flex-col bg-white rounded-[32px] border border-gray-100 shadow-xl overflow-hidden transition-all hover:shadow-2xl hover:-translate-y-1">
                             <div class="p-8 pb-4 flex justify-between items-start">
                                 <div class="w-14 h-14 bg-gov-light rounded-2xl flex items-center justify-center border border-gray-100 shadow-inner">
-                                    <i data-lucide="user" class="w-7 h-7 text-gray-400"></i>
+                                    <i data-lucide="${isTemp ? 'timer' : 'user'}" class="w-7 h-7 ${isTemp ? 'text-orange-500' : 'text-gray-400'}"></i>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
                                     <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase border tracking-widest bg-${statusColor}-50 text-${statusColor}-600 border-${statusColor}-200">
                                         ${isDeleting ? 'PURGE EN COURS' : char.status.toUpperCase()}
                                     </span>
+                                    ${isTemp ? '<span class="text-[7px] font-black text-orange-600 uppercase tracking-tighter">DOSSIER TEMPORAIRE</span>' : ''}
                                 </div>
                             </div>
 
@@ -136,15 +127,27 @@ export const ProfileHubView = () => {
                                         CHARGER LE DOSSIER
                                     </button>
                                     <div class="flex gap-2">
-                                        <button onclick="actions.viewCensusDetails()" class="flex-1 py-2.5 bg-white text-gray-500 hover:text-gov-blue border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
+                                        <button onclick="actions.viewCensusDetails('${char.id}')" class="flex-1 py-2.5 bg-white text-gray-500 hover:text-gov-blue border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
                                             <i data-lucide="info" class="w-3.5 h-3.5"></i> NOTES
                                         </button>
                                         <button onclick="actions.startEditCharacter('${char.id}')" class="flex-1 py-2.5 bg-white text-gray-500 hover:text-gov-blue border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
                                             <i data-lucide="settings" class="w-3.5 h-3.5"></i> ÉDITER
                                         </button>
-                                        <button onclick="actions.requestCharacterDeletion('${char.id}')" class="flex-1 py-2.5 bg-white text-gray-400 hover:text-gov-red border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
-                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> PURGER
-                                        </button>
+                                        
+                                        ${isTemp ? `
+                                            <button 
+                                                onmousedown="actions.startHoldPurge(event, '${char.id}')" 
+                                                onmouseup="actions.stopHoldPurge()" 
+                                                onmouseleave="actions.stopHoldPurge()"
+                                                class="hold-to-purge flex-1 py-2.5 bg-red-50 text-red-600 border border-red-100 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 relative overflow-hidden">
+                                                <div id="hold-progress-${char.id}" class="absolute left-0 top-0 h-full bg-red-600/20 w-0 pointer-events-none transition-all duration-100"></div>
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5 relative z-10"></i> <span class="relative z-10">WIPE FLASH</span>
+                                            </button>
+                                        ` : `
+                                            <button onclick="actions.requestCharacterDeletion('${char.id}')" class="flex-1 py-2.5 bg-white text-gray-400 hover:text-gov-red border border-gray-200 rounded-lg transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> PURGER
+                                            </button>
+                                        `}
                                     </div>
                                 ` : isDeleting ? `
                                     <div class="text-center mb-2">
@@ -155,7 +158,7 @@ export const ProfileHubView = () => {
                                     </button>
                                 ` : isRejected ? `
                                     <div class="flex flex-col gap-2">
-                                        <button onclick="actions.startEditCharacter('${char.id}')" class="w-full py-4 bg-gov-text text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-black transition-all rounded-xl shadow-lg">
+                                        <button onclick="actions.startEditCharacter('${char.id}')" class="w-full py-4 bg-gov-text text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-black transition-all rounded-xl">
                                             MODIFIER LA DEMANDE
                                         </button>
                                         <button onclick="actions.deleteCharacterImmediate('${char.id}')" class="w-full py-2.5 text-red-600 font-black text-[9px] uppercase tracking-widest hover:underline">
@@ -217,27 +220,6 @@ export const ProfileHubView = () => {
         `;
     }
 
-    else if (currentTab === 'sanctions') {
-        tabContent = `
-            <div class="space-y-4 animate-in max-w-4xl mx-auto pb-20">
-                ${sanctions.length > 0 ? sanctions.map(s => `
-                    <div class="p-6 bg-white border border-gray-100 rounded-[28px] flex items-center justify-between group hover:border-gov-red/20 transition-all shadow-xl">
-                        <div class="flex items-center gap-6">
-                            <div class="w-12 h-12 rounded-xl bg-gov-light flex items-center justify-center text-lg font-black uppercase text-gov-red border border-gray-200 shadow-inner group-hover:scale-105 transition-transform italic">${s.type[0]}</div>
-                            <div>
-                                <div class="text-[10px] font-black text-gov-text uppercase tracking-tight italic">${s.type.toUpperCase()} — LE ${new Date(s.created_at).toLocaleDateString()}</div>
-                                <div class="text-[12px] text-gray-500 font-medium italic mt-1 leading-relaxed">"${s.reason}"</div>
-                            </div>
-                        </div>
-                        ${!s.appeal_at ? `
-                            <button onclick="actions.openAppealModal('${s.id}')" class="text-[8px] font-black text-gov-blue uppercase tracking-widest border-2 border-gov-blue px-4 py-2 rounded-xl hover:bg-gov-blue hover:text-white transition-all">CONTESTER</button>
-                        ` : '<span class="text-[8px] font-black text-gray-400 uppercase italic bg-gov-light px-3 py-1.5 rounded-lg border border-gray-200">En examen</span>'}
-                    </div>
-                `).join('') : '<div class="text-center py-24 text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] border-4 border-dashed border-gray-100 rounded-[40px]">Aucun signalement</div>'}
-            </div>
-        `;
-    }
-
     else if (currentTab === 'lootbox') {
         const turns = u.whell_turn || 0;
         const isOpening = state.isOpening;
@@ -263,12 +245,27 @@ export const ProfileHubView = () => {
                             </div>
                             
                             <h2 class="text-4xl font-black text-gov-text tracking-tighter italic uppercase mb-2">Caisse de Récompenses</h2>
-                            <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-10">Vous disposez de <span class="text-gov-blue">${turns}</span> Clé(s) d'accès</p>
+                            <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-10">Vous disposez de <span class="text-gov-blue font-black">${turns}</span> Clé(s) d'accès</p>
                             
                             <button onclick="actions.openCrate(0)" ${turns <= 0 || isOpening ? 'disabled' : ''} 
                                 class="px-16 py-6 bg-gov-blue text-white rounded-[32px] font-black text-sm uppercase tracking-[0.3em] shadow-xl hover:bg-black transition-all transform active:scale-95 disabled:opacity-30 disabled:grayscale">
                                 ${isOpening ? 'DÉCRYPTAGE...' : 'TIRER LE LEVIER'}
                             </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                            <div class="p-6 bg-gov-light rounded-3xl border border-gray-100">
+                                <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Règles Officielles</h4>
+                                <p class="text-[11px] text-gray-500 leading-relaxed">Les gains sont certifiés par l'État. L'argent est versé au personnage de votre choix. Les rôles VIP sont permanents.</p>
+                            </div>
+                            <div class="p-6 bg-gov-light rounded-3xl border border-gray-100">
+                                <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Algorithme</h4>
+                                <p class="text-[11px] text-gray-500 leading-relaxed">Le tirage utilise une graine aléatoire cryptographique. 100% équitable et vérifiable.</p>
+                            </div>
+                            <div class="p-6 bg-gov-light rounded-3xl border border-gray-100">
+                                <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Probabilités</h4>
+                                <button onclick="actions.showProbabilities()" class="text-[10px] font-black text-gov-blue uppercase hover:underline">Voir les chances de gain</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -278,39 +275,13 @@ export const ProfileHubView = () => {
 
     else if (currentTab === 'security') {
         const deletionDate = u.deletion_requested_at ? new Date(u.deletion_requested_at) : null;
-        
+        const recentAudit = state.globalTransactions?.filter(t => 
+            (t.receiver_id && characters.some(c => c.id === t.receiver_id)) ||
+            (t.sender_id && characters.some(c => c.id === t.sender_id))
+        ).slice(0, 10) || [];
+
         tabContent = `
             <div class="animate-in max-w-6xl mx-auto pb-20 space-y-8">
-                <!-- RÉCAPITULATIF DES DOSSIERS -->
-                <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl">
-                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-8">Audit de vos Dossiers</h4>
-                    <div class="space-y-4">
-                        ${characters.map(char => {
-                            const isDeleting = !!char.deletion_requested_at;
-                            return `
-                                <div class="p-5 bg-gov-light rounded-2xl border ${isDeleting ? 'border-orange-200' : 'border-gray-100'} flex items-center justify-between">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400">
-                                            <i data-lucide="user" class="w-5 h-5"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm font-black text-gov-text uppercase">${char.first_name} ${char.last_name}</div>
-                                            <div class="text-[8px] text-gray-400 font-black uppercase tracking-widest mt-0.5">Status : ${char.status} ${isDeleting ? '— PURGE ACTIVE' : ''}</div>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        ${isDeleting ? `
-                                            <button onclick="actions.cancelCharacterDeletion('${char.id}')" class="text-[9px] font-black text-gov-blue uppercase hover:underline">Annuler Purge</button>
-                                        ` : `
-                                            <button onclick="actions.requestCharacterDeletion('${char.id}')" class="text-[9px] font-black text-gray-400 hover:text-red-600 uppercase">Purger</button>
-                                        `}
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-
                 <!-- DROIT A L'OUBLI -->
                 <div class="bg-white p-10 rounded-[40px] border-t-8 border-gov-red shadow-xl">
                     <h4 class="text-[10px] font-black text-gov-red uppercase tracking-[0.4em] mb-6 flex items-center gap-3"><i data-lucide="shield-alert" class="w-4 h-4"></i> Droit à l'oubli numérique</h4>
@@ -325,6 +296,68 @@ export const ProfileHubView = () => {
                     ` : `
                         <button onclick="actions.requestDataDeletion()" class="bg-gov-red text-white px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl transform active:scale-95">RÉVOQUER TOUTES MES DONNÉES</button>
                     `}
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- GESTION DES DOSSIERS -->
+                    <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl flex flex-col h-full">
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-8 flex items-center gap-3"><i data-lucide="users" class="w-4 h-4"></i> Gestion des Dossiers Citoyens</h4>
+                        <div class="space-y-4 flex-1">
+                            ${characters.map(char => {
+                                const isDeleting = !!char.deletion_requested_at;
+                                const isTemp = char.infos?.type === 'temporaire';
+                                return `
+                                    <div class="p-4 bg-gov-light rounded-2xl border ${isDeleting ? 'border-orange-200' : 'border-gray-100'} flex items-center justify-between group">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-gray-400 border border-gray-100 shadow-sm"><i data-lucide="${isTemp ? 'timer' : 'user'}" class="w-5 h-5"></i></div>
+                                            <div>
+                                                <div class="text-sm font-black text-gov-text uppercase">${char.first_name} ${char.last_name}</div>
+                                                <div class="text-[8px] text-gray-400 uppercase font-black">${isTemp ? 'Temporaire' : 'Permanent'} • UID: #${char.id.substring(0,4)}</div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            ${isDeleting ? `
+                                                <button onclick="actions.cancelCharacterDeletion('${char.id}')" class="text-[8px] font-black text-gov-blue uppercase hover:underline">Annuler Purge</button>
+                                            ` : isTemp ? `
+                                                <button 
+                                                    onmousedown="actions.startHoldPurge(event, '${char.id}')" 
+                                                    onmouseup="actions.stopHoldPurge()" 
+                                                    class="text-[8px] font-black text-red-600 uppercase flex items-center gap-1.5 group relative px-2 py-1 overflow-hidden">
+                                                    <div id="hold-progress-sec-${char.id}" class="absolute left-0 top-0 h-full bg-red-600/10 w-0 pointer-events-none transition-all duration-100"></div>
+                                                    <i data-lucide="trash-2" class="w-3 h-3"></i> <span class="relative z-10">Wipe Flash</span>
+                                                </button>
+                                            ` : `
+                                                <button onclick="actions.requestCharacterDeletion('${char.id}')" class="text-[8px] font-black text-gray-400 hover:text-red-500 uppercase flex items-center gap-1.5"><i data-lucide="trash-2" class="w-3 h-3"></i> Purger</button>
+                                            `}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+
+                    <!-- AUDIT PATRIMONIAL -->
+                    <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl flex flex-col h-full">
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-8 flex items-center gap-3"><i data-lucide="history" class="w-4 h-4"></i> Journal d'Audit Patrimonial</h4>
+                        <div class="space-y-4 flex-1">
+                            ${recentAudit.length === 0 ? `
+                                <div class="h-full flex flex-col items-center justify-center opacity-30 text-center py-10">
+                                    <i data-lucide="scroll-text" class="w-10 h-10 mb-2"></i>
+                                    <p class="text-[10px] font-black uppercase">Aucun flux récent</p>
+                                </div>
+                            ` : recentAudit.map(t => `
+                                <div class="p-4 bg-gov-light rounded-2xl border border-gray-100 flex justify-between items-center">
+                                    <div>
+                                        <div class="text-[10px] font-black text-gov-text uppercase truncate max-w-[150px]">${t.description || 'Virement'}</div>
+                                        <div class="text-[8px] text-gray-400 font-mono mt-0.5">${new Date(t.created_at).toLocaleTimeString()}</div>
+                                    </div>
+                                    <div class="font-mono font-black text-xs ${t.sender_id && characters.some(c => c.id === t.sender_id) ? 'text-red-600' : 'text-emerald-600'}">
+                                        ${t.sender_id && characters.some(c => c.id === t.sender_id) ? '-' : '+'} $${t.amount.toLocaleString()}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
