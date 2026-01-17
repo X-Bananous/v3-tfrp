@@ -45,7 +45,14 @@ export const selectCharacter = async (charId) => {
     }
 };
 
-export const goToCreate = () => router('create');
+export const goToCreate = () => {
+    // RESET FORCE POUR EVITER LE BUG DU FORMULAIRE NON REINITIALISE
+    state.editingCharacter = null;
+    state.isAdminEditing = false;
+    state.adminTargetUserId = null;
+    router('create');
+};
+
 export const cancelCreate = () => router('profile_hub');
 
 export const setHubPanel = async (panel) => {

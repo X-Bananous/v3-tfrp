@@ -220,6 +220,27 @@ export const ProfileHubView = () => {
         `;
     }
 
+    else if (currentTab === 'sanctions') {
+        tabContent = `
+            <div class="space-y-4 animate-in max-w-4xl mx-auto pb-20">
+                ${sanctions.length > 0 ? sanctions.map(s => `
+                    <div class="p-6 bg-white border border-gray-100 rounded-[28px] flex items-center justify-between group hover:border-gov-red/20 transition-all shadow-xl">
+                        <div class="flex items-center gap-6">
+                            <div class="w-12 h-12 rounded-xl bg-gov-light flex items-center justify-center text-lg font-black uppercase text-gov-red border border-gray-200 shadow-inner group-hover:scale-105 transition-transform italic">${s.type[0]}</div>
+                            <div>
+                                <div class="text-[10px] font-black text-gov-text uppercase tracking-tight italic">${s.type.toUpperCase()} — LE ${new Date(s.created_at).toLocaleDateString()}</div>
+                                <div class="text-[12px] text-gray-500 font-medium italic mt-1 leading-relaxed">"${s.reason}"</div>
+                            </div>
+                        </div>
+                        ${!s.appeal_at ? `
+                            <button onclick="actions.openAppealModal('${s.id}')" class="text-[8px] font-black text-gov-blue uppercase tracking-widest border-2 border-gov-blue px-4 py-2 rounded-xl hover:bg-gov-blue hover:text-white transition-all">CONTESTER</button>
+                        ` : '<span class="text-[8px] font-black text-gray-400 uppercase italic bg-gov-light px-3 py-1.5 rounded-lg border border-gray-200">En examen</span>'}
+                    </div>
+                `).join('') : '<div class="text-center py-24 text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] border-4 border-dashed border-gray-100 rounded-[40px]">Aucun signalement</div>'}
+            </div>
+        `;
+    }
+
     else if (currentTab === 'lootbox') {
         const turns = u.whell_turn || 0;
         const isOpening = state.isOpening;
@@ -252,21 +273,6 @@ export const ProfileHubView = () => {
                                 ${isOpening ? 'DÉCRYPTAGE...' : 'TIRER LE LEVIER'}
                             </button>
                         </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-                            <div class="p-6 bg-gov-light rounded-3xl border border-gray-100">
-                                <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Règles Officielles</h4>
-                                <p class="text-[11px] text-gray-500 leading-relaxed">Les gains sont certifiés par l'État. L'argent est versé au personnage de votre choix. Les rôles VIP sont permanents.</p>
-                            </div>
-                            <div class="p-6 bg-gov-light rounded-3xl border border-gray-100">
-                                <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Algorithme</h4>
-                                <p class="text-[11px] text-gray-500 leading-relaxed">Le tirage utilise une graine aléatoire cryptographique. 100% équitable et vérifiable.</p>
-                            </div>
-                            <div class="p-6 bg-gov-light rounded-3xl border border-gray-100">
-                                <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Probabilités</h4>
-                                <button onclick="actions.showProbabilities()" class="text-[10px] font-black text-gov-blue uppercase hover:underline">Voir les chances de gain</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -275,13 +281,50 @@ export const ProfileHubView = () => {
 
     else if (currentTab === 'security') {
         const deletionDate = u.deletion_requested_at ? new Date(u.deletion_requested_at) : null;
-        const recentAudit = state.globalTransactions?.filter(t => 
-            (t.receiver_id && characters.some(c => c.id === t.receiver_id)) ||
-            (t.sender_id && characters.some(c => c.id === t.sender_id))
-        ).slice(0, 10) || [];
-
+        
         tabContent = `
             <div class="animate-in max-w-6xl mx-auto pb-20 space-y-8">
+                <!-- RÉCAPITULATIF DES DOSSIERS -->
+                <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl">
+                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-8">Maintenance des Dossiers Citoyens</h4>
+                    <div class="space-y-4">
+                        ${characters.map(char => {
+                            const isDeleting = !!char.deletion_requested_at;
+                            const isTemp = char.infos?.type === 'temporaire';
+                            return `
+                                <div class="p-5 bg-gov-light rounded-2xl border ${isDeleting ? 'border-orange-200' : 'border-gray-100'} flex items-center justify-between group">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 shadow-sm">
+                                            <i data-lucide="${isTemp ? 'timer' : 'user'}" class="w-6 h-6"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-black text-gov-text uppercase tracking-tight">${char.first_name} ${char.last_name}</div>
+                                            <div class="text-[8px] text-gray-400 font-black uppercase tracking-widest mt-0.5">${isTemp ? 'Dossier Temporaire' : 'Dossier Permanent'} • ID #${char.id.substring(0,4).toUpperCase()}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button onclick="actions.openCharacterAudit('${char.id}')" class="px-4 py-2 bg-white text-gov-blue border border-gov-blue/20 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-gov-blue hover:text-white transition-all shadow-sm">Audit Global</button>
+                                        
+                                        ${isDeleting ? `
+                                            <button onclick="actions.cancelCharacterDeletion('${char.id}')" class="px-4 py-2 bg-white text-orange-600 border border-orange-200 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-orange-50 transition-all">Annuler Purge</button>
+                                        ` : isTemp ? `
+                                            <button 
+                                                onmousedown="actions.startHoldPurge(event, '${char.id}')" 
+                                                onmouseup="actions.stopHoldPurge()" 
+                                                class="px-4 py-2 bg-red-50 text-red-600 border border-red-100 rounded-xl text-[9px] font-black uppercase tracking-widest relative overflow-hidden group">
+                                                <div id="hold-progress-sec-${char.id}" class="absolute left-0 top-0 h-full bg-red-600/10 w-0 pointer-events-none transition-all duration-100"></div>
+                                                <span class="relative z-10">Wipe Flash</span>
+                                            </button>
+                                        ` : `
+                                            <button onclick="actions.requestCharacterDeletion('${char.id}')" class="px-4 py-2 bg-white text-gray-400 border border-gray-200 rounded-xl text-[9px] font-black uppercase tracking-widest hover:text-red-600 hover:border-red-100 transition-all">Purger</button>
+                                        `}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
                 <!-- DROIT A L'OUBLI -->
                 <div class="bg-white p-10 rounded-[40px] border-t-8 border-gov-red shadow-xl">
                     <h4 class="text-[10px] font-black text-gov-red uppercase tracking-[0.4em] mb-6 flex items-center gap-3"><i data-lucide="shield-alert" class="w-4 h-4"></i> Droit à l'oubli numérique</h4>
@@ -296,68 +339,6 @@ export const ProfileHubView = () => {
                     ` : `
                         <button onclick="actions.requestDataDeletion()" class="bg-gov-red text-white px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl transform active:scale-95">RÉVOQUER TOUTES MES DONNÉES</button>
                     `}
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- GESTION DES DOSSIERS -->
-                    <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl flex flex-col h-full">
-                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-8 flex items-center gap-3"><i data-lucide="users" class="w-4 h-4"></i> Gestion des Dossiers Citoyens</h4>
-                        <div class="space-y-4 flex-1">
-                            ${characters.map(char => {
-                                const isDeleting = !!char.deletion_requested_at;
-                                const isTemp = char.infos?.type === 'temporaire';
-                                return `
-                                    <div class="p-4 bg-gov-light rounded-2xl border ${isDeleting ? 'border-orange-200' : 'border-gray-100'} flex items-center justify-between group">
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-gray-400 border border-gray-100 shadow-sm"><i data-lucide="${isTemp ? 'timer' : 'user'}" class="w-5 h-5"></i></div>
-                                            <div>
-                                                <div class="text-sm font-black text-gov-text uppercase">${char.first_name} ${char.last_name}</div>
-                                                <div class="text-[8px] text-gray-400 uppercase font-black">${isTemp ? 'Temporaire' : 'Permanent'} • UID: #${char.id.substring(0,4)}</div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            ${isDeleting ? `
-                                                <button onclick="actions.cancelCharacterDeletion('${char.id}')" class="text-[8px] font-black text-gov-blue uppercase hover:underline">Annuler Purge</button>
-                                            ` : isTemp ? `
-                                                <button 
-                                                    onmousedown="actions.startHoldPurge(event, '${char.id}')" 
-                                                    onmouseup="actions.stopHoldPurge()" 
-                                                    class="text-[8px] font-black text-red-600 uppercase flex items-center gap-1.5 group relative px-2 py-1 overflow-hidden">
-                                                    <div id="hold-progress-sec-${char.id}" class="absolute left-0 top-0 h-full bg-red-600/10 w-0 pointer-events-none transition-all duration-100"></div>
-                                                    <i data-lucide="trash-2" class="w-3 h-3"></i> <span class="relative z-10">Wipe Flash</span>
-                                                </button>
-                                            ` : `
-                                                <button onclick="actions.requestCharacterDeletion('${char.id}')" class="text-[8px] font-black text-gray-400 hover:text-red-500 uppercase flex items-center gap-1.5"><i data-lucide="trash-2" class="w-3 h-3"></i> Purger</button>
-                                            `}
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-
-                    <!-- AUDIT PATRIMONIAL -->
-                    <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl flex flex-col h-full">
-                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-8 flex items-center gap-3"><i data-lucide="history" class="w-4 h-4"></i> Journal d'Audit Patrimonial</h4>
-                        <div class="space-y-4 flex-1">
-                            ${recentAudit.length === 0 ? `
-                                <div class="h-full flex flex-col items-center justify-center opacity-30 text-center py-10">
-                                    <i data-lucide="scroll-text" class="w-10 h-10 mb-2"></i>
-                                    <p class="text-[10px] font-black uppercase">Aucun flux récent</p>
-                                </div>
-                            ` : recentAudit.map(t => `
-                                <div class="p-4 bg-gov-light rounded-2xl border border-gray-100 flex justify-between items-center">
-                                    <div>
-                                        <div class="text-[10px] font-black text-gov-text uppercase truncate max-w-[150px]">${t.description || 'Virement'}</div>
-                                        <div class="text-[8px] text-gray-400 font-mono mt-0.5">${new Date(t.created_at).toLocaleTimeString()}</div>
-                                    </div>
-                                    <div class="font-mono font-black text-xs ${t.sender_id && characters.some(c => c.id === t.sender_id) ? 'text-red-600' : 'text-emerald-600'}">
-                                        ${t.sender_id && characters.some(c => c.id === t.sender_id) ? '-' : '+'} $${t.amount.toLocaleString()}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
                 </div>
             </div>
         `;

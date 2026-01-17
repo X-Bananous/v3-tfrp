@@ -63,6 +63,64 @@ export const viewCensusDetails = (charId) => {
     });
 };
 
+export const openCharacterAudit = async (charId) => {
+    const char = state.characters.find(c => c.id === charId);
+    if (!char) return;
+
+    ui.showToast("Récupération des archives...", "info");
+    
+    // Récupération dynamique des données financières et inventaire
+    const { data: bank } = await state.supabase.from('bank_accounts').select('*').eq('character_id', charId).maybeSingle();
+    const { data: inv = [] } = await state.supabase.from('inventory').select('*').eq('character_id', charId);
+    
+    const bankBalance = bank?.bank_balance || 0;
+    const cashBalance = bank?.cash_balance || 0;
+    const savingsBalance = bank?.savings_balance || 0;
+    
+    let invValue = 0;
+    inv.forEach(i => invValue += (i.quantity * (i.estimated_value || 0)));
+
+    const auditHtml = `
+        <div class="space-y-8 text-left animate-fade-in">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 bg-gov-light rounded-2xl border border-gray-100">
+                    <div class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Solde Bancaire</div>
+                    <div class="text-lg font-mono font-black text-gov-text">$${bankBalance.toLocaleString()}</div>
+                </div>
+                <div class="p-4 bg-gov-light rounded-2xl border border-gray-100">
+                    <div class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Liquide (Sac)</div>
+                    <div class="text-lg font-mono font-black text-emerald-600">$${cashBalance.toLocaleString()}</div>
+                </div>
+            </div>
+
+            <div class="p-6 bg-gov-light rounded-[28px] border border-gray-100">
+                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i data-lucide="backpack" class="w-3 h-3"></i> Inventaire Matériel
+                </div>
+                <div class="space-y-2 max-h-32 overflow-y-auto custom-scrollbar pr-2">
+                    ${inv.length === 0 ? '<p class="text-[10px] text-gray-400 italic">Aucun objet répertorié.</p>' : inv.map(i => `
+                        <div class="flex justify-between items-center text-xs py-1 border-b border-gray-50 last:border-0">
+                            <span class="font-bold text-gov-text uppercase tracking-tight">${i.name}</span>
+                            <span class="font-mono text-gray-400">x${i.quantity}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+                <div class="text-[9px] text-gray-400 font-black uppercase tracking-widest">Valeur Nette Totale</div>
+                <div class="text-2xl font-mono font-black text-gov-blue">$${(bankBalance + cashBalance + savingsBalance + invValue).toLocaleString()}</div>
+            </div>
+        </div>
+    `;
+
+    ui.showModal({
+        title: `Audit : ${char.first_name} ${char.last_name}`,
+        content: auditHtml,
+        confirmText: "Fermer les archives"
+    });
+};
+
 // --- LOGIQUE HOLD-TO-PURGE ---
 export const startHoldPurge = (e, charId) => {
     if (e.cancelable) e.preventDefault();
