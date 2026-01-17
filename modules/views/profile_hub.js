@@ -5,6 +5,7 @@ import { router, render } from '../utils.js';
 import { loadUserSanctions } from '../actions/profile.js';
 import { ui } from '../ui.js';
 import { fetchStaffProfiles, fetchGlobalTransactions } from '../services.js';
+import { WHEEL_REWARDS } from '../actions/wheel.js';
 
 const ALL_PERMISSIONS = [
     { k: 'can_approve_characters', l: 'File Whitelist', d: "Autorise l'examen et la validation des nouveaux citoyens entrant sur le territoire (Whitelist)." },
@@ -221,22 +222,69 @@ export const ProfileHubView = () => {
     }
 
     else if (currentTab === 'sanctions') {
+        const activeSanctionsCount = sanctions.filter(s => !s.expires_at || new Date(s.expires_at) > new Date()).length;
+        
         tabContent = `
-            <div class="space-y-4 animate-in max-w-4xl mx-auto pb-20">
-                ${sanctions.length > 0 ? sanctions.map(s => `
-                    <div class="p-6 bg-white border border-gray-100 rounded-[28px] flex items-center justify-between group hover:border-gov-red/20 transition-all shadow-xl">
-                        <div class="flex items-center gap-6">
-                            <div class="w-12 h-12 rounded-xl bg-gov-light flex items-center justify-center text-lg font-black uppercase text-gov-red border border-gray-200 shadow-inner group-hover:scale-105 transition-transform italic">${s.type[0]}</div>
-                            <div>
-                                <div class="text-[10px] font-black text-gov-text uppercase tracking-tight italic">${s.type.toUpperCase()} — LE ${new Date(s.created_at).toLocaleDateString()}</div>
-                                <div class="text-[12px] text-gray-500 font-medium italic mt-1 leading-relaxed">"${s.reason}"</div>
-                            </div>
-                        </div>
-                        ${!s.appeal_at ? `
-                            <button onclick="actions.openAppealModal('${s.id}')" class="text-[8px] font-black text-gov-blue uppercase tracking-widest border-2 border-gov-blue px-4 py-2 rounded-xl hover:bg-gov-blue hover:text-white transition-all">CONTESTER</button>
-                        ` : '<span class="text-[8px] font-black text-gray-400 uppercase italic bg-gov-light px-3 py-1.5 rounded-lg border border-gray-200">En examen</span>'}
+            <div class="animate-in max-w-4xl mx-auto pb-20 space-y-8">
+                <!-- RÉCAPITULATIF CONDUITE -->
+                <div class="bg-white p-8 rounded-[40px] border border-gray-100 shadow-xl flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gov-blue/5 rounded-bl-full"></div>
+                    <div class="w-20 h-20 rounded-3xl ${activeSanctionsCount > 0 ? 'bg-orange-50 text-orange-500' : 'bg-emerald-50 text-emerald-500'} flex items-center justify-center shrink-0 shadow-inner">
+                        <i data-lucide="${activeSanctionsCount > 0 ? 'shield-alert' : 'shield-check'}" class="w-10 h-10"></i>
                     </div>
-                `).join('') : '<div class="text-center py-24 text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] border-4 border-dashed border-gray-100 rounded-[40px]">Aucun signalement</div>'}
+                    <div class="flex-1 text-center md:text-left">
+                        <h4 class="text-2xl font-black text-gov-text uppercase italic tracking-tighter mb-1">État de votre Casier</h4>
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">
+                            ${activeSanctionsCount === 0 ? 'Félicitations, votre conduite est exemplaire.' : `Attention, vous avez <span class="text-orange-600">${activeSanctionsCount}</span> sanction(s) active(s).`}
+                        </p>
+                    </div>
+                    <div class="bg-gov-light px-6 py-3 rounded-2xl border border-gray-100 text-center">
+                        <div class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Total Historique</div>
+                        <div class="text-2xl font-mono font-black text-gov-text">${sanctions.length}</div>
+                    </div>
+                </div>
+
+                <!-- LISTE DES SANCTIONS -->
+                <div class="space-y-4">
+                    ${sanctions.length > 0 ? sanctions.map(s => {
+                        const isExpired = s.expires_at && new Date(s.expires_at) < new Date();
+                        const typeColor = s.type === 'warn' ? 'amber' : s.type === 'mute' ? 'orange' : 'red';
+                        const statusLabel = isExpired ? 'EXPIRÉ' : 'ACTIF';
+                        
+                        return `
+                            <div class="p-6 bg-white border border-gray-100 rounded-[32px] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group hover:border-${typeColor}-200 transition-all shadow-lg hover:shadow-xl relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-1.5 h-full bg-${typeColor}-500"></div>
+                                <div class="flex items-center gap-6 flex-1 min-w-0">
+                                    <div class="w-14 h-14 rounded-2xl bg-${typeColor}-50 flex items-center justify-center text-xl font-black uppercase text-${typeColor}-600 border border-${typeColor}-100 shadow-inner italic">${s.type[0]}</div>
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-3 mb-1">
+                                            <div class="text-[10px] font-black text-gov-text uppercase tracking-tight italic">${s.type.toUpperCase()} — LE ${new Date(s.created_at).toLocaleDateString()}</div>
+                                            <span class="px-2 py-0.5 rounded bg-${isExpired ? 'gray' : typeColor}-100 text-${isExpired ? 'gray' : typeColor}-600 text-[8px] font-black uppercase border border-${isExpired ? 'gray' : typeColor}-200">${statusLabel}</span>
+                                        </div>
+                                        <div class="text-[13px] text-gray-500 font-medium italic leading-relaxed truncate">"${s.reason}"</div>
+                                        <div class="text-[8px] text-gray-400 font-mono mt-1 uppercase">ID: #${s.id.substring(0,8).toUpperCase()}</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 w-full md:w-auto shrink-0 border-t md:border-t-0 border-gray-50 pt-4 md:pt-0">
+                                    ${!s.appeal_at && !isExpired ? `
+                                        <button onclick="actions.openAppealModal('${s.id}')" class="flex-1 md:flex-none text-[8px] font-black text-gov-blue uppercase tracking-widest border-2 border-gov-blue/20 px-6 py-2.5 rounded-xl hover:bg-gov-blue hover:text-white transition-all shadow-sm">CONTESTER</button>
+                                    ` : s.appeal_at ? `
+                                        <span class="flex-1 md:flex-none text-[8px] font-black text-gray-400 uppercase italic bg-gov-light px-4 py-2.5 rounded-xl border border-gray-200 text-center">Appel en examen</span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('') : `
+                        <div class="text-center py-24 text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] border-4 border-dashed border-gray-100 rounded-[48px] bg-white/50">
+                            Aucun signalement administratif répertorié
+                        </div>
+                    `}
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-100 p-6 rounded-3xl">
+                    <h5 class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2 flex items-center gap-2"><i data-lucide="info" class="w-3 h-3"></i> Information au Citoyen</h5>
+                    <p class="text-[11px] text-blue-500/80 leading-relaxed font-medium">Les sanctions sont archivées de façon permanente mais perdent leur valeur d'opposition après expiration de la période de latence. Vous disposez d'un droit de contestation par année civile pour chaque dossier.</p>
+                </div>
             </div>
         `;
     }
@@ -247,32 +295,82 @@ export const ProfileHubView = () => {
         
         tabContent = `
             <div class="animate-in max-w-6xl mx-auto pb-20 space-y-12">
-                <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
-                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(0,0,145,0.02),transparent_70%)]"></div>
+                <!-- SECTION TIRAGE -->
+                <div class="bg-white p-12 rounded-[48px] border border-gray-100 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(0,0,145,0.03),transparent_70%)]"></div>
                     
                     <div class="relative z-10 w-full">
-                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gov-blue/10 text-gov-blue text-[10px] font-black uppercase tracking-[0.3em] border border-gov-blue/20 mb-8">
-                            <i data-lucide="package" class="w-4 h-4"></i> Loterie Nationale Certifiée
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gov-blue/10 text-gov-blue text-[10px] font-black uppercase tracking-[0.3em] border border-gov-blue/20 mb-12">
+                            <i data-lucide="package" class="w-4 h-4"></i> Loterie Nationale Certifiée v6.4
                         </div>
                         
-                        <div class="flex flex-col items-center mb-12">
-                            <div class="relative mb-8">
-                                <div id="lootbox-visual" class="w-40 h-40 bg-gov-light rounded-[48px] border-4 border-gov-blue/20 flex items-center justify-center text-gov-blue shadow-2xl relative transition-all duration-500 ${isOpening ? 'lootbox-opening-anim' : 'hover:scale-105 hover:rotate-2'}">
-                                    <i data-lucide="package" class="w-20 h-20"></i>
-                                    <div class="absolute -bottom-4 -right-4 w-14 h-14 bg-white rounded-2xl flex items-center justify-center border border-gray-100 shadow-xl">
-                                        <i data-lucide="key" class="w-7 h-7 text-yellow-500"></i>
+                        <div class="flex flex-col items-center mb-16">
+                            <div class="relative mb-10">
+                                <div id="lootbox-visual" class="w-48 h-48 bg-gov-light rounded-[56px] border-4 border-gov-blue/10 flex items-center justify-center text-gov-blue shadow-2xl relative transition-all duration-500 ${isOpening ? 'lootbox-opening-anim' : 'hover:scale-105 hover:rotate-2 shadow-blue-900/5'}">
+                                    <i data-lucide="package" class="w-24 h-24"></i>
+                                    <div class="absolute -bottom-6 -right-6 w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-gray-100 shadow-2xl">
+                                        <i data-lucide="key" class="w-8 h-8 text-yellow-500"></i>
                                     </div>
                                 </div>
                             </div>
                             
-                            <h2 class="text-4xl font-black text-gov-text tracking-tighter italic uppercase mb-2">Caisse de Récompenses</h2>
-                            <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-10">Vous disposez de <span class="text-gov-blue font-black">${turns}</span> Clé(s) d'accès</p>
+                            <h2 class="text-5xl font-black text-gov-text tracking-tighter italic uppercase mb-2">Caisse de Récompenses</h2>
+                            <p class="text-gray-400 text-xs font-bold uppercase tracking-[0.2em] mb-12">Solde de Sécurité : <span class="text-gov-blue font-black">${turns} CLÉ(S)</span></p>
                             
                             <button onclick="actions.openCrate(0)" ${turns <= 0 || isOpening ? 'disabled' : ''} 
-                                class="px-16 py-6 bg-gov-blue text-white rounded-[32px] font-black text-sm uppercase tracking-[0.3em] shadow-xl hover:bg-black transition-all transform active:scale-95 disabled:opacity-30 disabled:grayscale">
-                                ${isOpening ? 'DÉCRYPTAGE...' : 'TIRER LE LEVIER'}
+                                class="px-20 py-6 bg-gov-blue text-white rounded-[32px] font-black text-sm uppercase tracking-[0.3em] shadow-2xl hover:bg-black transition-all transform active:scale-95 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed">
+                                ${isOpening ? 'SÉQUENCE DÉCRYPTAGE...' : 'UTILISER UNE CLÉ'}
                             </button>
                         </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left border-t border-gray-50 pt-12">
+                            <div class="p-6 bg-gov-light/50 rounded-3xl border border-gray-100">
+                                <h4 class="text-[9px] font-black text-gov-blue uppercase tracking-widest mb-3 flex items-center gap-2"><i data-lucide="help-circle" class="w-3 h-3"></i> Comment obtenir ?</h4>
+                                <p class="text-[11px] text-gray-500 leading-relaxed font-medium italic">Les clés sont distribuées lors d'événements communautaires, de concours de boost Discord ou par mérite administratif.</p>
+                            </div>
+                            <div class="p-6 bg-gov-light/50 rounded-3xl border border-gray-100">
+                                <h4 class="text-[9px] font-black text-gov-blue uppercase tracking-widest mb-3 flex items-center gap-2"><i data-lucide="shield-check" class="w-3 h-3"></i> Gains Garantis</h4>
+                                <p class="text-[11px] text-gray-500 leading-relaxed font-medium italic">Chaque clé déverrouille un lot unique. Les sommes d'argent sont créditées instantanément sur votre compte citoyen.</p>
+                            </div>
+                            <div class="p-6 bg-gov-light/50 rounded-3xl border border-gray-100">
+                                <h4 class="text-[9px] font-black text-gov-blue uppercase tracking-widest mb-3 flex items-center gap-2"><i data-lucide="trending-up" class="w-3 h-3"></i> Probabilités</h4>
+                                <button onclick="actions.showProbabilities()" class="text-[10px] font-black text-gov-blue uppercase tracking-widest hover:underline flex items-center gap-2">Consulter les chances <i data-lucide="external-link" class="w-3 h-3"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION CATALOGUE DES LOTS -->
+                <div class="space-y-6">
+                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.4em] flex items-center gap-4 px-2">
+                         <span class="w-8 h-px bg-gray-200"></span> CATALOGUE DES DOTATIONS
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        ${WHEEL_REWARDS.map(r => {
+                            const rarityColors = {
+                                'Commun': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+                                'Peu Commun': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                                'Rare': 'bg-blue-50 text-blue-600 border-blue-100',
+                                'Très Rare': 'bg-blue-100 text-blue-700 border-blue-200',
+                                'Mythique': 'bg-purple-50 text-purple-600 border-purple-100',
+                                'Légendaire': 'bg-yellow-50 text-yellow-600 border-yellow-200',
+                                'Relique': 'bg-red-50 text-red-600 border-red-200',
+                                'Ancestral': 'bg-red-100 text-red-700 border-red-300',
+                                'Premium': 'bg-orange-50 text-orange-600 border-orange-100',
+                                'Elite': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+                                'Divin': 'bg-purple-100 text-purple-700 border-purple-300',
+                                'Unique': 'bg-pink-50 text-pink-600 border-pink-100'
+                            };
+                            return `
+                                <div class="bg-white p-5 rounded-[28px] border border-gray-100 shadow-sm flex flex-col items-center text-center group hover:border-gov-blue/20 transition-all hover:-translate-y-1">
+                                    <div class="w-10 h-10 rounded-full mb-3 flex items-center justify-center shadow-inner" style="background: ${r.color}20">
+                                        <i data-lucide="${r.type === 'money' ? 'banknote' : r.type === 'role' ? 'shield' : 'sparkles'}" class="w-5 h-5" style="color: ${r.color}"></i>
+                                    </div>
+                                    <div class="text-[11px] font-black text-gov-text uppercase tracking-tighter mb-1">${r.label}</div>
+                                    <span class="px-2 py-0.5 rounded-full text-[7px] font-black uppercase border tracking-tighter ${rarityColors[r.rarity] || 'bg-gray-50 text-gray-500 border-gray-100'}">${r.rarity}</span>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
                 </div>
             </div>
@@ -311,6 +409,7 @@ export const ProfileHubView = () => {
                                             <button 
                                                 onmousedown="actions.startHoldPurge(event, '${char.id}')" 
                                                 onmouseup="actions.stopHoldPurge()" 
+                                                onmouseleave="actions.stopHoldPurge()"
                                                 class="px-4 py-2 bg-red-50 text-red-600 border border-red-100 rounded-xl text-[9px] font-black uppercase tracking-widest relative overflow-hidden group">
                                                 <div id="hold-progress-sec-${char.id}" class="absolute left-0 top-0 h-full bg-red-600/10 w-0 pointer-events-none transition-all duration-100"></div>
                                                 <span class="relative z-10">Wipe Flash</span>
