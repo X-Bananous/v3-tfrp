@@ -226,7 +226,6 @@ export const ProfileHubView = () => {
         
         tabContent = `
             <div class="animate-in max-w-4xl mx-auto pb-20 space-y-8">
-                <!-- RÉCAPITULATIF CONDUITE -->
                 <div class="bg-white p-8 rounded-[40px] border border-gray-100 shadow-xl flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-gov-blue/5 rounded-bl-full"></div>
                     <div class="w-20 h-20 rounded-3xl ${activeSanctionsCount > 0 ? 'bg-orange-50 text-orange-500' : 'bg-emerald-50 text-emerald-500'} flex items-center justify-center shrink-0 shadow-inner">
@@ -244,7 +243,6 @@ export const ProfileHubView = () => {
                     </div>
                 </div>
 
-                <!-- LISTE DES SANCTIONS -->
                 <div class="space-y-4">
                     ${sanctions.length > 0 ? sanctions.map(s => {
                         const isExpired = s.expires_at && new Date(s.expires_at) < new Date();
@@ -295,7 +293,6 @@ export const ProfileHubView = () => {
         
         tabContent = `
             <div class="animate-in max-w-6xl mx-auto pb-20 space-y-12">
-                <!-- SECTION TIRAGE -->
                 <div class="bg-white p-12 rounded-[48px] border border-gray-100 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
                     <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(0,0,145,0.03),transparent_70%)]"></div>
                     
@@ -340,7 +337,6 @@ export const ProfileHubView = () => {
                     </div>
                 </div>
 
-                <!-- SECTION CATALOGUE DES LOTS -->
                 <div class="space-y-6">
                     <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.4em] flex items-center gap-4 px-2">
                          <span class="w-8 h-px bg-gray-200"></span> CATALOGUE DES DOTATIONS
@@ -409,7 +405,6 @@ export const ProfileHubView = () => {
                                             <button 
                                                 onmousedown="actions.startHoldPurge(event, '${char.id}')" 
                                                 onmouseup="actions.stopHoldPurge()" 
-                                                onmouseleave="actions.stopHoldPurge()"
                                                 class="px-4 py-2 bg-red-50 text-red-600 border border-red-100 rounded-xl text-[9px] font-black uppercase tracking-widest relative overflow-hidden group">
                                                 <div id="hold-progress-sec-${char.id}" class="absolute left-0 top-0 h-full bg-red-600/10 w-0 pointer-events-none transition-all duration-100"></div>
                                                 <span class="relative z-10">Wipe Flash</span>

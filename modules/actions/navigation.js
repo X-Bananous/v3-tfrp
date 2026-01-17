@@ -88,7 +88,7 @@ export const setHubPanel = async (panel) => {
         else if (panel === 'jobs') await fetchEnterprises();
         else if (panel === 'bank') await fetchBankData(state.activeCharacter.id);
         else if (panel === 'assets') await Promise.all([fetchInventory(state.activeCharacter.id), fetchPlayerInvoices(state.activeCharacter.id)]);
-        else if (panel === 'staff') await Promise.all([fetchPendingApplications(), fetchAllCharacters(), fetchStaffProfiles(), fetchGlobalHeists()]);
+        else if (panel === 'staff') await Promise.all([fetchAllCharacters(), fetchStaffProfiles(), fetchGlobalHeists()]);
     } finally { state.isPanelLoading = false; render(); }
 };
 
